@@ -25,7 +25,7 @@
                 <repository>
                     <id>github</id>
                     <name>GitHub sventorben Apache Maven Packages</name>
-                    <url>https://maven.pkg.github.com/sventorben/keycloak-restrict-client-auth</url>
+                    <url>https://maven.pkg.github.com/sventorben/keycloak</url>
                 </repository>
             </repositories>
         </profile>
