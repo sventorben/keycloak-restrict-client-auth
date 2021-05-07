@@ -1,0 +1,19 @@
+version: '3'
+services:
+  keycloak:
+    container_name: keycloak
+    image: jboss/keycloak:13.0.0
+    environment:
+      DB_VENDOR: h2
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      DEBUG_PORT: '*:8787'
+      DEBUG_MODE: 'true'
+    command: '--debug'
+    ports:
+      - 8080:8080
+      - 8443:8443
+      - 8787:8787
+      - 9990:9990
+    volumes:
+    - ./target/keycloak-restrict-client-auth.jar:/opt/jboss/keycloak/standalone/deployments/keycloak-restrict-client-auth.jar
