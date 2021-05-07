@@ -36,6 +36,14 @@
         <system>GitHub Issues</system>
     </issueManagement>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub sventorben Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/sventorben/keycloak</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>13</maven.compiler.source>
