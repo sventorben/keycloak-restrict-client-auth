@@ -5,7 +5,7 @@
 
     <groupId>de.sventorben.keycloak</groupId>
     <artifactId>keycloak-restrict-client-auth</artifactId>
-    <version>13.0.0</version>
+    <version>13.0.1-SNAPSHOT</version>
 
     <name>Keycloak: Authenticator - Restrict client authentication</name>
     <description>A Keycloak authenticator to restrict authentication on clients</description>
@@ -26,7 +26,8 @@
 
     <scm>
         <connection>scm:git:ssh://git@github.com:sventorben/keycloak-restrict-client-auth.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:sventorben/keycloak-restrict-client-auth.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com:sventorben/keycloak-restrict-client-auth.git
+        </developerConnection>
         <url>https://github.com/sventorben/keycloak-restrict-client-auth.git</url>
         <tag>HEAD</tag>
     </scm>
@@ -92,6 +93,25 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.0.0-M1</version>
             </plugin>
         </plugins>
     </build>
