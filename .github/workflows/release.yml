@@ -46,7 +46,8 @@ jobs:
       with:
         files: "target/keycloak-restrict-client-auth.jar"
         body_path: "RELEASELOG"
-        fail_on_unmatched_files: "true"
+        fail_on_unmatched_files: true
+        tag_name: v${{ github.event.inputs.releaseVersion }}
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     - name: Create Pull Request
@@ -61,6 +62,5 @@ jobs:
         body: "Automated PR to prepare next version after release ${{ github.event.inputs.releaseVersion }}"
         labels: "release"
         assignees: "sventorben"
-        reviewers: "sventorben"
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
