@@ -32,7 +32,7 @@ public class RestrictClientAuthAuthenticatorFactory implements AuthenticatorFact
 
     @Override
     public String getDisplayType() {
-        return "Restrict Client Authentication";
+        return "Restrict user authentication on clients";
     }
 
     @Override
@@ -57,7 +57,7 @@ public class RestrictClientAuthAuthenticatorFactory implements AuthenticatorFact
 
     @Override
     public String getHelpText() {
-        return "Restricts authorization for users on certain clients based on a client role";
+        return "Restricts user authentication on clients based on a client role";
     }
 
     @Override
