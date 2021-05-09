@@ -36,7 +36,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Release to GitHub packages
-      run: mvn -B clean release:prepare release:perform -s maven-github-settings.xml --file pom.xml -DpushChanges=false -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
+      run: mvn -B clean release:prepare release:perform -s maven-github-settings.xml --file pom.xml -DpushChanges=false -DlocalCheckout=true -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
     - name: Release to GitHub releases
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
