@@ -23,7 +23,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Release to GitHub Packages
-      run: mvn -B clean mvn -B release:prepare release:perform -s maven-github-settings.xml --file pom.xml
+      run: mvn -B clean release:prepare release:perform -s maven-github-settings.xml --file pom.xml
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Release to GitHub Releases
