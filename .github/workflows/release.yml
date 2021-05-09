@@ -1,8 +1,16 @@
 name: Build and release
 
 on:
-  push:
-    branches: [ release ]
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: "Default version to use when preparing a release."
+        required: true
+        default: "X.Y.Z"
+      developmentVersion:
+        description: "Default version to use for new local working copy."
+        required: true
+        default: "X.Y.Z-SNAPSHOT"
 
 jobs:
   build:
@@ -11,6 +19,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Configure Git User
+      run: |
+        git config user.email "actions@github.com"
+        git config user.name "GitHub Actions"
     - name: Set up JDK 11
       uses: actions/setup-java@v1
       with:
@@ -23,7 +35,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Release to GitHub Packages
-      run: mvn -B clean release:prepare release:perform -s maven-github-settings.xml --file pom.xml
+      run: mvn -B clean release:prepare release:perform -s maven-github-settings.xml --file pom.xml -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Release to GitHub Releases
