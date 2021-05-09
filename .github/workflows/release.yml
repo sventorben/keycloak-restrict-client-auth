@@ -18,7 +18,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Configure Git User
       run: |
         git config user.email "actions@github.com"
@@ -30,20 +31,33 @@ jobs:
     - name: Cache maven repository
       uses: actions/cache@v2
       with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        path: "~/.m2/repository"
+        key: "${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}"
         restore-keys: |
           ${{ runner.os }}-maven-
-    - name: Release to GitHub Packages
-      run: mvn -B clean release:prepare release:perform -s maven-github-settings.xml --file pom.xml -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Release to GitHub Releases
+    - name: Release to GitHub packages
+      run: mvn -B clean release:prepare release:perform -s maven-github-settings.xml --file pom.xml -DpushChanges=false -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
+    - name: Release to GitHub releases
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: target/keycloak-restrict-client-auth.jar
-        body_path: RELEASELOG
-        fail_on_unmatched_files: true
+        files: "target/keycloak-restrict-client-auth.jar"
+        body_path: "RELEASELOG"
+        fail_on_unmatched_files: "true"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Pull Request
+      id: create-pr
+      uses: peter-evans/create-pull-request@v3
+      with:
+        commit-message: "chore(release): Prepare next version"
+        delete-branch: "true"
+        branch: "release/${{ github.event.inputs.releaseVersion }}"
+        base: "main"
+        title: "chore(release): Prepare next version after release ${{ github.event.inputs.releaseVersion }}"
+        body: "Automated PR to prepare next version after release ${{ github.event.inputs.releaseVersion }}"
+        labels: "release"
+        assignees: "sventorben"
+        reviewers: "sventorben"
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
