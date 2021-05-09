@@ -36,7 +36,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Release to GitHub packages
-      run: mvn -B clean release:prepare release:perform -s maven-github-settings.xml --file pom.xml -DpushChanges=false -DlocalCheckout=true -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
+      run: |
+        mvn -B clean release:prepare release:perform -s maven-github-settings.xml --file pom.xml -DpushChanges=false -DlocalCheckout=true -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
+        git push origin v${{ github.event.inputs.releaseVersion }}
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     - name: Release to GitHub releases
