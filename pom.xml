@@ -76,6 +76,7 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>3.0.0-M4</version>
                     <configuration>
+                        <scmCommentPrefix>chore(release):</scmCommentPrefix>
                         <tagNameFormat>v@{project.version}</tagNameFormat>
                     </configuration>
                 </plugin>
