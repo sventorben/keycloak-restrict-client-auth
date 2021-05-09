@@ -37,6 +37,8 @@ jobs:
           ${{ runner.os }}-maven-
     - name: Release to GitHub packages
       run: mvn -B clean release:prepare release:perform -s maven-github-settings.xml --file pom.xml -DpushChanges=false -DlocalCheckout=true -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     - name: Release to GitHub releases
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
@@ -45,7 +47,7 @@ jobs:
         body_path: "RELEASELOG"
         fail_on_unmatched_files: "true"
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     - name: Create Pull Request
       id: create-pr
       uses: peter-evans/create-pull-request@v3
