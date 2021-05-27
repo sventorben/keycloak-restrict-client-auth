@@ -50,7 +50,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.release>11</maven.compiler.release>
 
-        <version.keycloak>13.0.1</version.keycloak>
+        <version.keycloak>12.0.4</version.keycloak>
 
         <version.mockito>3.7.7</version.mockito>
     </properties>

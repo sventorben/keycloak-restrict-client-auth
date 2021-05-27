@@ -36,7 +36,7 @@ public final class RestrictClientAuthAuthenticator implements Authenticator {
             LOG.warnf("Authentication for user '%s' failed. User does not have client role '%s' on client '%s'.",
                     user.getUsername(), clientRoleName, client.getId());
             final Response response = errorResponse("access_denied", "Access to client is denied.");
-            context.failure(AuthenticationFlowError.ACCESS_DENIED, response);
+            context.failure(AuthenticationFlowError.CLIENT_DISABLED, response);
         }
     }
 
@@ -60,7 +60,7 @@ public final class RestrictClientAuthAuthenticator implements Authenticator {
     @Override
     public void action(AuthenticationFlowContext context) {
         LOG.warn("Action called!");
-        context.failure(AuthenticationFlowError.ACCESS_DENIED);
+        context.failure(AuthenticationFlowError.CLIENT_DISABLED);
     }
 
     @Override
