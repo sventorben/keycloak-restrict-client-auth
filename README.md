@@ -16,7 +16,7 @@ With Keycloak 13 two new authenticators have been added, namely `Allow Access` a
 
 Here are some reasons/thoughts
 * It is not really flexible. Since `Condition - User Role` only allows for checking one concrete (realm or client-specific) role, a very complex flow handling all clients, or a totally separate flow for each individual client would be needed. 
-* It simply does not work well with federated authentication (ie. identity provider redirects), since there is no way to configure client specific behaviour for `First login flow` or `Post login flows`. In other words, there is not feature like `Authentication flow overrides` at an IdP level. Hence, the same flow will be used for all clients. As said before, this becomes very complicated.
+* It simply does not work well with federated authentication (ie. identity provider redirects), since there is no way to configure client specific behaviour for `First login flow` or `Post login flows`. In other words, there is no feature like `Authentication flow overrides` at an IdP level. Hence, the same flow will be used for all clients. As said before, this becomes very complicated.
 
 ## How does it work?
 The authenticator uses client roles to restrict authentication. It works like this:
@@ -38,7 +38,7 @@ Drop the file to `standalone/deployments` folder to make use of Keycloak Deploye
 
 For Docker-based setups follow the [guidelines for adding custom providers](https://github.com/keycloak/keycloak-containers/tree/master/server#user-content-adding-a-custom-provider).
 
-> :info: **Maven/Gradle**: Packages are beeing released to GitHub Packages. You find the coordinates [here](https://github.com/sventorben?tab=packages&repo_name=keycloak-restrict-client-auth)! It may happen that I remove older packages without prior notice, because the storage is limited on the free tier.
+> :[info]: **Maven/Gradle**: Packages are beeing released to GitHub Packages. You find the coordinates [here](https://github.com/sventorben?tab=packages&repo_name=keycloak-restrict-client-auth)! It may happen that I remove older packages without prior notice, because the storage is limited on the free tier.
 
 ## How to configure?
 
@@ -48,7 +48,7 @@ See the image below for an example.
 
 ![Example flow](docs/images/flow.jpg)
 
-> :info: **User identity**: The authenticator needs a user identity to check whether the user has the desired role or not. Hence, ensure that you have steps/executions in your flow prior to this authenticator that can ensure user's identity.
+> :[info]: **User identity**: The authenticator needs a user identity to check whether the user has the desired role or not. Hence, ensure that you have steps/executions in your flow prior to this authenticator that can ensure user's identity.
 
 Second, you need to add a role named `restricted-access` to the client you want to restrict accss to.
 
