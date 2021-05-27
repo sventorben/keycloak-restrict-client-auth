@@ -38,7 +38,10 @@ Drop the file to `standalone/deployments` folder to make use of Keycloak Deploye
 
 For Docker-based setups follow the [guidelines for adding custom providers](https://github.com/keycloak/keycloak-containers/tree/master/server#user-content-adding-a-custom-provider).
 
-> :[info]: **Maven/Gradle**: Packages are beeing released to GitHub Packages. You find the coordinates [here](https://github.com/sventorben?tab=packages&repo_name=keycloak-restrict-client-auth)! It may happen that I remove older packages without prior notice, because the storage is limited on the free tier.
+---
+:info: **Maven/Gradle**: Packages are beeing released to GitHub Packages. You find the coordinates [here](https://github.com/sventorben?tab=packages&repo_name=keycloak-restrict-client-auth)! It may happen that I remove older packages without prior notice, because the storage is limited on the free tier.
+
+---
 
 ## How to configure?
 
@@ -48,7 +51,10 @@ See the image below for an example.
 
 ![Example flow](docs/images/flow.jpg)
 
-> :[info]: **User identity**: The authenticator needs a user identity to check whether the user has the desired role or not. Hence, ensure that you have steps/executions in your flow prior to this authenticator that can ensure user's identity.
+---
+:info: **User identity**: The authenticator needs a user identity to check whether the user has the desired role or not. Hence, ensure that you have steps/executions in your flow prior to this authenticator that can ensure user's identity.
+
+---
 
 Second, you need to add a role named `restricted-access` to the client you want to restrict accss to.
 
