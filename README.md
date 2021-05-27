@@ -11,6 +11,13 @@ Generally the qustion goes like this
 As of today, my general answer is _"no, at least not out of the box"_. And in general my advice is to redesign and relocate the policy enforcement point (PEP).
 However, since this question popped up so often, I wrote this simple authenticator to support this functionality.
 
+### Why not use "Allow/Deny Access" authenticators with conditions?
+With Keycloak 13 two new authenticators have been added, namely `Allow Access` and `Deny Access`. Together with `Condition - User Role` authenticator authentication may be restricted in a similar way with out-of-the-box features. So, the question is why not use that and override authentication flows on a per client basis?
+
+Here are some reasons/thoughts
+* It is not really flexible. Since `Condition - User Role` only allows for checking one concrete (realm or client-specific) role, a very complex flow handling all clients, or a totally separate flow for each individual client would be needed. 
+* It simply does not work well with federated authentication (ie. identity provider redirects), since there is no way to configure client specific behaviour for `First login flow` or `Post login flows`. In other words, there is not feature like `Authentication flow overrides` at an IdP level. Hence, the same flow will be used for all clients. As said before, this becomes very complicated.
+
 ## How does it work?
 The authenticator uses client roles to restrict authentication. It works like this:
 
