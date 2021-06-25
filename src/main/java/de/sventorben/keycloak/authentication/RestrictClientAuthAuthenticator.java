@@ -4,8 +4,11 @@ import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
+import org.keycloak.events.Errors;
 import org.keycloak.models.*;
 import org.keycloak.representations.idm.OAuth2ErrorRepresentation;
+import org.keycloak.services.messages.Messages;
+import org.keycloak.utils.MediaTypeMatcher;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -35,9 +38,32 @@ public final class RestrictClientAuthAuthenticator implements Authenticator {
         } else {
             LOG.warnf("Authentication for user '%s' failed. User does not have client role '%s' on client '%s'.",
                     user.getUsername(), clientRoleName, client.getId());
-            final Response response = errorResponse("access_denied", "Access to client is denied.");
-            context.failure(AuthenticationFlowError.ACCESS_DENIED, response);
+            context.getEvent().client(client).user(context.getUser()).realm(context.getRealm()).error(Errors.ACCESS_DENIED);
+            context.failure(AuthenticationFlowError.ACCESS_DENIED,  errorResponse(context));
         }
+    }
+
+    private Response errorResponse(AuthenticationFlowContext context) {
+        Response response;
+        if (MediaTypeMatcher.isHtmlRequest(context.getHttpRequest().getHttpHeaders())) {
+            response = htmlErrorResponse(context);
+        } else {
+            response = oAuth2ErrorResponse();
+        }
+        return response;
+    }
+
+    private Response htmlErrorResponse(AuthenticationFlowContext context) {
+        return context.form()
+                .setError(Messages.ACCESS_DENIED)
+                .createErrorPage(Response.Status.FORBIDDEN);
+    }
+
+    private static Response oAuth2ErrorResponse() {
+        return Response.status(Response.Status.UNAUTHORIZED.getStatusCode())
+                .entity(new OAuth2ErrorRepresentation(Messages.ACCESS_DENIED, "Access to client is denied."))
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build();
     }
 
     private boolean isAuthRestricted(ClientModel client) {
@@ -48,13 +74,6 @@ public final class RestrictClientAuthAuthenticator implements Authenticator {
         final RoleModel role = client.getRole(clientRoleName);
         if (role == null) return false;
         return user != null && user.hasRole(role);
-    }
-
-    private static Response errorResponse(String error, String errorDescription) {
-        return Response.status(Response.Status.UNAUTHORIZED.getStatusCode())
-                .entity(new OAuth2ErrorRepresentation(error, errorDescription))
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .build();
     }
 
     @Override

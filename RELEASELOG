@@ -1,1 +1,1 @@
-* Update Keycloak dependencies from version 13.0.1 to 14.0.0
+* Support HTML error page instead of OAuht2 error message (JSON) when request is an HTML request (e.g. in Browser Flow instead of Direct Grant)
