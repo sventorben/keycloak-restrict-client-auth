@@ -4,7 +4,7 @@ This is a simple Keycloak authenticator to restrict user authentication to clien
 ## What is it good for?
 Every now and then I get asked whether it is possible to restrict user authentication for certain clients.
 
-Generally the qustion goes like this
+Generally the question goes like this
 
 > Is it possible to allow specific users to authenticate to a client, while reject others?
 
@@ -40,7 +40,7 @@ For Docker-based setups follow the [guidelines for adding custom providers](http
 
 > ℹ️ **Maven/Gradle**:
 >
-> Packages are beeing released to GitHub Packages. You find the coordinates [here](https://github.com/sventorben?tab=packages&repo_name=keycloak-restrict-client-auth)! It may happen that I remove older packages without prior notice, because the storage is limited on the free tier.
+> Packages are being released to GitHub Packages. You find the coordinates [here](https://github.com/sventorben?tab=packages&repo_name=keycloak-restrict-client-auth)! It may happen that I remove older packages without prior notice, because the storage is limited on the free tier.
 
 
 ## How to configure?
@@ -55,13 +55,13 @@ See the image below for an example.
 >
 > The authenticator needs a user identity to check whether the user has the desired role or not. Hence, ensure that you have steps/executions in your flow prior to this authenticator that can ensure user's identity.
 
-Second, you need to add a role named `restricted-access` to the client you want to restrict accss to.
+Second, you need to add a role named `restricted-access` to the client you want to restrict access to.
 
 See the image below for an example.
 
 ![Client role configuration](docs/images/client-role.jpg)
 
-Afterwards, no user can authenticated to this client. To allow a user to authenticate, you need to assign the role `restricted-access` to the user. You may do so either by assining the role to the user directly or via groupd or combined roles.
+Afterwards, no user can authenticate to this client. To allow a user to authenticate, you need to assign the role `restricted-access` to the user. You may do so either by assigning the role to the user directly or via groups or combined roles.
 
 ## How to change the role name?
 
