@@ -14,10 +14,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static de.sventorben.keycloak.authentication.RestrictClientAuthConfigProperties.CONFIG_PROPERTIES;
 import static org.keycloak.models.AuthenticationExecutionModel.Requirement.DISABLED;
 import static org.keycloak.models.AuthenticationExecutionModel.Requirement.REQUIRED;
 
-public class RestrictClientAuthAuthenticatorFactory implements AuthenticatorFactory, ServerInfoAwareProviderFactory {
+public final class RestrictClientAuthAuthenticatorFactory implements AuthenticatorFactory, ServerInfoAwareProviderFactory {
 
     private static final Logger LOG = Logger.getLogger(RestrictClientAuthAuthenticatorFactory.class);
 
@@ -42,7 +43,7 @@ public class RestrictClientAuthAuthenticatorFactory implements AuthenticatorFact
 
     @Override
     public boolean isConfigurable() {
-        return false;
+        return true;
     }
 
     @Override
@@ -62,7 +63,7 @@ public class RestrictClientAuthAuthenticatorFactory implements AuthenticatorFact
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return Collections.emptyList();
+        return CONFIG_PROPERTIES;
     }
 
     @Override

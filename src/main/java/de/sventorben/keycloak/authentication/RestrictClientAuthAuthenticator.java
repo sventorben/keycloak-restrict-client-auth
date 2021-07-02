@@ -8,12 +8,13 @@ import org.keycloak.events.Errors;
 import org.keycloak.models.*;
 import org.keycloak.representations.idm.OAuth2ErrorRepresentation;
 import org.keycloak.services.messages.Messages;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaTypeMatcher;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-public final class RestrictClientAuthAuthenticator implements Authenticator {
+final class RestrictClientAuthAuthenticator implements Authenticator {
 
     private static final Logger LOG = Logger.getLogger(RestrictClientAuthAuthenticator.class);
 
@@ -54,8 +55,10 @@ public final class RestrictClientAuthAuthenticator implements Authenticator {
     }
 
     private Response htmlErrorResponse(AuthenticationFlowContext context) {
+        RestrictClientAuthConfig config = new RestrictClientAuthConfig(context.getAuthenticatorConfig());
+        AuthenticationSessionModel authSession = context.getAuthenticationSession();
         return context.form()
-                .setError(Messages.ACCESS_DENIED)
+                .setError(config.getErrorMessage(), authSession.getAuthenticatedUser().getUsername(), authSession.getClient().getClientId(), clientRoleName)
                 .createErrorPage(Response.Status.FORBIDDEN);
     }
 

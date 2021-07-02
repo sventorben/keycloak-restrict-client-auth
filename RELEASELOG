@@ -1,1 +1,1 @@
-* Support HTML error page instead of OAuht2 error message (JSON) when request is an HTML request (e.g. in Browser Flow instead of Direct Grant)
+* Support configuration of custom error message when access is restricted
