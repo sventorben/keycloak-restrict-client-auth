@@ -1,4 +1,6 @@
 # Keycloak: Authenticator - Restrict user authentication on client
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/sventorben/keycloak-restrict-client-auth?sort=semver) ![build and test](https://github.com/sventorben/keycloak-restrict-client-auth>/actions/workflows/buildAndTest.yml/badge.svg) ![GitHub Release Date](https://img.shields.io/github/release-date/sventorben/keycloak-restrict-client-auth) ![open issues](https://img.shields.io/github/issues/sventorben/keycloak-restrict-client-auth)
+
 This is a simple Keycloak authenticator to restrict user authentication to client.
 
 ## What is it good for?
