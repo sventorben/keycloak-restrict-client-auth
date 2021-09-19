@@ -30,6 +30,7 @@ jobs:
   compatibility:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         keycloak: [ 13.0.1, 14.0.0 ]
     steps:
