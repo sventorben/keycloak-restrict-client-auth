@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        keycloak: [ 12.0.4, 13.0.1, 14.0.0 ]
+        keycloak: [ 13.0.1, 14.0.0 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
