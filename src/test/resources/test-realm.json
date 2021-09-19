@@ -1220,12 +1220,6 @@
         "allow-default-scopes" : [ "true" ]
       }
     } ],
-    "org.keycloak.userprofile.UserProfileProvider" : [ {
-      "id" : "be4c0ee1-bb66-40af-8795-7d4141d9f8ea",
-      "providerId" : "declarative-user-profile",
-      "subComponents" : { },
-      "config" : { }
-    } ],
     "org.keycloak.keys.KeyProvider" : [ {
       "id" : "6cfef4b3-8cbf-46c3-9cf2-da76dcef7995",
       "name" : "hmac-generated",
