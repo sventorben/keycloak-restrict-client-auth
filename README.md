@@ -53,6 +53,8 @@ For Docker-based setups follow the [guidelines for adding custom providers](http
 
 ## How to configure?
 
+### Configuring the authenticator
+
 First, you need to add the authenticator to your desired flow. Mark the authenticator as `Required`. Bind your newly created flow as desired - either as a default for the whole realm or on a per-client basis.
 
 See the image below for an example.
@@ -71,17 +73,36 @@ See the image below for an example.
 
 Afterwards, no user can authenticate to this client. To allow a user to authenticate, you need to assign the role `restricted-access` to the user. You may do so either by assigning the role to the user directly or via groups or combined roles.
 
-## How to change the role name?
+### Using a custom error message
+
+If a user tries to log in via a browser-based flow and access gets denied by the authenticator, a custom error message can be displayed.
+In the flow choose the `Actions` button and then choose `Config`. You will see the following configuration screen.
+
+![Error message configuration](docs/images/config-message.jpg)
+
+You can directly define a particular message or use a property, which will be used for mapping the error message. If you choose a property, the property will be looked up from your custom theme's `messages*.properties` files and therefore supports internationalization.
+
+```
+# messages.properties
+restricted-access.denied=Access denied. User is missing required role 'restricted-access'
+# messages_de.properties
+restricted-access.denied=Zugriff verweigert. Dem Benutzer fehlt die notwendige Rolle 'restricted-access'.
+```
+
+If the field is blank, default property `access-denied` is used. In this case you do not need a custom theme, since this property comes with Keycloak out of the box. 
+For details on how to add custom messages to Keycloak, please refer to [Messages and Internationalization](https://www.keycloak.org/docs/latest/server_development/#messages) in the server developer guide.
+
+### Changing the default role name
 
 You do not like the role name or you do have some kind of naming conventions in place? You can change the role name globally by configuring the provider.
 
-### via CLI:
+#### via CLI:
 ```
 /subsystem=keycloak-server/spi=authenticator/:add
 /subsystem=keycloak-server/spi=authenticator/provider=restrict-client-auth-authenticator/:add(properties={clientRoleName=my-custom-role-name},enabled=true)
 ```
 
-### via standalone.xml:
+#### via standalone.xml:
 ```XML
 <spi name="authenticator">
     <provider name="restrict-client-auth-authenticator" enabled="true">

@@ -15,7 +15,7 @@ public class RestrictClientAuthConfigProperties {
             ERROR_MESSAGE,
             "Error message",
             "Error message which will be shown to the user. " +
-                "You can directly define particular message or property, which will be used for mapping the error message f.e `deny-access-role1`." +
+                "You can directly define a particular message or property, which will be used for mapping the error message e.g. `deny-access-role1`." +
                 "If the field is blank, default property 'access-denied' is used.",
             STRING_TYPE,
             Messages.ACCESS_DENIED,
