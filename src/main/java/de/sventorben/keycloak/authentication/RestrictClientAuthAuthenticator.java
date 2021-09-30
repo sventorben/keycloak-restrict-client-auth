@@ -28,17 +28,17 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
     public void authenticate(final AuthenticationFlowContext context) {
         final ClientModel client = context.getSession().getContext().getClient();
 
-        if (!isAuthRestricted(client)) {
+        final Access access = new ClientRoleBasedAccess(clientRoleName);
+
+        if (!access.isRestricted(client)) {
             context.success();
             return;
         }
 
         final UserModel user = context.getUser();
-        if (userHasClientRole(client, user)) {
+        if (access.isPermitted(client, user)) {
             context.success();
         } else {
-            LOG.warnf("Authentication for user '%s' failed. User does not have client role '%s' on client '%s'.",
-                    user.getUsername(), clientRoleName, client.getId());
             context.getEvent().client(client).user(context.getUser()).realm(context.getRealm()).error(Errors.ACCESS_DENIED);
             context.failure(AuthenticationFlowError.ACCESS_DENIED,  errorResponse(context));
         }
@@ -67,16 +67,6 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
                 .entity(new OAuth2ErrorRepresentation(Messages.ACCESS_DENIED, "Access to client is denied."))
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .build();
-    }
-
-    private boolean isAuthRestricted(ClientModel client) {
-        return client.getRole(clientRoleName) != null;
-    }
-
-    private boolean userHasClientRole(ClientModel client, UserModel user) {
-        final RoleModel role = client.getRole(clientRoleName);
-        if (role == null) return false;
-        return user != null && user.hasRole(role);
     }
 
     @Override
