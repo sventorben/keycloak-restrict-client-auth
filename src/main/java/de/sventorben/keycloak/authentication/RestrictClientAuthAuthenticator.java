@@ -18,17 +18,14 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
 
     private static final Logger LOG = Logger.getLogger(RestrictClientAuthAuthenticator.class);
 
-    private final String clientRoleName;
-
-    RestrictClientAuthAuthenticator(final String clientRoleName) {
-        this.clientRoleName = clientRoleName;
+    RestrictClientAuthAuthenticator() {
     }
 
     @Override
     public void authenticate(final AuthenticationFlowContext context) {
         final ClientModel client = context.getSession().getContext().getClient();
 
-        final Access access = new ClientRoleBasedAccess(clientRoleName);
+        final AccessProvider access = context.getSession().getProvider(AccessProvider.class, ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
 
         if (!access.isRestricted(client)) {
             context.success();
@@ -58,7 +55,7 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
         RestrictClientAuthConfig config = new RestrictClientAuthConfig(context.getAuthenticatorConfig());
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         return context.form()
-                .setError(config.getErrorMessage(), authSession.getAuthenticatedUser().getUsername(), authSession.getClient().getClientId(), clientRoleName)
+                .setError(config.getErrorMessage(), authSession.getAuthenticatedUser().getUsername(), authSession.getClient().getClientId())
                 .createErrorPage(Response.Status.FORBIDDEN);
     }
 

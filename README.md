@@ -23,7 +23,7 @@ However, since this question popped up so often, I wrote this simple authenticat
 With Keycloak 13 two new authenticators have been added, namely `Allow Access` and `Deny Access`. Together with `Condition - User Role` authenticator authentication may be restricted in a similar way with out-of-the-box features. So, the question is why not use that and override authentication flows on a per client basis?
 
 Here are some reasons/thoughts
-* It is not really flexible. Since `Condition - User Role` only allows for checking one concrete (realm or client-specific) role, a very complex flow handling all clients, or a totally separate flow for each individual client would be needed. 
+* It is not really flexible. Since `Condition - User Role` only allows for checking one concrete (realm or client-specific) role, a very complex flow handling all clients, or a totally separate flow for each individual client would be needed.
 * It simply does not work well with federated authentication (ie. identity provider redirects), since there is no way to configure client specific behaviour for `First login flow` or `Post login flows`. In other words, there is no feature like `Authentication flow overrides` at an IdP level. Hence, the same flow will be used for all clients. As said before, this becomes very complicated.
 
 ## How does it work?
@@ -40,15 +40,32 @@ A client with that role has the feature enabled. Only users with that role can a
 
 ## How to install?
 
+### Kecloak distribution powered by Wildfly
+
 Download a release (*.jar file) that works with your Keycloak version from the [list of releases](https://github.com/sventorben/keycloak-restrict-client-auth/releases).
 
-Drop the file to `standalone/deployments` folder to make use of Keycloak Deployer. For details please refer to the [official documentation](https://www.keycloak.org/docs/latest/server_development/#registering-provider-implementations).
+Create a Wildfly module and deploy it to your Keycloak instance. For details please refer to the [official documentation](https://www.keycloak.org/docs/latest/server_development/#register-a-provider-using-modules).
 
-For Docker-based setups follow the [guidelines for adding custom providers](https://github.com/keycloak/keycloak-containers/tree/master/server#user-content-adding-a-custom-provider).
+For convenience, here is a `module.xml` file.
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.3" name="keycloak-restrict-client-auth">
+    <resources>
+        <resource-root path="keycloak-restrict-client-auth.jar"/>
+    </resources>
+    <dependencies>
+        <module name="org.keycloak.keycloak-services"/>
+    </dependencies>
+</module>
+```
 
-> ℹ️ **Maven/Gradle**:
->
-> Packages are being released to GitHub Packages. You find the coordinates [here](https://github.com/sventorben?tab=packages&repo_name=keycloak-restrict-client-auth)! It may happen that I remove older packages without prior notice, because the storage is limited on the free tier.
+### Container image (Docker)
+
+For Docker-based setups mount or copy the jar to `/opt/jboss/keycloak/providers`. You may want to check [docker-compose.yml](docker-compose.yml) as example.
+
+### Maven/Gradle
+
+Packages are being released to GitHub Packages. You find the coordinates [here](https://github.com/sventorben?tab=packages&repo_name=keycloak-restrict-client-auth)! It may happen that I remove older packages without prior notice, because the storage is limited on the free tier.
 
 
 ## How to configure?
@@ -89,7 +106,7 @@ restricted-access.denied=Access denied. User is missing required role 'restricte
 restricted-access.denied=Zugriff verweigert. Dem Benutzer fehlt die notwendige Rolle 'restricted-access'.
 ```
 
-If the field is blank, default property `access-denied` is used. In this case you do not need a custom theme, since this property comes with Keycloak out of the box. 
+If the field is blank, default property `access-denied` is used. In this case you do not need a custom theme, since this property comes with Keycloak out of the box.
 For details on how to add custom messages to Keycloak, please refer to [Messages and Internationalization](https://www.keycloak.org/docs/latest/server_development/#messages) in the server developer guide.
 
 ### Changing the default role name
@@ -98,14 +115,15 @@ You do not like the role name or you do have some kind of naming conventions in 
 
 #### via CLI:
 ```
-/subsystem=keycloak-server/spi=authenticator/:add
-/subsystem=keycloak-server/spi=authenticator/provider=restrict-client-auth-authenticator/:add(properties={clientRoleName=my-custom-role-name},enabled=true)
+/subsystem=keycloak-server/spi=restrict-client-auth:add(default-provider=restrict-client-auth-access-client-role)
+/subsystem=keycloak-server/spi=restrict-client-auth/provider=restrict-client-auth-access-client-role:add(properties={clientRoleName=my-custom-role-name,enabled=true})
 ```
 
 #### via standalone.xml:
 ```XML
-<spi name="authenticator">
-    <provider name="restrict-client-auth-authenticator" enabled="true">
+<spi name="restrict-client-auth">
+    <default-provider>restrict-client-auth-access-client-role</default-provider>
+    <provider name="restrict-client-auth-access-client-role" enabled="true">
         <properties>
             <property name="clientRoleName" value="my-custom-role-name"/>
         </properties>

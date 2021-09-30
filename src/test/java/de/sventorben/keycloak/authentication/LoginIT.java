@@ -12,7 +12,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.ws.rs.*;
+import javax.ws.rs.NotAuthorizedException;
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,11 +39,11 @@ class LoginIT {
     private static String KEYCLOAK_AUTH_URL;
 
     @Container
-    private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer(
+    private static final KeycloakContainer KEYCLOAK_CONTAINER = new CustomKeycloakContainer(
             "jboss/keycloak:" + System.getProperty("version.keycloak", "latest"))
+            .withProviderClassesFrom("target/classes")
             .withAdminUsername(KEYCLOAK_ADMIN_USER)
             .withAdminPassword(KEYCLOAK_ADMIN_PASS)
-            .withExtensionClassesFrom("target/classes")
             .withRealmImportFiles("master-realm.json", "test-realm.json")
             .withExposedPorts(KEYCLOAK_HTTP_PORT)
             .withLogConsumer(new Slf4jLogConsumer(LOGGER).withSeparateOutputStreams())

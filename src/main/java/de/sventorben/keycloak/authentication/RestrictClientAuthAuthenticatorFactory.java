@@ -24,9 +24,6 @@ public final class RestrictClientAuthAuthenticatorFactory implements Authenticat
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = new AuthenticationExecutionModel.Requirement[]{REQUIRED, DISABLED};
 
-    private static final String CLIENT_ROLE_NAME = "clientRoleName";
-    private final String CLIENT_ROLE_NAME_DEFAULT = "restricted-access";
-
     private static final String PROVIDER_ID = "restrict-client-auth-authenticator";
 
     private Config.Scope config;
@@ -68,8 +65,7 @@ public final class RestrictClientAuthAuthenticatorFactory implements Authenticat
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        String clientRoleName = config.get(CLIENT_ROLE_NAME, CLIENT_ROLE_NAME_DEFAULT);
-        return new RestrictClientAuthAuthenticator(clientRoleName);
+        return new RestrictClientAuthAuthenticator();
     }
 
     @Override

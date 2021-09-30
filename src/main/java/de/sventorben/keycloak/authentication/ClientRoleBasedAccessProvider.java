@@ -5,13 +5,13 @@ import org.keycloak.models.ClientModel;
 import org.keycloak.models.RoleModel;
 import org.keycloak.models.UserModel;
 
-final class ClientRoleBasedAccess implements Access {
+public final class ClientRoleBasedAccessProvider implements AccessProvider {
 
-    private static final Logger LOG = Logger.getLogger(ClientRoleBasedAccess.class);
+    private static final Logger LOG = Logger.getLogger(ClientRoleBasedAccessProvider.class);
 
     private final String clientRoleName;
 
-    ClientRoleBasedAccess(String clientRoleName) {
+    ClientRoleBasedAccessProvider(String clientRoleName) {
         this.clientRoleName = clientRoleName;
     }
 
@@ -31,5 +31,9 @@ final class ClientRoleBasedAccess implements Access {
                     user.getUsername(), clientRoleName, client.getId());
         }
         return permitted;
+    }
+
+    @Override
+    public void close() {
     }
 }

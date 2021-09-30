@@ -45,7 +45,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: "target/keycloak-restrict-client-auth.jar"
-        body_path: "RELEASELOG"
+        body_path: "RELEASELOG.md"
         fail_on_unmatched_files: true
         tag_name: v${{ github.event.inputs.releaseVersion }}
       env:
