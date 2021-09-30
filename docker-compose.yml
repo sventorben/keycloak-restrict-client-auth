@@ -2,7 +2,7 @@ version: '3'
 services:
   keycloak:
     container_name: keycloak
-    image: jboss/keycloak:15.0.2
+    image: quay.io/keycloak/keycloak:15.0.2
     environment:
       DB_VENDOR: h2
       KEYCLOAK_USER: admin

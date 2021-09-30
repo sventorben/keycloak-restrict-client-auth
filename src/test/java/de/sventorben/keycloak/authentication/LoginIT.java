@@ -40,7 +40,7 @@ class LoginIT {
 
     @Container
     private static final KeycloakContainer KEYCLOAK_CONTAINER = new CustomKeycloakContainer(
-            "jboss/keycloak:" + System.getProperty("version.keycloak", "latest"))
+            "quay.io/keycloak/keycloak:" + System.getProperty("version.keycloak", "latest"))
             .withProviderClassesFrom("target/classes")
             .withAdminUsername(KEYCLOAK_ADMIN_USER)
             .withAdminPassword(KEYCLOAK_ADMIN_PASS)
