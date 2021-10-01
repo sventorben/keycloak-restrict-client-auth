@@ -16,4 +16,4 @@ services:
       - 8787:8787
       - 9990:9990
     volumes:
-    - ./target/keycloak-restrict-client-auth.jar:/opt/jboss/keycloak/standalone/deployments/keycloak-restrict-client-auth.jar
+    - ./target/keycloak-restrict-client-auth.jar:/opt/jboss/keycloak/providers/keycloak-restrict-client-auth.jar
