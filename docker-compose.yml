@@ -7,6 +7,7 @@ services:
       DB_VENDOR: h2
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_IMPORT: /tmp/import/test-realm.json
       DEBUG_PORT: '*:8787'
       DEBUG_MODE: 'true'
     command: '--debug'
@@ -17,3 +18,4 @@ services:
       - 9990:9990
     volumes:
     - ./target/keycloak-restrict-client-auth.jar:/opt/jboss/keycloak/providers/keycloak-restrict-client-auth.jar
+    - ./src/test/resources/:/tmp/import
