@@ -72,23 +72,21 @@ Packages are being released to GitHub Packages. You find the coordinates [here](
 
 ### Configuring the authenticator
 
-First, you need to add the authenticator to your desired flow. Mark the authenticator as `Required`. Bind your newly created flow as desired - either as a default for the whole realm or on a per-client basis.
-
+1) First, you need to add the authenticator to your desired flow. Mark the authenticator as `Required`.
+Then bind your newly created flow as desired - either as a default for the whole realm or on a per-client basis.
 See the image below for an example.
-
 ![Example flow](docs/images/flow.jpg)
+2) Second, configure the authenticator by clicking on `Actions -> Config` and select `restrict-client-auth-access-client-role` as the `Access Provider`.
+![Role-based access restriction](docs/images/config-client-role-based.jpg)
+3) Third, you need to add a role named `restricted-access` to the client you want to restrict access to.
+See the image below for an example.
+![Client role configuration](docs/images/client-role.jpg)
+4) Afterwards, no user can authenticate to this client. To allow a user to authenticate, you need to assign the role `restricted-access` to the user. You may do so either by assigning the role to the user directly or via groups or combined roles.
 
 > ⚠️ **User identity**:
 >
 > The authenticator needs a user identity to check whether the user has the desired role or not. Hence, ensure that you have steps/executions in your flow prior to this authenticator that can ensure user's identity.
 
-Second, you need to add a role named `restricted-access` to the client you want to restrict access to.
-
-See the image below for an example.
-
-![Client role configuration](docs/images/client-role.jpg)
-
-Afterwards, no user can authenticate to this client. To allow a user to authenticate, you need to assign the role `restricted-access` to the user. You may do so either by assigning the role to the user directly or via groups or combined roles.
 
 ### Using a custom error message
 

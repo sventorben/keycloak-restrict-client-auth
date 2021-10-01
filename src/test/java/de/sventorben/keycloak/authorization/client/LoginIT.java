@@ -66,8 +66,8 @@ class LoginIT {
     }
 
     /**
-     * If no access provider is given configured in the authenticator, and no default access provider is configured via
-     * SPI configuration, then we fallback to restrict-client-auth-access-client-role.
+     * If no access provider is configured for the authenticator, and no server-wide default access provider is configured via
+     * SPI configuration, then we fallback to 'restrict-client-auth-access-client-role'.
      */
     @Nested
     class RestrictedClient {
