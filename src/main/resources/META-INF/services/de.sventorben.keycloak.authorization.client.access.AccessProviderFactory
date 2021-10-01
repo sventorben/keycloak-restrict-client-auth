@@ -1,0 +1,2 @@
+de.sventorben.keycloak.authorization.client.access.role.ClientRoleBasedAccessProviderFactory
+de.sventorben.keycloak.authorization.client.access.policy.PolicyBasedAccessProviderFactory

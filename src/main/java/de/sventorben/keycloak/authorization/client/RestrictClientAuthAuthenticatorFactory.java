@@ -1,5 +1,6 @@
-package de.sventorben.keycloak.authentication;
+package de.sventorben.keycloak.authorization.client;
 
+import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
@@ -8,13 +9,13 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.provider.ProviderFactory;
 import org.keycloak.provider.ServerInfoAwareProviderFactory;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import static de.sventorben.keycloak.authentication.RestrictClientAuthConfigProperties.CONFIG_PROPERTIES;
 import static org.keycloak.models.AuthenticationExecutionModel.Requirement.DISABLED;
 import static org.keycloak.models.AuthenticationExecutionModel.Requirement.REQUIRED;
 
@@ -35,7 +36,7 @@ public final class RestrictClientAuthAuthenticatorFactory implements Authenticat
 
     @Override
     public String getReferenceCategory() {
-        return "JWT";
+        return "Auhtorization";
     }
 
     @Override
@@ -55,12 +56,12 @@ public final class RestrictClientAuthAuthenticatorFactory implements Authenticat
 
     @Override
     public String getHelpText() {
-        return "Restricts user authentication on clients based on a client role";
+        return "Restricts user authentication on clients based on an access provider";
     }
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return CONFIG_PROPERTIES;
+        return RestrictClientAuthConfigProperties.CONFIG_PROPERTIES;
     }
 
     @Override
@@ -75,6 +76,10 @@ public final class RestrictClientAuthAuthenticatorFactory implements Authenticat
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
+        RestrictClientAuthConfigProperties.ACCESS_PROVIDER_ID_PROPERTY.setOptions(
+            factory.getProviderFactoriesStream(AccessProvider.class)
+                .map(ProviderFactory::getId)
+                .collect(Collectors.toList()));
     }
 
     @Override

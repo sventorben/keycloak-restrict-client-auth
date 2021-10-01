@@ -1,4 +1,4 @@
-package de.sventorben.keycloak.authentication;
+package de.sventorben.keycloak.authorization.client;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 

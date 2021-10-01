@@ -1,5 +1,6 @@
-package de.sventorben.keycloak.authentication;
+package de.sventorben.keycloak.authorization.client.access.role;
 
+import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import org.jboss.logging.Logger;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.RoleModel;
@@ -26,9 +27,13 @@ public final class ClientRoleBasedAccessProvider implements AccessProvider {
         if (role == null) return false;
         if (user == null) return false;
         boolean permitted = user.hasRole(role);
-        if (!permitted) {
-            LOG.warnf("Access for user '%s' is denied. User does not have client role '%s' on client '%s'.",
-                    user.getUsername(), clientRoleName, client.getId());
+        if (permitted) {
+            LOG.debugf(
+                "Access for user '%s' to client '%s' in realm '%s' granted.",
+                user.getUsername(), client.getName(), client.getRealm().getName());
+        } else {
+            LOG.warnf("Access for user '%s' to client '%s' in realm '%s' is denied. User does not have client role '%s' on client with id '%s'.",
+                    user.getUsername(), client.getName(), client.getRealm().getName(), clientRoleName, client.getId());
         }
         return permitted;
     }
