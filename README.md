@@ -115,13 +115,13 @@ You do not like the role name or you do have some kind of naming conventions in 
 
 #### via CLI:
 ```
-/subsystem=keycloak-server/spi=restrict-client-auth:add(default-provider=restrict-client-auth-access-client-role)
-/subsystem=keycloak-server/spi=restrict-client-auth/provider=restrict-client-auth-access-client-role:add(properties={clientRoleName=my-custom-role-name,enabled=true})
+/subsystem=keycloak-server/spi=restrict-client-auth-access-provider:add(default-provider=restrict-client-auth-access-client-role)
+/subsystem=keycloak-server/spi=restrict-client-auth-access-provider/provider=restrict-client-auth-access-client-role:add(properties={clientRoleName=my-custom-role-name,enabled=true})
 ```
 
 #### via standalone.xml:
 ```XML
-<spi name="restrict-client-auth">
+<spi name="restrict-client-auth-access-provider">
     <default-provider>restrict-client-auth-access-client-role</default-provider>
     <provider name="restrict-client-auth-access-client-role" enabled="true">
         <properties>

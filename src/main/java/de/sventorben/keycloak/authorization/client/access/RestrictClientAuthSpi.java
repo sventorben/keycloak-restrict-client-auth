@@ -1,4 +1,4 @@
-package de.sventorben.keycloak.authentication;
+package de.sventorben.keycloak.authorization.client.access;
 
 import org.keycloak.provider.Provider;
 import org.keycloak.provider.ProviderFactory;
@@ -6,7 +6,7 @@ import org.keycloak.provider.Spi;
 
 public final class RestrictClientAuthSpi implements Spi {
 
-    private static final String SPI_NAME = "restrict-client-auth";
+    private static final String SPI_NAME = "restrict-client-auth-access-provider";
 
     @Override
     public boolean isInternal() {

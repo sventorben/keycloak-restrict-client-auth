@@ -1,4 +1,4 @@
-package de.sventorben.keycloak.authentication;
+package de.sventorben.keycloak.authorization.client.access;
 
 import org.keycloak.provider.ProviderFactory;
 

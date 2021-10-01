@@ -1,5 +1,7 @@
-package de.sventorben.keycloak.authentication;
+package de.sventorben.keycloak.authorization.client.access.role;
 
+import de.sventorben.keycloak.authorization.client.access.AccessProvider;
+import de.sventorben.keycloak.authorization.client.access.AccessProviderFactory;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
@@ -9,7 +11,7 @@ import java.util.Map;
 
 public final class ClientRoleBasedAccessProviderFactory implements AccessProviderFactory, ServerInfoAwareProviderFactory {
 
-    static final String PROVIDER_ID = "restrict-client-auth-access-client-role";
+    public static final String PROVIDER_ID = "restrict-client-auth-access-client-role";
 
     private static final String CLIENT_ROLE_NAME = "clientRoleName";
     private static final String CLIENT_ROLE_NAME_DEFAULT = "restricted-access";
