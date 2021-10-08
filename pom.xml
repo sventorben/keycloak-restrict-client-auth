@@ -52,7 +52,7 @@
 
         <version.keycloak>15.0.2</version.keycloak>
 
-        <version.mockito>3.12.4</version.mockito>
+        <version.mockito>4.0.0</version.mockito>
     </properties>
 
     <build>
