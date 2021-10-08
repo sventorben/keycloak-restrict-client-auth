@@ -14,7 +14,7 @@ updates:
     assignees:
       - "sventorben"
     commit-message:
-      prefix: "chore: "
+      prefix: "chore"
 
 
   # Maintain dependencies for maven
@@ -26,4 +26,4 @@ updates:
       - "sventorben"
     commit-message:
       include: "scope"
-      prefix: "chore: "
+      prefix: "chore"
