@@ -11,7 +11,7 @@ import java.util.Map;
 
 public final class ClientRoleBasedAccessProviderFactory implements AccessProviderFactory, ServerInfoAwareProviderFactory {
 
-    public static final String PROVIDER_ID = "restrict-client-auth-access-client-role";
+    public static final String PROVIDER_ID = "client-role";
 
     private static final String CLIENT_ROLE_NAME = "clientRoleName";
     private static final String CLIENT_ROLE_NAME_DEFAULT = "restricted-access";

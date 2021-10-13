@@ -11,7 +11,7 @@ import java.util.Map;
 
 public final class PolicyBasedAccessProviderFactory implements AccessProviderFactory, ServerInfoAwareProviderFactory {
 
-    private static final String PROVIDER_ID = "restrict-client-auth-access-policy";
+    private static final String PROVIDER_ID = "policy";
 
     private Config.Scope config;
 
