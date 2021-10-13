@@ -67,13 +67,13 @@ class LoginIT {
 
     /**
      * If no access provider is configured for the authenticator, and no server-wide default access provider is configured via
-     * SPI configuration, then we fallback to 'restrict-client-auth-access-client-role'.
+     * SPI configuration, then we fallback to 'client-role'.
      */
     @Nested
     class RestrictedClient {
 
         @ParameterizedTest
-        @CsvSource(value = {"restrict-client-auth-access-client-role", "null"}, nullValues = "null")
+        @CsvSource(value = {"client-role", "null"}, nullValues = "null")
         void accessForUserWithoutRoleIsDenied(String accessProviderId) {
             LoginIT.this.switchAccessProvider(accessProviderId);
             Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED);
@@ -82,7 +82,7 @@ class LoginIT {
         }
 
         @ParameterizedTest
-        @CsvSource(value = {"restrict-client-auth-access-client-role", "null"}, nullValues = "null")
+        @CsvSource(value = {"client-role", "null"}, nullValues = "null")
         void accessForUserWithRoleIsAllowed(String accessProviderId) {
             LoginIT.this.switchAccessProvider(accessProviderId);
             Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_RESTRICTED);
@@ -95,7 +95,7 @@ class LoginIT {
 
         @BeforeEach
         void switchAccessProvider() {
-            LoginIT.this.switchAccessProvider("restrict-client-auth-access-policy");
+            LoginIT.this.switchAccessProvider("policy");
         }
 
         @Test
