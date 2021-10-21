@@ -1,4 +1,4 @@
-# \[Keycloak\] Restrict user authorization on clients
+# Keycloak: Restrict user authorization on clients
 
 This is a simple Keycloak authenticator to restrict user authorization on clients.
 
