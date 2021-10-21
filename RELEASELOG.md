@@ -9,5 +9,6 @@
 > * The way to configure a custom client role name has changed. It needs to be configured via the newly introduced custom SPI.
 > * The way to install the authenticator has changed. It needs to be deployed as a provider/module now instead as a deployment.
 >
-> Please check [README.md](README.md) for details.
 >
+
+Please check the [README for this release version](README.md) for installation and configuration instructions.
