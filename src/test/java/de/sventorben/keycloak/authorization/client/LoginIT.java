@@ -47,7 +47,7 @@ class LoginIT {
     private static String KEYCLOAK_AUTH_URL;
 
     @Container
-    private static final KeycloakContainer KEYCLOAK_CONTAINER = new CustomKeycloakContainer(
+    private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer(
             "quay.io/keycloak/keycloak:" + System.getProperty("version.keycloak", "latest"))
             .withProviderClassesFrom("target/classes")
             .withAdminUsername(KEYCLOAK_ADMIN_USER)
