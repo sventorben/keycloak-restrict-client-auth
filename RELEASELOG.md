@@ -3,6 +3,7 @@
   This is only supported for confidential OIDC clients with authorization enabled.
 * Support adding additional mechanisms to enable and evaluate client access restrictions by a custom SPI.
   The SPI is marked internal for now and may change or even be removed anytime without prior notice.
+* Tested to support Quarkus-based Keycloak.X distribution.
 
 > ⚠️ **Configuration changes**:
 >

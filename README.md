@@ -59,7 +59,7 @@ A client with that resource has the authenticator enabled. Users will only be ab
 Download a release (*.jar file) that works with your Keycloak version from the [list of releases](https://github.com/sventorben/keycloak-restrict-client-auth/releases).
 Follow the below instructions depending on your distribution and runtime environment.
 
-### Kecloak distribution powered by Wildfly
+### Wildfly-based distro
 
 Create a Wildfly module and deploy it to your Keycloak instance. For details please refer to the [official documentation](https://www.keycloak.org/docs/latest/server_development/#register-a-provider-using-modules).
 
@@ -185,6 +185,16 @@ If the field is left blank, default property `access-denied` is used. In this ca
 For details on how to add custom messages to Keycloak, please refer to section [Messages and Internationalization](https://www.keycloak.org/docs/latest/server_development/#messages) in the server developer guide.
 
 ## Frequently asked questions
+
+### Does it (already) work with Keycloak.X?
+On October 28th 2021 the Keycloak project [announced](https://www.keycloak.org/2021/10/keycloak-x-update) the roadmap for the new Quarkus-based Keycloak-X distribution.
+According to this Keycloak 16 will be the last preview of the Quarkus distribution. As of December 2021, Keycloak 17 will make the Quarkus distribution fully supported the WildFly distribution will be deprecated.
+Support for the Wildfly distribution will be removed by mid 2022.
+
+Therefore, I will focus all further development of this library towards the Quarkus-based Keycloak.X distribution.
+Once the Wildfly support will be removed from the Keycloak project, I will remove all support for Wildfly here as well.
+
+Don't worry, I will ensure this library stays compatible with the Wildfly distribution as well as with Keycloak.X until then.
 
 ### Does it work with Keycloak version X.Y.Z?
 
