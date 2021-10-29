@@ -115,13 +115,15 @@ It may happen that I remove older packages without prior notice, because the sto
 
 You do not like the role name `restricted-access` or you do have some kind of naming conventions in place? You can change the role name globally by configuring the provider.
 
-##### via CLI:
+##### Wildfly-based distro
+
+###### via CLI:
 ```
 /subsystem=keycloak-server/spi=restrict-client-auth-access-provider:add(default-provider=client-role)
 /subsystem=keycloak-server/spi=restrict-client-auth-access-provider/provider=client-role:add(properties={clientRoleName=my-custom-role-name,enabled=true})
 ```
 
-##### via standalone.xml:
+###### via standalone.xml:
 ```XML
 <spi name="restrict-client-auth-access-provider">
     <default-provider>client-role</default-provider>
@@ -134,6 +136,14 @@ You do not like the role name `restricted-access` or you do have some kind of na
 ```
 
 For details, please refer to [Manage Subsystem Configuration](https://www.keycloak.org/docs/latest/server_installation/index.html#manage-subsystem-configuration) section in the server installation guide.
+
+##### Keycloak.X distro:
+```properties
+spi.restrict-client-auth-access-provider.client-role.enabled=true
+spi.restrict-client-auth-access-provider.client-role.client-role-name=custom-role
+```
+
+For details on SPI and provider configuration in Keycloak.X, please refer to [SPIs and Provider Configuration](https://github.com/keycloak/keycloak-community/blob/master/design/keycloak.x/configuration.md#spis-and-provider-configuration) section in the community guide.
 
 ### Policy-based mode
 
@@ -163,7 +173,7 @@ In the flow choose the `Actions` button and then choose `Config`. You will see t
 
 You can directly define a particular message or use a property, which will be used for mapping the error message. If you choose a property, the property will be looked up from your custom theme's `messages*.properties` files and therefore supports internationalization.
 
-```
+```properties
 # messages.properties
 restricted-access.denied=Access denied. User is missing required role 'restricted-access'
 # messages_de.properties
