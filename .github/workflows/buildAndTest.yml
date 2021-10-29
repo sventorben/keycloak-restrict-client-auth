@@ -32,7 +32,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        keycloak: [ 13.0.1, 14.0.0, 15.0.1 ]
+        keycloak_version: [ 13.0.1, 14.0.0, 15.0.1 ]
+        keycloak_dist: [keycloak, keycloak-x]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -48,4 +49,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Compatibility tests
-        run: mvn -B clean test-compile failsafe:integration-test failsafe:verify --file pom.xml -Dversion.keycloak=${{ matrix.keycloak }}
+        run: mvn -B clean test-compile failsafe:integration-test failsafe:verify --file pom.xml -Dkeycloak.version=${{ matrix.keycloak_version }} -Dkeycloak.dist=${{ matrix.keycloak_dist }}

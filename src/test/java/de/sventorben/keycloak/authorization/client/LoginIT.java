@@ -1,6 +1,8 @@
 package de.sventorben.keycloak.authorization.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -10,6 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.AuthenticationManagementResource;
 import org.keycloak.representations.idm.AuthenticatorConfigRepresentation;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
@@ -18,6 +21,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.ws.rs.NotAuthorizedException;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 
@@ -47,22 +51,37 @@ class LoginIT {
     private static String KEYCLOAK_AUTH_URL;
 
     @Container
-    private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer(
-            "quay.io/keycloak/keycloak:" + System.getProperty("version.keycloak", "latest"))
-            .withProviderClassesFrom("target/classes")
-            .withAdminUsername(KEYCLOAK_ADMIN_USER)
-            .withAdminPassword(KEYCLOAK_ADMIN_PASS)
-            .withRealmImportFiles("master-realm.json", "test-realm.json")
-            .withExposedPorts(KEYCLOAK_HTTP_PORT)
-            .withLogConsumer(new Slf4jLogConsumer(LOGGER).withSeparateOutputStreams())
-            .waitingFor(Wait.forHttp("/auth/")
-                    .forStatusCode(200)
-                    .withStartupTimeout(Duration.ofMinutes(1)));
+    private static final KeycloakContainer KEYCLOAK_CONTAINER = createContainer(
+        System.getProperty("keycloak.dist", "keycloak-x") + ":" + System.getProperty("keycloak.version", "latest"))
+        .withProviderClassesFrom("target/classes")
+        .withExposedPorts(KEYCLOAK_HTTP_PORT)
+        .withLogConsumer(new Slf4jLogConsumer(LOGGER).withSeparateOutputStreams())
+        .withStartupTimeout(Duration.ofSeconds(30));
 
+    private static KeycloakContainer createContainer(String image) {
+        String fullImage = "quay.io/keycloak/" + image;
+        LOGGER.info("Running test with Keycloak image: " + fullImage);
+        if (image.startsWith("keycloak-x")) {
+            return new KeycloakXContainer(fullImage);
+        } else {
+            return new KeycloakContainer(fullImage);
+        }
+    }
 
     @BeforeAll
-    static void setUp() {
+    static void setUp() throws IOException {
         KEYCLOAK_AUTH_URL = KEYCLOAK_CONTAINER.getAuthServerUrl();
+        importRealms();
+    }
+
+    private static void importRealms() throws IOException {
+        keycloakAdmin().realms().create(
+            new ObjectMapper()
+                .readValue(
+                    Thread.currentThread().getContextClassLoader().getResource("test-realm.json"),
+                    RealmRepresentation.class
+                )
+        );
     }
 
     /**
@@ -78,7 +97,7 @@ class LoginIT {
             LoginIT.this.switchAccessProvider(accessProviderId);
             Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED);
             assertThatThrownBy(() -> keycloak.tokenManager().getAccessToken())
-                    .isInstanceOf(NotAuthorizedException.class);
+                .isInstanceOf(NotAuthorizedException.class);
         }
 
         @ParameterizedTest
@@ -100,14 +119,16 @@ class LoginIT {
 
         @Test
         void accessForUserWithoutRoleIsDenied() {
-            Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY);
+            Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED,
+                CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY);
             assertThatThrownBy(() -> keycloak.tokenManager().getAccessToken())
                 .isInstanceOf(NotAuthorizedException.class);
         }
 
         @Test
         void accessForUserWithRoleIsAllowed() {
-            Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY);
+            Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
+                CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY);
             assertThat(keycloak.tokenManager().getAccessToken()).isNotNull();
         }
     }
@@ -154,8 +175,8 @@ class LoginIT {
         flows.updateAuthenticatorConfig(authenticationConfigId, authenticatorConfig);
     }
 
-    private Keycloak keycloakAdmin() {
-        return keycloak("master", "admin", "admin", "admin-cli", null);
+    private static Keycloak keycloakAdmin() {
+        return keycloak("master", KEYCLOAK_ADMIN_USER, KEYCLOAK_ADMIN_PASS, "admin-cli", null);
     }
 
     private static Keycloak keycloakTest(String username, String password, String client) {

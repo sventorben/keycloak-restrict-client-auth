@@ -50,9 +50,16 @@
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.release>11</maven.compiler.release>
 
+        <!-- For compilation -->
         <version.keycloak>15.0.2</version.keycloak>
 
+        <!-- For compatibility tests -->
+        <keycloak.version>${version.keycloak}</keycloak.version>
+        <keycloak.dist>keycloak-x</keycloak.dist>
+
+
         <version.mockito>4.0.0</version.mockito>
+        <version.shrinkwrap>1.2.6</version.shrinkwrap>
     </properties>
 
     <build>
@@ -80,7 +87,8 @@
                     <configuration>
                         <systemPropertyVariables>
                             <org.jboss.logging.provider>log4j2</org.jboss.logging.provider>
-                            <version.keycloak>${version.keycloak}</version.keycloak>
+                            <keycloak.version>${keycloak.version}</keycloak.version>
+                            <keycloak.dist>${keycloak.dist}</keycloak.dist>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
@@ -155,6 +163,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -230,6 +239,19 @@
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-admin-client</artifactId>
             <version>${version.keycloak}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- ShrinkWrap -->
+        <dependency>
+            <groupId>org.jboss.shrinkwrap</groupId>
+            <artifactId>shrinkwrap-api</artifactId>
+            <version>${version.shrinkwrap}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.shrinkwrap</groupId>
+            <artifactId>shrinkwrap-impl-base</artifactId>
+            <version>${version.shrinkwrap}</version>
             <scope>test</scope>
         </dependency>
         <!-- Logging -->
