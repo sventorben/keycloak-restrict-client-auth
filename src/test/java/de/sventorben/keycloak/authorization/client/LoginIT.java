@@ -1,8 +1,6 @@
 package de.sventorben.keycloak.authorization.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -12,16 +10,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.AuthenticationManagementResource;
 import org.keycloak.representations.idm.AuthenticatorConfigRepresentation;
-import org.keycloak.representations.idm.RealmRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.ws.rs.NotAuthorizedException;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 
@@ -52,36 +47,22 @@ class LoginIT {
 
     @Container
     private static final KeycloakContainer KEYCLOAK_CONTAINER = createContainer(
-        System.getProperty("keycloak.dist", "keycloak-x") + ":" + System.getProperty("keycloak.version", "latest"))
+        System.getProperty("keycloak.dist", "keycloak-x"), System.getProperty("keycloak.version", "latest"))
         .withProviderClassesFrom("target/classes")
         .withExposedPorts(KEYCLOAK_HTTP_PORT)
         .withLogConsumer(new Slf4jLogConsumer(LOGGER).withSeparateOutputStreams())
+        .withRealmImportFile("/test-realm.json")
         .withStartupTimeout(Duration.ofSeconds(30));
 
-    private static KeycloakContainer createContainer(String image) {
-        String fullImage = "quay.io/keycloak/" + image;
+    private static KeycloakContainer createContainer(String dist, String version) {
+        String fullImage = "quay.io/keycloak/" + dist + ":" + version;
         LOGGER.info("Running test with Keycloak image: " + fullImage);
-        if (image.startsWith("keycloak-x")) {
-            return new KeycloakXContainer(fullImage);
-        } else {
-            return new KeycloakContainer(fullImage);
-        }
+        return new KeycloakContainer(fullImage);
     }
 
     @BeforeAll
-    static void setUp() throws IOException {
+    static void setUp() {
         KEYCLOAK_AUTH_URL = KEYCLOAK_CONTAINER.getAuthServerUrl();
-        importRealms();
-    }
-
-    private static void importRealms() throws IOException {
-        keycloakAdmin().realms().create(
-            new ObjectMapper()
-                .readValue(
-                    Thread.currentThread().getContextClassLoader().getResource("test-realm.json"),
-                    RealmRepresentation.class
-                )
-        );
     }
 
     /**

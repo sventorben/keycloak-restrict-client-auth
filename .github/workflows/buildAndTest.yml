@@ -49,4 +49,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Compatibility tests
-        run: mvn -B clean test-compile failsafe:integration-test failsafe:verify --file pom.xml -Dkeycloak.version=${{ matrix.keycloak_version }} -Dkeycloak.dist=${{ matrix.keycloak_dist }}
+        run: mvn -B -U clean test-compile failsafe:integration-test failsafe:verify --file pom.xml -Dkeycloak.version=${{ matrix.keycloak_version }} -Dkeycloak.dist=${{ matrix.keycloak_dist }}

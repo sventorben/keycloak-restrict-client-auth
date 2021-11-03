@@ -57,10 +57,52 @@
         <keycloak.version>${version.keycloak}</keycloak.version>
         <keycloak.dist>keycloak-x</keycloak.dist>
 
-
         <version.mockito>4.1.0</version.mockito>
         <version.shrinkwrap>1.2.6</version.shrinkwrap>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>dist-keycloak-x</id>
+            <activation>
+                <property>
+                    <name>keycloak.dist</name>
+                    <value>!keycloak</value>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>jitpack.io</id>
+                    <url>https://jitpack.io</url>
+                </repository>
+            </repositories>
+            <dependencies>
+                <dependency>
+                    <groupId>com.github.dasniko</groupId>
+                    <artifactId>testcontainers-keycloak</artifactId>
+                    <version>keycloak-x-SNAPSHOT</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>dist-keycloak</id>
+            <activation>
+                <property>
+                    <name>keycloak.dist</name>
+                    <value>keycloak</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.github.dasniko</groupId>
+                    <artifactId>testcontainers-keycloak</artifactId>
+                    <version>1.8.1</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -227,12 +269,6 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>1.16.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.dasniko</groupId>
-            <artifactId>testcontainers-keycloak</artifactId>
-            <version>1.8.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
