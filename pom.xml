@@ -58,7 +58,7 @@
         <keycloak.dist>keycloak-x</keycloak.dist>
 
 
-        <version.mockito>4.0.0</version.mockito>
+        <version.mockito>4.1.0</version.mockito>
         <version.shrinkwrap>1.2.6</version.shrinkwrap>
     </properties>
 
