@@ -1,4 +1,4 @@
-* Update Keycloak dependencies from version 15.0.0 to 15.0.2
+* Update Keycloak dependencies to 15.1.0
 * Support policy-based access restrictions to leverage Keycloak's resources, permissions, and policies.
   This is only supported for confidential OIDC clients with authorization enabled.
 * Support adding additional mechanisms to enable and evaluate client access restrictions by a custom SPI.
