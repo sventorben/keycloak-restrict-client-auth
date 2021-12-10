@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        keycloak_version: [ 13.0.1, 14.0.0, 15.0.2 ]
+        keycloak_version: [ 13.0.1, 14.0.0, 15.1.0 ]
         keycloak_dist: [keycloak, keycloak-x]
     steps:
       - uses: actions/checkout@v2
