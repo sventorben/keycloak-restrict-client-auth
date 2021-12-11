@@ -3,6 +3,9 @@ name: Build and test
 on:
   push:
     branches: [ main ]
+    paths:
+    - 'src/**'
+    - '*.xml'
   pull_request:
     branches: [ main ]
 
