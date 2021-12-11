@@ -45,7 +45,7 @@ In this mode, the authenticator uses client resources, permissions and policies 
 This mode only works for confidential OIDC clients with authorization enabled.
 It works like this:
 
-* The authenticator checks whether a client defines a resource name `Keycloak Client Resource`
+* The authenticator checks whether a client defines a resource named `Keycloak Client Resource`
     * If it does, the authenticator checks whether policies and permission evaluate to `PERMIT`
         * If it does, the authenticator returns success (i.e. authentication is successful)
         * If it does not, the authenticator returns failure (i.e. authentication is unsuccessful)
