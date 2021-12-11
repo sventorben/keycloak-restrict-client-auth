@@ -17,6 +17,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.ws.rs.NotAuthorizedException;
+import java.lang.module.ModuleDescriptor;
+import java.lang.module.ModuleDescriptor.Version;
 import java.time.Duration;
 import java.util.Map;
 
@@ -57,6 +59,10 @@ class LoginIT {
     private static KeycloakContainer createContainer(String dist, String version) {
         String fullImage = "quay.io/keycloak/" + dist + ":" + version;
         LOGGER.info("Running test with Keycloak image: " + fullImage);
+        if ("keycloak-x".equalsIgnoreCase(dist) &&
+            (Version.parse(version).compareTo(Version.parse("15.1")) >= 0 || "latest".equalsIgnoreCase(version))) {
+            return new KeycloakXContainer(fullImage);
+        }
         return new KeycloakContainer(fullImage);
     }
 
