@@ -76,9 +76,21 @@ For convenience, here is a `module.xml` file.
 </module>
 ```
 
+### Quarkus-based distro (Keycloak.X)
+
+Copy the jar to the `providers` folder and execute the following command:
+
+```shell
+${kc.home.dir}/bin/kc.sh config
+```
+
 ### Container image (Docker)
 
-For Docker-based setups mount or copy the jar to `/opt/jboss/keycloak/providers`. You may want to check [docker-compose.yml](docker-compose.yml) as an example.
+For Docker-based setups mount or copy the jar to
+- `/opt/jboss/keycloak/providers` for Wildfly-based distro or Keycloak.X prior to version `15.1.0`
+- `/opt/keycloak/providers` for Keycloak.X from version `15.1.0`
+
+You may want to check [docker-compose.yml](docker-compose.yml) as an example.
 
 ### Maven/Gradle
 
