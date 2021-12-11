@@ -39,7 +39,7 @@ body:
     description: |
       examples:
         - **Keycloak**: 15.1.0 (quarkus/wildfly)
-        - **This extension**:  15.1.0
+        - **This extension**:  15.2.0
     value: |
         - Keycloak:
         - This extension:
