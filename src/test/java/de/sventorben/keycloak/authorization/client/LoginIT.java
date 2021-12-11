@@ -60,7 +60,7 @@ class LoginIT {
         String fullImage = "quay.io/keycloak/" + dist + ":" + version;
         LOGGER.info("Running test with Keycloak image: " + fullImage);
         if ("keycloak-x".equalsIgnoreCase(dist) &&
-            (Version.parse(version).compareTo(Version.parse("15.1")) >= 0 || "latest".equalsIgnoreCase(version))) {
+            ("latest".equalsIgnoreCase(version) || Version.parse(version).compareTo(Version.parse("15.1")) >= 0)) {
             return new KeycloakXContainer(fullImage);
         }
         return new KeycloakContainer(fullImage);
