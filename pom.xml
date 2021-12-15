@@ -88,7 +88,7 @@
                 <dependency>
                     <groupId>com.github.dasniko</groupId>
                     <artifactId>testcontainers-keycloak</artifactId>
-                    <version>keycloak-x-SNAPSHOT</version>
+                    <version>1.6.1</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -105,7 +105,7 @@
                 <dependency>
                     <groupId>com.github.dasniko</groupId>
                     <artifactId>testcontainers-keycloak</artifactId>
-                    <version>1.8.1</version>
+                    <version>1.6.1</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
