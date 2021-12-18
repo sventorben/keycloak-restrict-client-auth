@@ -1,15 +1,1 @@
-* Update Keycloak dependencies to 15.1.0
-* Support policy-based access restrictions to leverage Keycloak's resources, permissions, and policies.
-  This is only supported for confidential OIDC clients with authorization enabled.
-* Support adding additional mechanisms to enable and evaluate client access restrictions by a custom SPI.
-  The SPI is marked internal for now and may change or even be removed anytime without prior notice.
-* Tested to support Quarkus-based Keycloak.X distribution.
-
-> ⚠️ **Configuration changes**:
->
-> * The way to configure a custom client role name has changed. It needs to be configured via the newly introduced custom SPI.
-> * The way to install the authenticator has changed. It needs to be deployed as a provider/module now instead as a deployment.
->
->
-
-Please check the [README of this release version](README.md) for installation and configuration instructions.
+* Update Keycloak dependencies to 16.0.0
