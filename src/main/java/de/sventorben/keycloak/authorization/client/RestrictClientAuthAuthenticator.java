@@ -59,11 +59,11 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
             if (accessProvider == null) {
                 LOG.warnf(
                     "Configured access provider '%s' in authenticator config '%s' does not exist.",
-                    accessProviderId, context.getAuthenticatorConfig().getAlias());
+                    accessProviderId, config.getAuthenticatorConfigAlias());
             } else {
                 LOG.tracef(
                     "Using access provider '%s' in authenticator config '%s'.",
-                    accessProviderId, context.getAuthenticatorConfig().getAlias());
+                    accessProviderId, config.getAuthenticatorConfigAlias());
                 return accessProvider;
             }
         }
@@ -72,13 +72,13 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
         if (defaultProvider != null) {
             LOG.debugf(
                 "No access provider is configured in authenticator config '%s'. Using server-wide default provider '%s'",
-                context.getAuthenticatorConfig().getAlias(), defaultProvider);
+                config.getAuthenticatorConfigAlias(), defaultProvider);
             return defaultProvider;
         }
 
         LOG.infof(
             "Neither an access provider is configured in authenticator config '%s' nor has a server-wide default provider been set. Using '%s' as a fallback.",
-            context.getAuthenticatorConfig().getAlias(), ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
+            config.getAuthenticatorConfigAlias(), ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
         return context.getSession().getProvider(AccessProvider.class, ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
     }
 

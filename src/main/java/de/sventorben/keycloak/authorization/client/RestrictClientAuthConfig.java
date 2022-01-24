@@ -30,4 +30,10 @@ final class RestrictClientAuthConfig {
             .map(config -> config.getOrDefault(ACCESS_PROVIDER_ID, ClientRoleBasedAccessProviderFactory.PROVIDER_ID))
             .orElse(ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
     }
+
+    String getAuthenticatorConfigAlias() {
+        return Optional.ofNullable(authenticatorConfigModel)
+            .map(AuthenticatorConfigModel::getAlias)
+            .orElse(null);
+    }
 }
