@@ -2,13 +2,13 @@ version: '3'
 services:
   keycloak:
     container_name: keycloak
-    image: quay.io/keycloak/keycloak-x:16.1.1
+    image: quay.io/keycloak/keycloak-x:17.0.0
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       DEBUG_PORT: '*:8787'
       DEBUG: 'true'
-    command: ['start-dev', '--db=h2-file', '--debug', '-Dkeycloak.import=/tmp/import/test-realm.json']
+    command: ['start-dev', '--debug', '-Dkeycloak.import=/tmp/import/test-realm.json']
     ports:
       - 8080:8080
       - 8443:8443

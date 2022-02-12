@@ -1,1 +1,1 @@
-* [deps] Update Keycloak dependencies to 16.1.1
+* [deps] Update Keycloak dependencies to 17.0.0
