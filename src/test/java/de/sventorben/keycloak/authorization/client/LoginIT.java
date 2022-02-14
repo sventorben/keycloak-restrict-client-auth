@@ -57,6 +57,9 @@ class LoginIT {
         .withStartupTimeout(Duration.ofSeconds(30));
 
     private static KeycloakContainer createContainer(String dist, String version) {
+        if ("keycloak".equalsIgnoreCase(dist) && "latest".equalsIgnoreCase(version)) {
+            version = "16.1.1";
+        }
         String fullImage = "quay.io/keycloak/" + dist + ":" + version;
         if ("keycloak-x".equalsIgnoreCase(dist) &&
             !"latest".equalsIgnoreCase(version) && Version.parse(version).compareTo(Version.parse("17")) >= 0) {
