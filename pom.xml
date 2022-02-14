@@ -198,6 +198,7 @@
     <dependencyManagement>
         <dependencies>
             <!-- Keycloak -->
+            <!--
             <dependency>
                 <groupId>org.keycloak.bom</groupId>
                 <artifactId>keycloak-spi-bom</artifactId>
@@ -205,6 +206,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            -->
 
             <!-- Tests -->
             <dependency>
