@@ -58,10 +58,12 @@ class LoginIT {
 
     private static KeycloakContainer createContainer(String dist, String version) {
         String fullImage = "quay.io/keycloak/" + dist + ":" + version;
-        if ("keycloak-x".equalsIgnoreCase(dist) && Version.parse(version).compareTo(Version.parse("17")) >= 0) {
+        if ("keycloak-x".equalsIgnoreCase(dist) &&
+            !"latest".equalsIgnoreCase(version) && Version.parse(version).compareTo(Version.parse("17")) >= 0) {
             fullImage = fullImage.replace("keycloak-x", "keycloak");
         }
-        if ("keycloak".equalsIgnoreCase(dist) && Version.parse(version).compareTo(Version.parse("17")) >= 0) {
+        if ("keycloak".equalsIgnoreCase(dist) &&
+            !"latest".equalsIgnoreCase(version) && Version.parse(version).compareTo(Version.parse("17")) >= 0) {
             fullImage = fullImage + "-legacy";
         }
         LOGGER.info("Running test with Keycloak image: " + fullImage);
