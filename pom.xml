@@ -55,7 +55,7 @@
 
         <!-- For compatibility tests -->
         <keycloak.version>${version.keycloak}</keycloak.version>
-        <keycloak.dist>keycloak-x</keycloak.dist>
+        <keycloak.dist>quarkus</keycloak.dist>
 
         <version.mockito>4.3.1</version.mockito>
         <version.shrinkwrap>1.2.6</version.shrinkwrap>
@@ -63,11 +63,11 @@
 
     <profiles>
         <profile>
-            <id>dist-keycloak-x</id>
+            <id>dist-quarkus</id>
             <activation>
                 <property>
                     <name>keycloak.dist</name>
-                    <value>!keycloak</value>
+                    <value>!wildfly</value>
                 </property>
             </activation>
             <repositories>
@@ -86,11 +86,11 @@
             </dependencies>
         </profile>
         <profile>
-            <id>dist-keycloak</id>
+            <id>dist-wildlfy</id>
             <activation>
                 <property>
                     <name>keycloak.dist</name>
-                    <value>keycloak</value>
+                    <value>wildfly</value>
                 </property>
             </activation>
             <dependencies>

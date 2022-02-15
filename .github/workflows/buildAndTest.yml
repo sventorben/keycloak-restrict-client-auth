@@ -36,7 +36,7 @@ jobs:
       fail-fast: false
       matrix:
         keycloak_version: [ 13.0.1, 14.0.0, 15.0.2, 15.1.1, 16.1.1, 17.0.0, latest ]
-        keycloak_dist: [keycloak, keycloak-x]
+        keycloak_dist: [wildfly, quarkus]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
