@@ -44,14 +44,6 @@
         </repository>
     </distributionManagement>
 
-    <repositories>
-        <repository>
-            <id>jboss-public-repository-group</id>
-            <name>JBoss Public Maven Repository Group</name>
-            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-        </repository>
-    </repositories>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>13</maven.compiler.source>
@@ -88,7 +80,7 @@
                 <dependency>
                     <groupId>com.github.dasniko</groupId>
                     <artifactId>testcontainers-keycloak</artifactId>
-                    <version>keycloak-x-SNAPSHOT</version>
+                    <version>2.0.0</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -105,7 +97,7 @@
                 <dependency>
                     <groupId>com.github.dasniko</groupId>
                     <artifactId>testcontainers-keycloak</artifactId>
-                    <version>1.9.0</version>
+                    <version>1.10.0</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -149,7 +141,6 @@
                     <configuration>
                         <scmCommentPrefix>chore(release):</scmCommentPrefix>
                         <tagNameFormat>v@{project.version}</tagNameFormat>
-                        <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
                     </configuration>
                 </plugin>
             </plugins>
@@ -197,17 +188,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Keycloak -->
-            <!--
-            <dependency>
-                <groupId>org.keycloak.bom</groupId>
-                <artifactId>keycloak-spi-bom</artifactId>
-                <version>${version.keycloak}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            -->
-
             <!-- Tests -->
             <dependency>
                 <groupId>org.junit</groupId>
