@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up JDK 11
       uses: actions/setup-java@v2
       with:
@@ -38,7 +38,7 @@ jobs:
         keycloak_version: [ 15.1.1, 16.1.1, 17.0.0, latest ]
         keycloak_dist: [wildfly, quarkus]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up JDK 11
         uses: actions/setup-java@v2
         with:
