@@ -17,7 +17,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.ws.rs.NotAuthorizedException;
-import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleDescriptor.Version;
 import java.time.Duration;
 import java.util.Map;
@@ -62,7 +61,7 @@ class LoginIT {
 
         if ("latest".equalsIgnoreCase(version)) {
             if ("wildfly".equalsIgnoreCase(dist)) {
-                imageVersion = "17.0.0-legacy";
+                imageVersion = "17.0.1-legacy";
             }
         } else {
             Version parsedVersion = Version.parse(version);
