@@ -139,11 +139,11 @@ You do not like the role name `restricted-access` or you do have some kind of na
 
 ##### Quarkus-based distro (Keycloak.X):
 ```properties
-spi.restrict-client-auth-access-provider.client-role.enabled=true
-spi.restrict-client-auth-access-provider.client-role.client-role-name=custom-role
+spi-restrict-client-auth-access-provider-client-role-enabled=true
+spi-restrict-client-auth-access-provider-client-role-client-role-name=custom-role
 ```
 
-For details on SPI and provider configuration in Keycloak.X, please refer to [SPIs and Provider Configuration](https://github.com/keycloak/keycloak-community/blob/master/design/keycloak.x/configuration.md#spis-and-provider-configuration) section in the community guide.
+For details on SPI and provider configuration in Keycloak.X, please refer to [Configuring providers](https://www.keycloak.org/server/configuration-provider) guide.
 
 ##### Wildfly-based distro (👎)
 
