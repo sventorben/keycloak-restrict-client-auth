@@ -47,48 +47,17 @@ class LoginIT {
     private static String KEYCLOAK_AUTH_URL;
 
     @Container
-    private static final KeycloakContainer KEYCLOAK_CONTAINER = createContainer(
-        System.getProperty("keycloak.dist", "quarkus"), System.getProperty("keycloak.version", "latest"))
+    private static final KeycloakContainer KEYCLOAK_CONTAINER = FullImageName.createContainer()
         .withProviderClassesFrom("target/classes")
         .withExposedPorts(KEYCLOAK_HTTP_PORT)
         .withLogConsumer(new Slf4jLogConsumer(LOGGER).withSeparateOutputStreams())
         .withRealmImportFile("/test-realm.json")
         .withStartupTimeout(Duration.ofSeconds(30));
 
-    private static KeycloakContainer createContainer(String dist, String version) {
-        String imageName = "keycloak";
-        String imageVersion = version;
-
-        if ("latest".equalsIgnoreCase(version)) {
-            if ("wildfly".equalsIgnoreCase(dist)) {
-                imageVersion = "17.0.1-legacy";
-            }
-        } else {
-            Version parsedVersion = Version.parse(version);
-            if (parsedVersion.compareTo(Version.parse("17")) >= 0) {
-                if ("wildfly".equalsIgnoreCase(dist)) {
-                    imageVersion = version + "-legacy";
-                }
-            } else {
-                if ("quarkus".equalsIgnoreCase(dist)) {
-                    imageName = "keycloak-x";
-                }
-            }
-        }
-
-        String fullImage = "quay.io/keycloak/" + imageName + ":" + imageVersion;
-        LOGGER.info("Running test with Keycloak image: " + fullImage);
-
-        if ("quarkus".equalsIgnoreCase(dist) &&
-            !"latest".equalsIgnoreCase(version) && Version.parse(version).compareTo(Version.parse("15.1")) < 0) {
-            return new KeycloakXContainer(fullImage);
-        }
-        return new KeycloakContainer(fullImage);
-    }
-
     @BeforeAll
     static void setUp() {
         KEYCLOAK_AUTH_URL = KEYCLOAK_CONTAINER.getAuthServerUrl();
+        LOGGER.info("Running test with Keycloak image: " + FullImageName.get());
     }
 
     /**
