@@ -42,6 +42,9 @@ public final class PolicyBasedAccessProviderFactory implements AccessProviderFac
     @Override
     public Map<String, String> getOperationalInfo() {
         String version = getClass().getPackage().getImplementationVersion();
+        if (version == null) {
+            version = "unknown";
+        }
         return Map.of("Version", version);
     }
 
