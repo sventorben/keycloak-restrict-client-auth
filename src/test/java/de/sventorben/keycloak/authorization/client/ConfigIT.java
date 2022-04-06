@@ -12,6 +12,8 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.lang.module.ModuleDescriptor;
+import java.lang.module.ModuleDescriptor.Version;
 import java.time.Duration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -29,7 +31,7 @@ class ConfigIT {
         .withProviderClassesFrom("target/classes")
         .withExposedPorts(KEYCLOAK_HTTP_PORT)
         .withLogConsumer(new Slf4jLogConsumer(LOGGER).withSeparateOutputStreams())
-        .withStartupTimeout(Duration.ofSeconds(30))
+        .withStartupTimeout(Duration.ofSeconds(90))
         .withClasspathResourceMapping("keycloak.conf", "/opt/keycloak/conf/keycloak.conf", BindMode.READ_ONLY);
 
     @BeforeAll
@@ -38,8 +40,14 @@ class ConfigIT {
     }
 
     @BeforeEach
-    void assumeQuarkus() {
-        assumeThat(FullImageName.getDistribution()).isEqualTo(FullImageName.Distribution.quarkus);
+    void assumeQuarkusAbove17() {
+        assumeThat(FullImageName.getDistribution())
+            .withFailMessage("Test only supported for quarkus-based distribution ")
+            .isEqualTo(FullImageName.Distribution.quarkus);
+        assumeThat(FullImageName.isLatestVersion() || FullImageName.getParsedVersion().compareTo(
+            Version.parse("17")) >= 0)
+            .withFailMessage("Test only supported for Keycloak versions >= 17")
+            .isTrue();
     }
 
     @Test

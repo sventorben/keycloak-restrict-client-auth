@@ -52,7 +52,7 @@ class LoginIT {
         .withExposedPorts(KEYCLOAK_HTTP_PORT)
         .withLogConsumer(new Slf4jLogConsumer(LOGGER).withSeparateOutputStreams())
         .withRealmImportFile("/test-realm.json")
-        .withStartupTimeout(Duration.ofSeconds(30));
+        .withStartupTimeout(Duration.ofSeconds(90));
 
     @BeforeAll
     static void setUp() {
