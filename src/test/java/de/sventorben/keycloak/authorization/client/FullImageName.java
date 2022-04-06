@@ -41,8 +41,12 @@ class FullImageName {
         return "quay.io/keycloak/" + imageName + ":" + imageVersion;
     }
 
-    private static Version getParsedVersion() {
-        if (LATEST_VERSION.equalsIgnoreCase(KEYCLOAK_VERSION)) {
+    static Boolean isLatestVersion() {
+        return LATEST_VERSION.equalsIgnoreCase(KEYCLOAK_VERSION);
+    }
+
+    static Version getParsedVersion() {
+        if (isLatestVersion()) {
             return null;
         }
         return Version.parse(KEYCLOAK_VERSION);
