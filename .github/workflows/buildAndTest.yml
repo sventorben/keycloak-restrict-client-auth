@@ -30,10 +30,9 @@ jobs:
       fail-fast: false
       matrix:
         keycloak_version: [ 18.0.0, latest ]
-        keycloak_dist: [quarkus]
+        keycloak_dist: [quarkus, wildfly]
+        experimental: [false]
         include:
-          - keycloak_dist: wildfly
-            experimental: true
           - keycloak_version: nightly
             experimental: true
     continue-on-error: ${{ matrix.experimental }}
