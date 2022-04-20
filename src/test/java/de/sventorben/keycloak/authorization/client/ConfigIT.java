@@ -39,14 +39,10 @@ class ConfigIT {
     }
 
     @BeforeEach
-    void assumeQuarkusAbove17() {
+    void assumeQuarkus() {
         assumeThat(FullImageName.getDistribution())
             .withFailMessage("Test only supported for quarkus-based distribution ")
             .isEqualTo(FullImageName.Distribution.quarkus);
-        assumeThat(FullImageName.isNightlyVersion() || FullImageName.isLatestVersion() || FullImageName.getParsedVersion().compareTo(
-            Version.parse("17")) >= 0)
-            .withFailMessage("Test only supported for Keycloak versions >= 17")
-            .isTrue();
     }
 
     @Test

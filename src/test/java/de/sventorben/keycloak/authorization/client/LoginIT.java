@@ -22,6 +22,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 @Testcontainers
 class LoginIT {
@@ -57,6 +58,15 @@ class LoginIT {
     static void setUp() {
         KEYCLOAK_AUTH_URL = KEYCLOAK_CONTAINER.getAuthServerUrl();
         LOGGER.info("Running test with Keycloak image: " + FullImageName.get());
+    }
+
+    @BeforeEach
+    void assumeQuarkusIfNightlyBuild() {
+        if (FullImageName.isNightlyVersion()) {
+            assumeThat(FullImageName.getDistribution())
+                .withFailMessage("Nightly build only supported for quarkus-based distribution ")
+                .isEqualTo(FullImageName.Distribution.quarkus);
+        }
     }
 
     /**

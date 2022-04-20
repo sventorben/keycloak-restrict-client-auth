@@ -64,17 +64,8 @@ class FullImageName {
     }
 
     static KeycloakContainer createContainer() {
-
         String fullImage = FullImageName.get();
-
-        if (!isNightlyVersion()) {
-            if (quarkus.equals(KEYCLOAK_DIST) &&
-                !isLatestVersion() && getParsedVersion().compareTo(Version.parse("15.1")) < 0) {
-                return new KeycloakXContainer(fullImage);
-            }
-        }
         return new KeycloakContainer(fullImage);
-
     }
 
 }
