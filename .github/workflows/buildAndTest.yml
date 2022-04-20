@@ -34,6 +34,7 @@ jobs:
         experimental: [false]
         include:
           - keycloak_version: nightly
+            keycloak_dist: quarkus
             experimental: true
     continue-on-error: ${{ matrix.experimental }}
     steps:
