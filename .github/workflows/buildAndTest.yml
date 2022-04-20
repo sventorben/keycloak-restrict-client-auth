@@ -29,21 +29,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        keycloak_version: [ 18.0.0, latest, nightly ]
-        keycloak_dist: [wildfly, quarkus]
+        keycloak_version: [ 18.0.0, latest ]
+        keycloak_dist: [quarkus]
+        include:
+          - keycloak_dist: wildfly
+            experimental: true
+          - keycloak_version: nightly
+            experimental: true
+    continue-on-error: ${{ matrix.experimental }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: 11
-      - name: Cache maven repository
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+          cache: 'maven'
       - name: Compatibility tests
         run: mvn -B -U clean test-compile failsafe:integration-test failsafe:verify --file pom.xml -Dkeycloak.version=${{ matrix.keycloak_version }} -Dkeycloak.dist=${{ matrix.keycloak_dist }}
