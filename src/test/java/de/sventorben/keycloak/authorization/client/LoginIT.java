@@ -17,7 +17,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.ws.rs.NotAuthorizedException;
-import java.lang.module.ModuleDescriptor.Version;
 import java.time.Duration;
 import java.util.Map;
 

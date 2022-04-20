@@ -12,7 +12,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleDescriptor.Version;
 import java.time.Duration;
 
@@ -44,7 +43,7 @@ class ConfigIT {
         assumeThat(FullImageName.getDistribution())
             .withFailMessage("Test only supported for quarkus-based distribution ")
             .isEqualTo(FullImageName.Distribution.quarkus);
-        assumeThat(FullImageName.isLatestVersion() || FullImageName.getParsedVersion().compareTo(
+        assumeThat(FullImageName.isNightlyVersion() || FullImageName.isLatestVersion() || FullImageName.getParsedVersion().compareTo(
             Version.parse("17")) >= 0)
             .withFailMessage("Test only supported for Keycloak versions >= 17")
             .isTrue();
