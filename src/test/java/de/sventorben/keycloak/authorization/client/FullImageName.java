@@ -24,7 +24,7 @@ class FullImageName {
 
         if (LATEST_VERSION.equalsIgnoreCase(KEYCLOAK_VERSION)) {
             if (wildfly.equals(KEYCLOAK_DIST)) {
-                imageVersion = "17.0.1-legacy";
+                imageVersion = "18.0.0-legacy";
             }
         } else {
             if (getParsedVersion().compareTo(Version.parse("17")) >= 0) {

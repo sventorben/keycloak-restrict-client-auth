@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        keycloak_version: [ 15.1.1, 16.1.1, 17.0.1, latest ]
+        keycloak_version: [ 15.1.1, 16.1.1, 17.0.1, 18.0.0, latest ]
         keycloak_dist: [wildfly, quarkus]
     steps:
       - uses: actions/checkout@v3

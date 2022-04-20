@@ -104,6 +104,6 @@ public final class PolicyBasedAccessProvider implements AccessProvider {
         if (resourceServer == null) {
             return null;
         }
-        return storeFactory.getResourceStore().findByName(RESOURCE_NAME, resourceServer.getId());
+        return storeFactory.getResourceStore().findByName(resourceServer, RESOURCE_NAME);
     }
 }

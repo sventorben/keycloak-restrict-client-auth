@@ -4,7 +4,7 @@
 
     <groupId>de.sventorben.keycloak</groupId>
     <artifactId>keycloak-restrict-client-auth</artifactId>
-    <version>17.0.1-SNAPSHOT</version>
+    <version>18.0.0-SNAPSHOT</version>
 
     <name>Keycloak: Authenticator - Restrict client authentication</name>
     <description>A Keycloak authenticator to restrict authentication on clients</description>
@@ -51,7 +51,7 @@
         <maven.compiler.release>11</maven.compiler.release>
 
         <!-- For compilation -->
-        <version.keycloak>17.0.1</version.keycloak>
+        <version.keycloak>18.0.0</version.keycloak>
 
         <!-- For compatibility tests -->
         <keycloak.version>${version.keycloak}</keycloak.version>
