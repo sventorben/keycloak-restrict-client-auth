@@ -10,7 +10,7 @@ This is a simple Keycloak authenticator to restrict user authorization on client
 
 ![CI build](https://github.com/sventorben/keycloak-restrict-client-auth/actions/workflows/buildAndTest.yml/badge.svg)
 ![open issues](https://img.shields.io/github/issues/sventorben/keycloak-restrict-client-auth)
-[![CodeScene general](https://codescene.io/images/analyzed-by-codescene-badge.svg)](https://codescene.io/projects/25589)
+[![CodeScene general](https://img.shields.io/badge/CS-Analyzed%20by%20CodeScene-yellow)](https://codescene.io/projects/25589)
 
 > ⚠️ **Deprecation warning**:
 >
