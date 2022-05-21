@@ -5,9 +5,14 @@ import de.sventorben.keycloak.authorization.client.access.AccessProviderFactory;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.provider.ProviderConfigurationBuilder;
 import org.keycloak.provider.ServerInfoAwareProviderFactory;
 
+import java.util.List;
 import java.util.Map;
+
+import static org.keycloak.provider.ProviderConfigProperty.STRING_TYPE;
 
 public final class ClientRoleBasedAccessProviderFactory implements AccessProviderFactory, ServerInfoAwareProviderFactory {
 
@@ -50,6 +55,19 @@ public final class ClientRoleBasedAccessProviderFactory implements AccessProvide
             version = "unknown";
         }
         return Map.of("Version", version, CLIENT_ROLE_NAME, getClientRoleName());
+    }
+
+    @Override
+    public List<ProviderConfigProperty> getConfigMetadata() {
+        return ProviderConfigurationBuilder.create()
+            .property()
+            .name(CLIENT_ROLE_NAME)
+            .label("Client role name")
+            .defaultValue(CLIENT_ROLE_NAME_DEFAULT)
+            .helpText("The name of the client role used to enable the authenticator and grant access.")
+            .type(STRING_TYPE)
+            .add()
+            .build();
     }
 
     private String getClientRoleName() {
