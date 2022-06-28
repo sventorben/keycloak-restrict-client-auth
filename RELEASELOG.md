@@ -1,4 +1,4 @@
-* [deps] Update Keycloak dependencies to 18.0.0
+* [deps] Update Keycloak dependencies to 18.0.2
 
 > ⚠️ **Compatibility issues**:
 >
