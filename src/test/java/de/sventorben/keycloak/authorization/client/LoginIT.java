@@ -20,6 +20,18 @@ import javax.ws.rs.NotAuthorizedException;
 import java.time.Duration;
 import java.util.Map;
 
+import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY;
+import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_RESTRICTED;
+import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_RESTRICTED_BY_POLICY;
+import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_UNRESTRICTED;
+import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_ADMIN_PASS;
+import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_ADMIN_USER;
+import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_HTTP_PORT;
+import static de.sventorben.keycloak.authorization.client.TestConstants.PASS_TEST_RESTRICTED;
+import static de.sventorben.keycloak.authorization.client.TestConstants.PASS_TEST_UNRESTRICTED;
+import static de.sventorben.keycloak.authorization.client.TestConstants.REALM_TEST;
+import static de.sventorben.keycloak.authorization.client.TestConstants.USER_TEST_RESTRICTED;
+import static de.sventorben.keycloak.authorization.client.TestConstants.USER_TEST_UNRESTRICTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assumptions.assumeThat;
@@ -28,21 +40,6 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 class LoginIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginIT.class);
-
-    private static final int KEYCLOAK_HTTP_PORT = 8080;
-
-    private static final String KEYCLOAK_ADMIN_PASS = "admin";
-    private static final String KEYCLOAK_ADMIN_USER = "admin";
-
-    private static final String REALM_TEST = "test-realm";
-    private static final String CLIENT_TEST_RESTRICTED = "test-client-restricted";
-    private static final String CLIENT_TEST_RESTRICTED_BY_POLICY = "test-client-restricted-by-policy";
-    private static final String CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY = "42437f49-2b56-498e-a67c-13d4ee2d8cad";
-    private static final String CLIENT_TEST_UNRESTRICTED = "test-client-unrestricted";
-    private static final String USER_TEST_RESTRICTED = "test-restricted";
-    private static final String PASS_TEST_RESTRICTED = "test";
-    private static final String USER_TEST_UNRESTRICTED = "test-unrestricted";
-    private static final String PASS_TEST_UNRESTRICTED = "test";
 
     private static String KEYCLOAK_AUTH_URL;
 

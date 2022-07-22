@@ -12,9 +12,9 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.lang.module.ModuleDescriptor.Version;
 import java.time.Duration;
 
+import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_HTTP_PORT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
 
@@ -22,8 +22,6 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 class ConfigIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigIT.class);
-
-    private static final int KEYCLOAK_HTTP_PORT = 8080;
 
     @Container
     private static final KeycloakContainer KEYCLOAK_CONTAINER = FullImageName.createContainer()

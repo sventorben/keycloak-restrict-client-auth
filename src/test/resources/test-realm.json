@@ -2045,9 +2045,37 @@
   "keycloakVersion" : "15.0.2",
   "userManagedAccessAllowed" : false,
   "clientProfiles" : {
-    "profiles" : [ ]
+    "profiles" : [
+      {
+        "name": "test",
+        "executors" : [
+          {
+            "executor" : "consent-required",
+            "configuration" : {
+              "auto-configure" : true
+            }
+          }
+        ]
+      }
+    ]
   },
   "clientPolicies" : {
-    "policies" : [ ]
+    "policies" : [
+      {
+        "name" : "test",
+        "enabled" : true,
+        "conditions" : [
+          {
+            "condition" : "restrict-client-auth-enabled",
+            "configuration" : {
+              "is-negative-logic" : false
+            }
+          }
+        ],
+        "profiles" : [
+          "test"
+        ]
+      }
+    ]
   }
 }
