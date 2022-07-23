@@ -139,7 +139,7 @@ class LoginIT {
         Keycloak admin = keycloakAdmin();
         AuthenticationManagementResource flows = admin.realm(REALM_TEST).flows();
         String authenticationConfigId = flows
-            .getExecutions("direct-grant-restricted-client-auth").stream()
+            .getExecutions("direct-grant-restrict-client-auth").stream()
             .filter(it -> it.getProviderId().equalsIgnoreCase("restrict-client-auth-authenticator"))
             .findFirst()
             .get()

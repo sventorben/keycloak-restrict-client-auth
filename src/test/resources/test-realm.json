@@ -1733,7 +1733,7 @@
     } ]
   }, {
     "id" : "60a41db8-de43-40c6-8bb1-8c75bf07778c",
-    "alias" : "direct-grant-restricted-client-auth",
+    "alias" : "direct-grant-restrict-client-auth",
     "description" : "OpenID Connect Resource Owner Grant",
     "providerId" : "basic-flow",
     "topLevel" : true,
@@ -2025,7 +2025,7 @@
   } ],
   "browserFlow" : "browser",
   "registrationFlow" : "registration",
-  "directGrantFlow" : "direct-grant-restricted-client-auth",
+  "directGrantFlow" : "direct-grant-restrict-client-auth",
   "resetCredentialsFlow" : "reset credentials",
   "clientAuthenticationFlow" : "clients",
   "dockerAuthenticationFlow" : "docker auth",
@@ -2061,7 +2061,7 @@
         "name": "Restricted access by client role",
         "executors": [
           {
-            "executor": "restricted-client-auth-auto-config",
+            "executor": "restrict-client-auth-auto-config",
             "configuration": {
               "accessProviderId": "client-role"
             }

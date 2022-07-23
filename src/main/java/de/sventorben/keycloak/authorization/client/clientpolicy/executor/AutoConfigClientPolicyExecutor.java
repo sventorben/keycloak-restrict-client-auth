@@ -11,7 +11,7 @@ import java.util.Objects;
 
 class AutoConfigClientPolicyExecutor implements ClientPolicyExecutorProvider<AutoConfigClientPolicyExecutorConfiguration> {
 
-    static final String PROVIDER_ID = "restricted-client-auth-auto-config";
+    static final String PROVIDER_ID = "restrict-client-auth-auto-config";
 
     private final KeycloakSession keycloakSession;
     private AutoConfigClientPolicyExecutorConfiguration configuration;
