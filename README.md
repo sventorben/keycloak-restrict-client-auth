@@ -124,7 +124,7 @@ It may happen that I remove older packages without prior notice, because the sto
 >
 > The authenticator needs a user identity to check whether the user has the desired role or not. Hence, ensure that you have steps/executions in your flow prior to this authenticator that can ensure user's identity.
 
-### Role-based mode
+### Client Role based mode
 
 1) Configure the authenticator by clicking on `Actions -> Config` and select `client-role` as the `Access Provider`.
 ![Role-based access restriction](docs/images/config-client-role-based.jpg)
@@ -169,7 +169,7 @@ For details on SPI and provider configuration in Keycloak.X, please refer to [Co
 For details, please refer to [Manage Subsystem Configuration](https://www.keycloak.org/docs/latest/server_installation/index.html#manage-subsystem-configuration) section in the server installation guide.
 
 
-### Policy-based mode
+### Resource Policy based mode
 
 > ⚠️ **OIDC only**:
 >
@@ -206,6 +206,21 @@ restricted-access.denied=Zugriff verweigert. Dem Benutzer fehlt die notwendige R
 
 If the field is left blank, default property `access-denied` is used. In this case you do not need a custom theme, since this property comes with Keycloak out of the box.
 For details on how to add custom messages to Keycloak, please refer to section [Messages and Internationalization](https://www.keycloak.org/docs/latest/server_development/#messages) in the server developer guide.
+
+## Client Policy support
+
+> ⚠️ **Feature preview**:
+>
+> Support for client policies is currently feature preview. I am happy to get some feedback on this.
+> However, depending on feedback the feature may be changed  or even be removed again in the future.
+
+Since version 18.1.0 this extension has basic built-in support for [client policies](https://www.keycloak.org/docs/latest/server_admin/#_client_policies).
+
+### Conditions
+This extension provides a [client policy condition](https://www.keycloak.org/docs/latest/server_admin/#condition) named `restrict-client-auth-enabled` to check whether user authentication on a client has been restricted or not.
+
+### Executors
+This extension provides a [client policy executor](https://www.keycfloak.org/docs/latest/server_admin/#executor) named `restrict-client-auth-auto-config` to automatically enable restricted access for clients. The executor can be cofigured to either enable restricted access based on resource policies or based on client role.
 
 ## Frequently asked questions
 
