@@ -76,7 +76,7 @@ class LoginIT {
         void accessForUserWithoutRoleIsDenied(String accessProviderId) {
             LoginIT.this.switchAccessProvider(accessProviderId);
             Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED);
-            assertThatThrownBy(() -> keycloak.tokenManager().getAccessToken())
+            assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
                 .isInstanceOf(NotAuthorizedException.class);
         }
 
@@ -85,7 +85,7 @@ class LoginIT {
         void accessForUserWithRoleIsAllowed(String accessProviderId) {
             LoginIT.this.switchAccessProvider(accessProviderId);
             Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_RESTRICTED);
-            assertThat(keycloak.tokenManager().getAccessToken()).isNotNull();
+            assertThat(keycloak.tokenManager().grantToken()).isNotNull();
         }
     }
 
@@ -101,7 +101,7 @@ class LoginIT {
         void accessForUserWithoutRoleIsDenied() {
             Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED,
                 CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY);
-            assertThatThrownBy(() -> keycloak.tokenManager().getAccessToken())
+            assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
                 .isInstanceOf(NotAuthorizedException.class);
         }
 
@@ -109,7 +109,7 @@ class LoginIT {
         void accessForUserWithRoleIsAllowed() {
             Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
                 CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY);
-            assertThat(keycloak.tokenManager().getAccessToken()).isNotNull();
+            assertThat(keycloak.tokenManager().grantToken()).isNotNull();
         }
     }
 
@@ -124,13 +124,13 @@ class LoginIT {
         @Test
         void accessForRestrictedUserIsAllowed() {
             Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_UNRESTRICTED);
-            assertThat(keycloak.tokenManager().getAccessToken()).isNotNull();
+            assertThat(keycloak.tokenManager().grantToken()).isNotNull();
         }
 
         @Test
         void accessForUnrestrictedUserIsAllowed() {
             Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_UNRESTRICTED);
-            assertThat(keycloak.tokenManager().getAccessToken()).isNotNull();
+            assertThat(keycloak.tokenManager().grantToken()).isNotNull();
         }
     }
 
