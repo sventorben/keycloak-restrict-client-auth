@@ -3,10 +3,14 @@ package de.sventorben.keycloak.authorization.client;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.ClientResource;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.representations.idm.ClientPoliciesRepresentation;
+import org.keycloak.representations.idm.ClientPolicyRepresentation;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,14 +18,24 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import javax.ws.rs.NotAuthorizedException;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
 
+import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY;
+import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_RESTRICTED_BY_POLICY;
+import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_UNRESTRICTED;
 import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_ADMIN_PASS;
 import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_ADMIN_USER;
 import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_HTTP_PORT;
+import static de.sventorben.keycloak.authorization.client.TestConstants.PASS_TEST_RESTRICTED;
+import static de.sventorben.keycloak.authorization.client.TestConstants.PASS_TEST_UNRESTRICTED;
 import static de.sventorben.keycloak.authorization.client.TestConstants.REALM_TEST;
+import static de.sventorben.keycloak.authorization.client.TestConstants.USER_TEST_RESTRICTED;
+import static de.sventorben.keycloak.authorization.client.TestConstants.USER_TEST_UNRESTRICTED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assumptions.assumeThat;
 
 @Testcontainers
@@ -61,6 +75,7 @@ class ClientPolicyIT {
         ClientRepresentation client = admin.realm(REALM_TEST).clients().findByClientId(clientName).get(0);
         assertThat(client.isConsentRequired()).isFalse();
 
+        // update client to trigger policy
         ClientResource clientResource = admin.realm(REALM_TEST).clients().get(client.getId());
         client.setName(UUID.randomUUID().toString());
         clientResource.update(client);
@@ -69,8 +84,39 @@ class ClientPolicyIT {
         assertThat(client.isConsentRequired()).isEqualTo(expectedConsent);
     }
 
+    @Test
+    void checkIfRestrictedAccessAutoConfigWorks() {
+        Keycloak keycloakAdmin = keycloakAdmin();
+
+        Keycloak keycloakTest = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_UNRESTRICTED);
+        assertThat(keycloakTest.tokenManager().grantToken()).isNotNull();
+
+        // enable the policy
+        RealmResource testRealm = keycloakAdmin.realm(REALM_TEST);
+        ClientPoliciesRepresentation policies = testRealm.clientPoliciesPoliciesResource().getPolicies();
+        ClientPolicyRepresentation policy = policies.getPolicies().stream()
+            .filter(it -> "enable-restricted-access-all-clients" .equals(it.getName()))
+            .findFirst()
+            .get();
+        policy.setEnabled(true);
+        testRealm.clientPoliciesPoliciesResource().updatePolicies(policies);
+
+        // update the client to trigger policy
+        ClientRepresentation client = testRealm.clients().findByClientId(CLIENT_TEST_UNRESTRICTED).get(0);
+        ClientResource clientResource = testRealm.clients().get(client.getId());
+        client.setName(UUID.randomUUID().toString());
+        clientResource.update(client);
+
+        assertThatThrownBy(() -> keycloakTest.tokenManager().grantToken())
+            .isInstanceOf(NotAuthorizedException.class);
+    }
+
     private static Keycloak keycloakAdmin() {
         return Keycloak.getInstance(KEYCLOAK_AUTH_URL, "master", KEYCLOAK_ADMIN_USER, KEYCLOAK_ADMIN_PASS, "admin-cli");
+    }
+
+    private static Keycloak keycloakTest(String username, String password, String client) {
+        return TestConstants.keycloakTest(KEYCLOAK_AUTH_URL, username, password, client);
     }
 
 }

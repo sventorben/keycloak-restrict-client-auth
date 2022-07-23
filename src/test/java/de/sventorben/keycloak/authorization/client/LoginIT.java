@@ -24,8 +24,6 @@ import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_S
 import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_RESTRICTED;
 import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_RESTRICTED_BY_POLICY;
 import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_UNRESTRICTED;
-import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_ADMIN_PASS;
-import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_ADMIN_USER;
 import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_HTTP_PORT;
 import static de.sventorben.keycloak.authorization.client.TestConstants.PASS_TEST_RESTRICTED;
 import static de.sventorben.keycloak.authorization.client.TestConstants.PASS_TEST_UNRESTRICTED;
@@ -158,19 +156,15 @@ class LoginIT {
     }
 
     private static Keycloak keycloakAdmin() {
-        return keycloak("master", KEYCLOAK_ADMIN_USER, KEYCLOAK_ADMIN_PASS, "admin-cli", null);
+        return TestConstants.keycloakAdmin(KEYCLOAK_AUTH_URL);
     }
 
     private static Keycloak keycloakTest(String username, String password, String client) {
-        return keycloakTest(username, password, client, null);
+        return TestConstants.keycloakTest(KEYCLOAK_AUTH_URL, username, password, client, null);
     }
 
     private static Keycloak keycloakTest(String username, String password, String client, String clientSecret) {
-        return keycloak(REALM_TEST, username, password, client, clientSecret);
-    }
-
-    private static Keycloak keycloak(String realm, String username, String password, String client, String clientSecret) {
-        return Keycloak.getInstance(KEYCLOAK_AUTH_URL, realm, username, password, client, clientSecret);
+        return TestConstants.keycloakTest(KEYCLOAK_AUTH_URL, username, password, client, clientSecret);
     }
 
 }

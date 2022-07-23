@@ -39,6 +39,12 @@ public final class ClientRoleBasedAccessProvider implements AccessProvider {
     }
 
     @Override
+    public void enableFor(ClientModel client) {
+        if (isRestricted(client)) return;
+        client.addRole(clientRoleName);
+    }
+
+    @Override
     public void close() {
     }
 }

@@ -11,6 +11,7 @@ import org.keycloak.authorization.identity.Identity;
 import org.keycloak.authorization.model.Resource;
 import org.keycloak.authorization.model.ResourceServer;
 import org.keycloak.authorization.permission.ResourcePermission;
+import org.keycloak.authorization.store.ResourceServerStore;
 import org.keycloak.authorization.store.StoreFactory;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
@@ -76,6 +77,19 @@ public final class PolicyBasedAccessProvider implements AccessProvider {
         }
         return permitted;
 
+    }
+
+    @Override
+    public void enableFor(ClientModel client) {
+        if (isRestricted(client)) return;
+
+        client.setPublicClient(false);
+        client.setBearerOnly(false);
+
+        AuthorizationProvider authorization = keycloakSession.getProvider(AuthorizationProvider.class);
+        StoreFactory storeFactory = authorization.getStoreFactory();
+        ResourceServer resourceServer = storeFactory.getResourceServerStore().findById(client.getId());
+        storeFactory.getResourceStore().create(resourceServer, RESOURCE_NAME, resourceServer.getClientId());
     }
 
     @Override

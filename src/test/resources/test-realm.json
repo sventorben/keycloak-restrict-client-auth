@@ -2044,36 +2044,62 @@
   },
   "keycloakVersion" : "15.0.2",
   "userManagedAccessAllowed" : false,
-  "clientProfiles" : {
-    "profiles" : [
+  "clientProfiles": {
+    "profiles": [
       {
-        "name": "test",
-        "executors" : [
+        "name": "require consent",
+        "executors": [
           {
-            "executor" : "consent-required",
-            "configuration" : {
-              "auto-configure" : true
+            "executor": "consent-required",
+            "configuration": {
+              "auto-configure": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Restricted access by client role",
+        "executors": [
+          {
+            "executor": "restricted-client-auth-auto-config",
+            "configuration": {
+              "accessProviderId": "client-role"
             }
           }
         ]
       }
     ]
   },
-  "clientPolicies" : {
-    "policies" : [
+  "clientPolicies": {
+    "policies": [
       {
-        "name" : "test",
-        "enabled" : true,
-        "conditions" : [
+        "name": "test",
+        "enabled": true,
+        "conditions": [
           {
-            "condition" : "restrict-client-auth-enabled",
-            "configuration" : {
-              "is-negative-logic" : false
+            "condition": "restrict-client-auth-enabled",
+            "configuration": {
+              "is-negative-logic": false
             }
           }
         ],
-        "profiles" : [
-          "test"
+        "profiles": [
+          "require consent"
+        ]
+      },
+      {
+        "name": "enable-restricted-access-all-clients",
+        "enabled": false,
+        "conditions": [
+          {
+            "condition": "restrict-client-auth-enabled",
+            "configuration": {
+              "is-negative-logic": true
+            }
+          }
+        ],
+        "profiles": [
+          "Restricted access by client role"
         ]
       }
     ]

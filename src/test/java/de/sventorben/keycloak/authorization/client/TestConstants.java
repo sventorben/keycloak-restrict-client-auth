@@ -1,5 +1,7 @@
 package de.sventorben.keycloak.authorization.client;
 
+import org.keycloak.admin.client.Keycloak;
+
 class TestConstants {
 
     static final int KEYCLOAK_HTTP_PORT = 8080;
@@ -17,4 +19,19 @@ class TestConstants {
     static final String USER_TEST_UNRESTRICTED = "test-unrestricted";
     static final String PASS_TEST_UNRESTRICTED = "test";
 
+    static Keycloak keycloakAdmin(String serverUrl) {
+        return keycloak(serverUrl, "master", KEYCLOAK_ADMIN_USER, KEYCLOAK_ADMIN_PASS, "admin-cli", null);
+    }
+
+    static Keycloak keycloakTest(String serverUrl, String username, String password, String client) {
+        return keycloakTest(serverUrl, username, password, client, null);
+    }
+
+    static Keycloak keycloakTest(String serverUrl, String username, String password, String client, String clientSecret) {
+        return keycloak(serverUrl, REALM_TEST, username, password, client, clientSecret);
+    }
+
+    static Keycloak keycloak(String serverUrl, String realm, String username, String password, String client, String clientSecret) {
+        return Keycloak.getInstance(serverUrl, realm, username, password, client, clientSecret);
+    }
 }

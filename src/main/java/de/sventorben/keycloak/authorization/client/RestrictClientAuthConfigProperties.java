@@ -24,7 +24,7 @@ public class RestrictClientAuthConfigProperties {
             Messages.ACCESS_DENIED,
             false);
 
-    static final ProviderConfigProperty ACCESS_PROVIDER_ID_PROPERTY = new ProviderConfigProperty(
+    public static final ProviderConfigProperty ACCESS_PROVIDER_ID_PROPERTY = new ProviderConfigProperty(
         ACCESS_PROVIDER_ID,
         "Access Provider",
         "The access provider to be used with this authenticator.",

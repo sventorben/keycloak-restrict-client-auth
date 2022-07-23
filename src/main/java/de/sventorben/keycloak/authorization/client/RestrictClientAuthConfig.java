@@ -6,10 +6,10 @@ import org.keycloak.services.messages.Messages;
 
 import java.util.Optional;
 
-final class RestrictClientAuthConfig {
+public final class RestrictClientAuthConfig {
 
     static final String ERROR_MESSAGE = "restrictClientAuthErrorMessage";
-    static final String ACCESS_PROVIDER_ID = "accessProviderId";
+    public static final String ACCESS_PROVIDER_ID = "accessProviderId";
 
     private final AuthenticatorConfigModel authenticatorConfigModel;
 
