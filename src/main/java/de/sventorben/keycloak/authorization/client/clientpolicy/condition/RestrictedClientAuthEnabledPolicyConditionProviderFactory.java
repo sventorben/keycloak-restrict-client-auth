@@ -1,5 +1,6 @@
 package de.sventorben.keycloak.authorization.client.clientpolicy.condition;
 
+import de.sventorben.keycloak.authorization.client.common.OperationalInfo;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ServerInfoAwareProviderFactory;
@@ -39,10 +40,6 @@ public class RestrictedClientAuthEnabledPolicyConditionProviderFactory extends A
 
     @Override
     public Map<String, String> getOperationalInfo() {
-        String version = getClass().getPackage().getImplementationVersion();
-        if (version == null) {
-            version = "unknown";
-        }
-        return Map.of("Version", version);
+        return OperationalInfo.get();
     }
 }

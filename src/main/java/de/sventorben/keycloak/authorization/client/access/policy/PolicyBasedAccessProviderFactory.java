@@ -2,6 +2,7 @@ package de.sventorben.keycloak.authorization.client.access.policy;
 
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import de.sventorben.keycloak.authorization.client.access.AccessProviderFactory;
+import de.sventorben.keycloak.authorization.client.common.OperationalInfo;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
@@ -41,11 +42,7 @@ public final class PolicyBasedAccessProviderFactory implements AccessProviderFac
 
     @Override
     public Map<String, String> getOperationalInfo() {
-        String version = getClass().getPackage().getImplementationVersion();
-        if (version == null) {
-            version = "unknown";
-        }
-        return Map.of("Version", version);
+        return OperationalInfo.get();
     }
 
 }

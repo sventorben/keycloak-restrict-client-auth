@@ -1,6 +1,7 @@
 package de.sventorben.keycloak.authorization.client;
 
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
+import de.sventorben.keycloak.authorization.client.common.OperationalInfo;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
@@ -93,10 +94,6 @@ public final class RestrictClientAuthAuthenticatorFactory implements Authenticat
 
     @Override
     public Map<String, String> getOperationalInfo() {
-        String version = getClass().getPackage().getImplementationVersion();
-        if (version == null) {
-            version = "unknown";
-        }
-        return Map.of("Version", version);
+        return OperationalInfo.get();
     }
 }

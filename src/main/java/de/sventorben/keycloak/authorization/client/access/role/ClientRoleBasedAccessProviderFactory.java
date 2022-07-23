@@ -2,6 +2,7 @@ package de.sventorben.keycloak.authorization.client.access.role;
 
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import de.sventorben.keycloak.authorization.client.access.AccessProviderFactory;
+import de.sventorben.keycloak.authorization.client.common.OperationalInfo;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
@@ -9,6 +10,7 @@ import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ProviderConfigurationBuilder;
 import org.keycloak.provider.ServerInfoAwareProviderFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,11 +52,9 @@ public final class ClientRoleBasedAccessProviderFactory implements AccessProvide
 
     @Override
     public Map<String, String> getOperationalInfo() {
-        String version = getClass().getPackage().getImplementationVersion();
-        if (version == null) {
-            version = "unknown";
-        }
-        return Map.of("Version", version, CLIENT_ROLE_NAME, getClientRoleName());
+        Map<String, String> operationalInfo = new HashMap<>(OperationalInfo.get());
+        operationalInfo.put(CLIENT_ROLE_NAME, getClientRoleName());
+        return operationalInfo;
     }
 
     @Override
