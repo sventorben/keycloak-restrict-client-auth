@@ -71,44 +71,48 @@ class ClientPolicyIT {
     @ParameterizedTest
     @CsvSource(value = {"test-client-restricted,true", "test-client-restricted-by-policy,true", "test-client-unrestricted,false"})
     void checkIfRestrictedAccessEnabledConditionWorks(String clientName, boolean expectedConsent) {
-        Keycloak admin = keycloakAdmin();
-        ClientRepresentation client = admin.realm(REALM_TEST).clients().findByClientId(clientName).get(0);
-        assertThat(client.isConsentRequired()).isFalse();
+        try(Keycloak admin = keycloakAdmin()) {
+            ClientRepresentation client = admin.realm(REALM_TEST).clients().findByClientId(clientName).get(0);
+            assertThat(client.isConsentRequired()).isFalse();
 
-        // update client to trigger policy
-        ClientResource clientResource = admin.realm(REALM_TEST).clients().get(client.getId());
-        client.setName(UUID.randomUUID().toString());
-        clientResource.update(client);
+            // update client to trigger policy
+            ClientResource clientResource = admin.realm(REALM_TEST).clients().get(client.getId());
+            client.setName(UUID.randomUUID().toString());
+            clientResource.update(client);
 
-        client = clientResource.toRepresentation();
-        assertThat(client.isConsentRequired()).isEqualTo(expectedConsent);
+            client = clientResource.toRepresentation();
+            assertThat(client.isConsentRequired()).isEqualTo(expectedConsent);
+        }
     }
 
     @Test
     void checkIfRestrictedAccessAutoConfigWorks() {
-        Keycloak keycloakAdmin = keycloakAdmin();
+        try(Keycloak keycloakAdmin = keycloakAdmin()) {
 
-        Keycloak keycloakTest = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_UNRESTRICTED);
-        assertThat(keycloakTest.tokenManager().grantToken()).isNotNull();
+            try(Keycloak keycloakTest = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
+                CLIENT_TEST_UNRESTRICTED)) {
+                assertThat(keycloakTest.tokenManager().grantToken()).isNotNull();
 
-        // enable the policy
-        RealmResource testRealm = keycloakAdmin.realm(REALM_TEST);
-        ClientPoliciesRepresentation policies = testRealm.clientPoliciesPoliciesResource().getPolicies();
-        ClientPolicyRepresentation policy = policies.getPolicies().stream()
-            .filter(it -> "enable-restricted-access-all-clients" .equals(it.getName()))
-            .findFirst()
-            .get();
-        policy.setEnabled(true);
-        testRealm.clientPoliciesPoliciesResource().updatePolicies(policies);
+                // enable the policy
+                RealmResource testRealm = keycloakAdmin.realm(REALM_TEST);
+                ClientPoliciesRepresentation policies = testRealm.clientPoliciesPoliciesResource().getPolicies();
+                ClientPolicyRepresentation policy = policies.getPolicies().stream()
+                    .filter(it -> "enable-restricted-access-all-clients" .equals(it.getName()))
+                    .findFirst()
+                    .get();
+                policy.setEnabled(true);
+                testRealm.clientPoliciesPoliciesResource().updatePolicies(policies);
 
-        // update the client to trigger policy
-        ClientRepresentation client = testRealm.clients().findByClientId(CLIENT_TEST_UNRESTRICTED).get(0);
-        ClientResource clientResource = testRealm.clients().get(client.getId());
-        client.setName(UUID.randomUUID().toString());
-        clientResource.update(client);
+                // update the client to trigger policy
+                ClientRepresentation client = testRealm.clients().findByClientId(CLIENT_TEST_UNRESTRICTED).get(0);
+                ClientResource clientResource = testRealm.clients().get(client.getId());
+                client.setName(UUID.randomUUID().toString());
+                clientResource.update(client);
 
-        assertThatThrownBy(() -> keycloakTest.tokenManager().grantToken())
-            .isInstanceOf(NotAuthorizedException.class);
+                assertThatThrownBy(() -> keycloakTest.tokenManager().grantToken())
+                    .isInstanceOf(NotAuthorizedException.class);
+            }
+        }
     }
 
     private static Keycloak keycloakAdmin() {

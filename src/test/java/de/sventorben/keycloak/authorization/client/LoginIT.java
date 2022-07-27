@@ -75,17 +75,19 @@ class LoginIT {
         @CsvSource(value = {"client-role", "null"}, nullValues = "null")
         void accessForUserWithoutRoleIsDenied(String accessProviderId) {
             LoginIT.this.switchAccessProvider(accessProviderId);
-            Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED);
-            assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
-                .isInstanceOf(NotAuthorizedException.class);
+            try(Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED)) {
+                assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
+                    .isInstanceOf(NotAuthorizedException.class);
+            }
         }
 
         @ParameterizedTest
         @CsvSource(value = {"client-role", "null"}, nullValues = "null")
         void accessForUserWithRoleIsAllowed(String accessProviderId) {
             LoginIT.this.switchAccessProvider(accessProviderId);
-            Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_RESTRICTED);
-            assertThat(keycloak.tokenManager().grantToken()).isNotNull();
+            try (Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_RESTRICTED)) {
+                assertThat(keycloak.tokenManager().grantToken()).isNotNull();
+            }
         }
     }
 
@@ -99,17 +101,19 @@ class LoginIT {
 
         @Test
         void accessForUserWithoutRoleIsDenied() {
-            Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED,
-                CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY);
-            assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
-                .isInstanceOf(NotAuthorizedException.class);
+            try (Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED,
+                CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY)) {
+                assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
+                    .isInstanceOf(NotAuthorizedException.class);
+            }
         }
 
         @Test
         void accessForUserWithRoleIsAllowed() {
-            Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
-                CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY);
-            assertThat(keycloak.tokenManager().grantToken()).isNotNull();
+            try(Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
+                CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY)) {
+                assertThat(keycloak.tokenManager().grantToken()).isNotNull();
+            }
         }
     }
 
@@ -123,36 +127,40 @@ class LoginIT {
 
         @Test
         void accessForRestrictedUserIsAllowed() {
-            Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_UNRESTRICTED);
-            assertThat(keycloak.tokenManager().grantToken()).isNotNull();
+            try(Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_UNRESTRICTED)) {
+                assertThat(keycloak.tokenManager().grantToken()).isNotNull();
+            }
         }
 
         @Test
         void accessForUnrestrictedUserIsAllowed() {
-            Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_UNRESTRICTED);
-            assertThat(keycloak.tokenManager().grantToken()).isNotNull();
+            try(Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_UNRESTRICTED)) {
+                assertThat(keycloak.tokenManager().grantToken()).isNotNull();
+            }
         }
     }
 
 
     private void switchAccessProvider(String accessProviderId) {
-        Keycloak admin = keycloakAdmin();
-        AuthenticationManagementResource flows = admin.realm(REALM_TEST).flows();
-        String authenticationConfigId = flows
-            .getExecutions("direct-grant-restrict-client-auth").stream()
-            .filter(it -> it.getProviderId().equalsIgnoreCase("restrict-client-auth-authenticator"))
-            .findFirst()
-            .get()
-            .getAuthenticationConfig();
-        AuthenticatorConfigRepresentation authenticatorConfig = flows.getAuthenticatorConfig(authenticationConfigId);
-        Map<String, String> config = authenticatorConfig.getConfig();
-        if (accessProviderId == null) {
-            config.remove("accessProviderId");
-        } else {
-            config.put("accessProviderId", accessProviderId);
+        try(Keycloak admin = keycloakAdmin()) {
+            AuthenticationManagementResource flows = admin.realm(REALM_TEST).flows();
+            String authenticationConfigId = flows
+                .getExecutions("direct-grant-restrict-client-auth").stream()
+                .filter(it -> it.getProviderId().equalsIgnoreCase("restrict-client-auth-authenticator"))
+                .findFirst()
+                .get()
+                .getAuthenticationConfig();
+            AuthenticatorConfigRepresentation authenticatorConfig = flows.getAuthenticatorConfig(
+                authenticationConfigId);
+            Map<String, String> config = authenticatorConfig.getConfig();
+            if (accessProviderId == null) {
+                config.remove("accessProviderId");
+            } else {
+                config.put("accessProviderId", accessProviderId);
+            }
+            authenticatorConfig.setConfig(config);
+            flows.updateAuthenticatorConfig(authenticationConfigId, authenticatorConfig);
         }
-        authenticatorConfig.setConfig(config);
-        flows.updateAuthenticatorConfig(authenticationConfigId, authenticatorConfig);
     }
 
     private static Keycloak keycloakAdmin() {
