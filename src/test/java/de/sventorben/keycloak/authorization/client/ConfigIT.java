@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.keycloak.admin.client.Keycloak;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -46,15 +47,18 @@ class ConfigIT {
     @Test
     @DisplayName("Client Role Name can be configured via SPI config")
     void clientRoleName() {
-        String clientRoleName = KEYCLOAK_CONTAINER.getKeycloakAdminClient()
-            .serverInfo()
-            .getInfo()
-            .getProviders()
-            .get("restrict-client-auth-access-provider")
-            .getProviders()
-            .get("client-role")
-            .getOperationalInfo()
-            .get("clientRoleName");
+        String clientRoleName;
+        try(Keycloak keycloakAdminClient = KEYCLOAK_CONTAINER.getKeycloakAdminClient()) {
+            clientRoleName = keycloakAdminClient
+                .serverInfo()
+                .getInfo()
+                .getProviders()
+                .get("restrict-client-auth-access-provider")
+                .getProviders()
+                .get("client-role")
+                .getOperationalInfo()
+                .get("clientRoleName");
+        }
         assertThat(clientRoleName).isEqualTo("band and crew only");
     }
 
