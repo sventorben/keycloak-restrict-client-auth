@@ -58,7 +58,6 @@
         <keycloak.dist>quarkus</keycloak.dist>
 
         <version.mockito>4.6.1</version.mockito>
-        <version.shrinkwrap>1.2.6</version.shrinkwrap>
     </properties>
 
     <profiles>
@@ -269,19 +268,6 @@
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-admin-client</artifactId>
             <version>${version.keycloak}</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- ShrinkWrap -->
-        <dependency>
-            <groupId>org.jboss.shrinkwrap</groupId>
-            <artifactId>shrinkwrap-api</artifactId>
-            <version>${version.shrinkwrap}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.shrinkwrap</groupId>
-            <artifactId>shrinkwrap-impl-base</artifactId>
-            <version>${version.shrinkwrap}</version>
             <scope>test</scope>
         </dependency>
         <!-- Logging -->
