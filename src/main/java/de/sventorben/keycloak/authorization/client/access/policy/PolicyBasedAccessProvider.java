@@ -88,7 +88,7 @@ public final class PolicyBasedAccessProvider implements AccessProvider {
 
         AuthorizationProvider authorization = keycloakSession.getProvider(AuthorizationProvider.class);
         StoreFactory storeFactory = authorization.getStoreFactory();
-        ResourceServer resourceServer = storeFactory.getResourceServerStore().findById(client.getId());
+        ResourceServer resourceServer = storeFactory.getResourceServerStore().findByClient(client);
         storeFactory.getResourceStore().create(resourceServer, RESOURCE_NAME, resourceServer.getClientId());
     }
 
@@ -104,7 +104,7 @@ public final class PolicyBasedAccessProvider implements AccessProvider {
 
     private ResourceServer getResourceServer(ClientModel client, AuthorizationProvider authorization) {
         StoreFactory storeFactory = authorization.getStoreFactory();
-        return storeFactory.getResourceServerStore().findById(client.getId());
+        return storeFactory.getResourceServerStore().findByClient(client);
     }
 
     private Resource getResource(ClientModel client) {
@@ -114,7 +114,7 @@ public final class PolicyBasedAccessProvider implements AccessProvider {
 
     private Resource getResource(ClientModel client, AuthorizationProvider authorization) {
         StoreFactory storeFactory = authorization.getStoreFactory();
-        ResourceServer resourceServer = storeFactory.getResourceServerStore().findById(client.getId());
+        ResourceServer resourceServer = storeFactory.getResourceServerStore().findByClient(client);
         if (resourceServer == null) {
             return null;
         }
