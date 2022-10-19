@@ -83,6 +83,11 @@ For Docker-based setups mount or copy the jar to
 - `/opt/jboss/keycloak/providers` for Wildfly-based distro or Keycloak.X prior to version `15.1.0` (👎)
 - `/opt/keycloak/providers` for Keycloak.X from version `15.1.0`
 
+If you are using RedHat SSO instead of Keycloak open source, mount or copy the jar to
+- `/opt/eap/providers/`
+
+On Wildfly-based distro you can determine the correct path by executing the following CLI command: `/subsystem=keycloak-server:read-attribute(name=providers, resolve-expressions=true)`
+
 You may want to check [docker-compose.yml](docker-compose.yml) as an example.
 
 ### Wildfly-based distro 👎
