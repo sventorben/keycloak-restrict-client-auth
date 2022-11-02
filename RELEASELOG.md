@@ -1,1 +1,1 @@
-* [deps] Update Keycloak dependencies to 19.0.3
+* [deps] Update Keycloak dependencies to 20.0.0

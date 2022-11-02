@@ -29,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        keycloak_version: [ 19.0.3, latest ]
+        keycloak_version: [ 19.0.3, 20.0.0, latest ]
         keycloak_dist: [quarkus, wildfly]
         experimental: [false]
         include:
