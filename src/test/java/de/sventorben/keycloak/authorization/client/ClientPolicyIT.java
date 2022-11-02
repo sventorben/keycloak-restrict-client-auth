@@ -59,15 +59,6 @@ class ClientPolicyIT {
         LOGGER.info("Running test with Keycloak image: " + FullImageName.get());
     }
 
-    @BeforeEach
-    void assumeQuarkusIfNightlyBuild() {
-        if (FullImageName.isNightlyVersion()) {
-            assumeThat(FullImageName.getDistribution())
-                .withFailMessage("Nightly build only supported for quarkus-based distribution ")
-                .isEqualTo(FullImageName.Distribution.quarkus);
-        }
-    }
-
     @ParameterizedTest
     @CsvSource(value = {"test-client-restricted,true", "test-client-restricted-by-policy,true", "test-client-unrestricted,false"})
     void checkIfRestrictedAccessEnabledConditionWorks(String clientName, boolean expectedConsent) {

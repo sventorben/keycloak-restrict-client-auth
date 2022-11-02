@@ -3,14 +3,12 @@ package de.sventorben.keycloak.authorization.client;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 
 import static de.sventorben.keycloak.authorization.client.FullImageName.Distribution.quarkus;
-import static de.sventorben.keycloak.authorization.client.FullImageName.Distribution.wildfly;
 import static java.lang.module.ModuleDescriptor.*;
 
 class FullImageName {
 
     enum Distribution {
-        quarkus,
-        wildfly
+        quarkus
     }
 
     private static final Distribution KEYCLOAK_DIST = Distribution.valueOf(System.getProperty("keycloak.dist", quarkus.name()));
@@ -21,19 +19,10 @@ class FullImageName {
 
     static String get() {
         String imageName = "keycloak";
-        String imageVersion = KEYCLOAK_VERSION;
 
         if (!isNightlyVersion()) {
-            if (isLatestVersion()) {
-                if (wildfly.equals(KEYCLOAK_DIST)) {
-                    imageVersion = "18.0.0-legacy";
-                }
-            } else {
-                if (getParsedVersion().compareTo(Version.parse("17")) >= 0) {
-                    if (wildfly.equals(KEYCLOAK_DIST)) {
-                        imageVersion = KEYCLOAK_VERSION + "-legacy";
-                    }
-                } else {
+            if (!isLatestVersion()) {
+                if (getParsedVersion().compareTo(Version.parse("17")) < 0) {
                     if (quarkus.equals(KEYCLOAK_DIST)) {
                         imageName = "keycloak-x";
                     }
@@ -41,7 +30,7 @@ class FullImageName {
             }
         }
 
-        return "quay.io/keycloak/" + imageName + ":" + imageVersion;
+        return "quay.io/keycloak/" + imageName + ":" + KEYCLOAK_VERSION;
     }
 
     static Boolean isNightlyVersion() {
