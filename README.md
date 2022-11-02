@@ -4,22 +4,12 @@ This is a simple Keycloak authenticator to restrict user authorization on client
 
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/sventorben/keycloak-restrict-client-auth?sort=semver)
 ![Keycloak Dependency Version](https://img.shields.io/badge/Keycloak-20.0.0-blue)
-![Keycloak.X ready](https://img.shields.io/badge/%E2%AD%90%20Keycloak.X%20%E2%AD%90-ready%20-blue)
 ![GitHub Release Date](https://img.shields.io/github/release-date-pre/sventorben/keycloak-restrict-client-auth)
 ![Github Last Commit](https://img.shields.io/github/last-commit/sventorben/keycloak-restrict-client-auth)
 
 ![CI build](https://github.com/sventorben/keycloak-restrict-client-auth/actions/workflows/buildAndTest.yml/badge.svg)
 ![open issues](https://img.shields.io/github/issues/sventorben/keycloak-restrict-client-auth)
 [![CodeScene general](https://img.shields.io/badge/CS-Analyzed%20by%20CodeScene-yellow)](https://codescene.io/projects/25589)
-
-> ⚠️ **Deprecation warning**:
->
-> With the release of Keycloak 17 the Quarkus-based distribution is now fully supported by the Keycloak team.
-> I will therefore deprecate support for the Wildfly-based distro from now on.
->
-> You will find deprecation marks (👎) of deprecated functionality within the readme below.
->
-> I will fully drop support once the Keycloak teams drops support for the Wildfly-based distro.
 
 ## What is it good for?
 
@@ -69,7 +59,7 @@ A client with that resource has the authenticator enabled. Users will only be ab
 Download a release (*.jar file) that works with your Keycloak version from the [list of releases](https://github.com/sventorben/keycloak-restrict-client-auth/releases).
 Follow the below instructions depending on your distribution and runtime environment.
 
-### Quarkus-based distro (Keycloak.X)
+### Standalone (without container)
 
 Copy the jar to the `providers` folder and execute the following command:
 
@@ -79,33 +69,11 @@ ${kc.home.dir}/bin/kc.sh build
 
 ### Container image (Docker)
 
-For Docker-based setups mount or copy the jar to
-- `/opt/jboss/keycloak/providers` for Wildfly-based distro or Keycloak.X prior to version `15.1.0` (👎)
-- `/opt/keycloak/providers` for Keycloak.X from version `15.1.0`
+For Docker-based setups mount or copy the jar to `/opt/keycloak/providers`.
 
-If you are using RedHat SSO instead of Keycloak open source, mount or copy the jar to
-- `/opt/eap/providers/`
-
-On Wildfly-based distro you can determine the correct path by executing the following CLI command: `/subsystem=keycloak-server:read-attribute(name=providers, resolve-expressions=true)`
+If you are using RedHat SSO instead of Keycloak open source, mount or copy the jar to `/opt/eap/providers/`.
 
 You may want to check [docker-compose.yml](docker-compose.yml) as an example.
-
-### Wildfly-based distro 👎
-
-Create a Wildfly module and deploy it to your Keycloak instance. For details please refer to the [official documentation](https://www.keycloak.org/docs/latest/server_development/#register-a-provider-using-modules).
-
-For convenience, here is a `module.xml` file.
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<module xmlns="urn:jboss:module:1.3" name="keycloak-restrict-client-auth">
-    <resources>
-        <resource-root path="keycloak-restrict-client-auth.jar"/>
-    </resources>
-    <dependencies>
-        <module name="org.keycloak.keycloak-services"/>
-    </dependencies>
-</module>
-```
 
 ### Maven/Gradle
 
@@ -143,36 +111,12 @@ It may happen that I remove older packages without prior notice, because the sto
 
 You do not like the role name `restricted-access` or you do have some kind of naming conventions in place? You can change the role name globally by configuring the provider.
 
-##### Quarkus-based distro (Keycloak.X):
 ```properties
 spi-restrict-client-auth-access-provider-client-role-enabled=true
 spi-restrict-client-auth-access-provider-client-role-client-role-name=custom-role
 ```
 
-For details on SPI and provider configuration in Keycloak.X, please refer to [Configuring providers](https://www.keycloak.org/server/configuration-provider) guide.
-
-##### Wildfly-based distro (👎)
-
-###### via CLI:
-```
-/subsystem=keycloak-server/spi=restrict-client-auth-access-provider:add(default-provider=client-role)
-/subsystem=keycloak-server/spi=restrict-client-auth-access-provider/provider=client-role:add(properties={clientRoleName=my-custom-role-name,enabled=true})
-```
-
-###### via standalone.xml:
-```XML
-<spi name="restrict-client-auth-access-provider">
-    <default-provider>client-role</default-provider>
-    <provider name="client-role" enabled="true">
-        <properties>
-            <property name="clientRoleName" value="my-custom-role-name"/>
-        </properties>
-    </provider>
-</spi>
-```
-
-For details, please refer to [Manage Subsystem Configuration](https://www.keycloak.org/docs/latest/server_installation/index.html#manage-subsystem-configuration) section in the server installation guide.
-
+For details on SPI and provider configuration, please refer to [Configuring providers](https://www.keycloak.org/server/configuration-provider) guide.
 
 ### Resource Policy based mode
 
@@ -229,17 +173,12 @@ This extension provides a [client policy executor](https://www.keycfloak.org/doc
 
 ## Frequently asked questions
 
-### Does it (already) work with Keycloak.X?
-On October 28th 2021 the Keycloak project [announced](https://www.keycloak.org/2021/10/keycloak-x-update) the roadmap for the new Quarkus-based Keycloak-X distribution.
-According to this Keycloak 16 will be the last preview of the Quarkus distribution. As of December 2021, Keycloak 17 will make the Quarkus distribution fully supported the WildFly distribution will be deprecated.
-Support for the Wildfly distribution will be removed by mid 2022.
+### Does it work with the legacy Wildfly-based Keycloak distro?
+Maybe! There is even a high chance it will, since this extension does not make use of any Quarkus-related functionality.
+For installation instructions, please refer to an [older version of this readme](https://github.com/sventorben/keycloak-restrict-client-auth/blob/v19.0.0/README.md).
 
-Meanwhile Keycloak 17 has been released and is fully based on Quarkus. Hence, the Wildfly-based distro has been deprecated.
-
-Therefore, I will focus all further development of this library towards the Quarkus-based Keycloak.X distribution.
-Once the Wildfly support will be removed from the Keycloak project, I will remove all support for Wildfly here as well.
-
-Don't worry, I will ensure this library stays compatible with the Wildfly distribution as well as with Keycloak.X until then. However, I will start to deprecate certain information in the README and no longer accept Wildfly-related feature requests.
+Please note that with the release of Keycloak 20.0.0 the Wildfly-based distro is no longer supported.
+Hence, I dropped support for the Wildfly-based distro already. Though this library may still work with the Wildfly-based distro, I will no longer put any efforts into keeping this extension compatible.
 
 ### Does it work with Keycloak version X.Y.Z?
 
