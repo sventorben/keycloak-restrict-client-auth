@@ -32,7 +32,7 @@ public final class RestrictClientAuthAuthenticatorFactory implements Authenticat
 
     @Override
     public String getDisplayType() {
-        return "Restrict user authentication on clients";
+        return "Restrict user authentication on clients (via Authenticator)";
     }
 
     @Override
@@ -57,7 +57,7 @@ public final class RestrictClientAuthAuthenticatorFactory implements Authenticat
 
     @Override
     public String getHelpText() {
-        return "Restricts user authentication on clients based on an access provider";
+        return "Restricts user authentication on clients based on an access provider. Access will be denied during authenticator execution.";
     }
 
     @Override
