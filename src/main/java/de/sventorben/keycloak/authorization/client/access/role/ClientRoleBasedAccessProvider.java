@@ -1,6 +1,7 @@
 package de.sventorben.keycloak.authorization.client.access.role;
 
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
+import java.util.Iterator;
 import org.jboss.logging.Logger;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.RoleModel;
@@ -23,10 +24,20 @@ public final class ClientRoleBasedAccessProvider implements AccessProvider {
 
     @Override
     public boolean isPermitted(ClientModel client, UserModel user) {
-        final RoleModel role = client.getRole(clientRoleName);
+        final RoleModel role = client.getRole(clientRoleName);   
         if (role == null) return false;
         if (user == null) return false;
+        
         boolean permitted = user.hasRole(role);
+        
+        Iterator<RoleModel> compositeRoleIterator 
+            = role.getCompositesStream().iterator();
+        
+        while(!permitted && compositeRoleIterator.hasNext())
+        {
+            permitted = user.hasRole(compositeRoleIterator.next());
+        }        
+                
         if (permitted) {
             LOG.debugf(
                 "Access for user '%s' to client '%s' in realm '%s' granted.",
