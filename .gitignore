@@ -9,6 +9,9 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
+# NetBeans
+nb-configuration.xml
+
 # Windows thumbnail cache files
 Thumbs.db
 Thumbs.db:encryptable
