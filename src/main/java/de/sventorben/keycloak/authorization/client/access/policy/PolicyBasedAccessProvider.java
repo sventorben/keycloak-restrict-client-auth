@@ -46,7 +46,7 @@ public final class PolicyBasedAccessProvider implements AccessProvider {
 
         if (resource == null || resourceServer == null) {
             LOG.warnf("Possible configuration issue: Could not find resource '%s' for client '%s' in realm '%s'.",
-                RESOURCE_NAME, client.getName(), client.getRealm().getName());
+                RESOURCE_NAME, client.getClientId(), client.getRealm().getName());
             return false;
         }
 
@@ -62,7 +62,7 @@ public final class PolicyBasedAccessProvider implements AccessProvider {
             logAccessDenied(client, user);
             LOG.warnf(
                 "Possible configuration issue: Did you forget to add a permission or policy for client '%s' and resource '%s' in realm '%s'",
-                client.getName(), RESOURCE_NAME, client.getRealm().getName());
+                client.getClientId(), RESOURCE_NAME, client.getRealm().getName());
             return false;
         }
 
