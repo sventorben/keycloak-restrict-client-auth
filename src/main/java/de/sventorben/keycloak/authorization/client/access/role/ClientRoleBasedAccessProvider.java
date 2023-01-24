@@ -30,10 +30,10 @@ public final class ClientRoleBasedAccessProvider implements AccessProvider {
         if (permitted) {
             LOG.debugf(
                 "Access for user '%s' to client '%s' in realm '%s' granted.",
-                user.getUsername(), client.getName(), client.getRealm().getName());
+                user.getUsername(), client.getClientId(), client.getRealm().getName());
         } else {
             LOG.warnf("Access for user '%s' to client '%s' in realm '%s' is denied. User does not have client role '%s' on client with id '%s'.",
-                    user.getUsername(), client.getName(), client.getRealm().getName(), clientRoleName, client.getId());
+                    user.getUsername(), client.getClientId(), client.getRealm().getName(), clientRoleName, client.getId());
         }
         return permitted;
     }
