@@ -13,7 +13,7 @@ public final class RestrictClientAuthConfig {
 
     private final AuthenticatorConfigModel authenticatorConfigModel;
 
-    RestrictClientAuthConfig(AuthenticatorConfigModel configModel) {
+    public RestrictClientAuthConfig(AuthenticatorConfigModel configModel) {
         this.authenticatorConfigModel = configModel;
     }
 
@@ -31,7 +31,7 @@ public final class RestrictClientAuthConfig {
             .orElse(ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
     }
 
-    String getAuthenticatorConfigAlias() {
+    public String getAuthenticatorConfigAlias() {
         return Optional.ofNullable(authenticatorConfigModel)
             .map(AuthenticatorConfigModel::getAlias)
             .orElse(null);

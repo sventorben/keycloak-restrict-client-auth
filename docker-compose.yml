@@ -16,3 +16,8 @@ services:
     volumes:
     - ./target/keycloak-restrict-client-auth.jar:/opt/keycloak/providers/keycloak-restrict-client-auth.jar
     - ./src/test/resources/:/tmp/import
+  mail:
+      container_name: mail
+      image: maildev/maildev
+      ports:
+          - 1080:1080

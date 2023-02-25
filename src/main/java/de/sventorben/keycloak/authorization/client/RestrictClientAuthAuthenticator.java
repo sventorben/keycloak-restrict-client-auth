@@ -1,6 +1,7 @@
 package de.sventorben.keycloak.authorization.client;
 
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
+import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
 import de.sventorben.keycloak.authorization.client.access.role.ClientRoleBasedAccessProviderFactory;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -31,7 +32,7 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
         final ClientModel client = context.getSession().getContext().getClient();
         final RestrictClientAuthConfig config = new RestrictClientAuthConfig(context.getAuthenticatorConfig());
 
-        final AccessProvider access = getAccessProvider(context, config);
+        final AccessProvider access = new AccessProviderResolver(config).resolve(context);
 
         if (!access.isRestricted(client)) {
             context.success();
@@ -49,37 +50,6 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
                 .error(Errors.ACCESS_DENIED);
             context.failure(AuthenticationFlowError.ACCESS_DENIED, errorResponse(context, config));
         }
-    }
-
-    private AccessProvider getAccessProvider(AuthenticationFlowContext context, RestrictClientAuthConfig config) {
-        final String accessProviderId = config.getAccessProviderId();
-
-        if (accessProviderId != null) {
-            AccessProvider accessProvider = context.getSession().getProvider(AccessProvider.class, accessProviderId);
-            if (accessProvider == null) {
-                LOG.warnf(
-                    "Configured access provider '%s' in authenticator config '%s' does not exist.",
-                    accessProviderId, config.getAuthenticatorConfigAlias());
-            } else {
-                LOG.tracef(
-                    "Using access provider '%s' in authenticator config '%s'.",
-                    accessProviderId, config.getAuthenticatorConfigAlias());
-                return accessProvider;
-            }
-        }
-
-        final AccessProvider defaultProvider = context.getSession().getProvider(AccessProvider.class);
-        if (defaultProvider != null) {
-            LOG.debugf(
-                "No access provider is configured in authenticator config '%s'. Using server-wide default provider '%s'",
-                config.getAuthenticatorConfigAlias(), defaultProvider);
-            return defaultProvider;
-        }
-
-        LOG.infof(
-            "Neither an access provider is configured in authenticator config '%s' nor has a server-wide default provider been set. Using '%s' as a fallback.",
-            config.getAuthenticatorConfigAlias(), ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
-        return context.getSession().getProvider(AccessProvider.class, ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
     }
 
     private Response errorResponse(AuthenticationFlowContext context, RestrictClientAuthConfig config) {

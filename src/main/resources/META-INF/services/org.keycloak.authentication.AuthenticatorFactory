@@ -1,1 +1,2 @@
 de.sventorben.keycloak.authorization.client.RestrictClientAuthAuthenticatorFactory
+de.sventorben.keycloak.authorization.client.requiredactions.RestrictClientAuthRequiredActionAuthenticator
