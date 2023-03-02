@@ -8,11 +8,11 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
       DEBUG_PORT: '*:8787'
       DEBUG: 'true'
-    command: ['start-dev', '--debug', '-Dkeycloak.import=/tmp/import/test-realm.json', "--features=client-policies"]
+    command: ['start-dev', '--debug', '--import-realm', '--features=client-policies']
     ports:
       - 8080:8080
       - 8443:8443
       - 8787:8787
     volumes:
     - ./target/keycloak-restrict-client-auth.jar:/opt/keycloak/providers/keycloak-restrict-client-auth.jar
-    - ./src/test/resources/:/tmp/import
+    - ./src/test/resources/:/opt/keycloak/data/import
