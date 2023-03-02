@@ -196,3 +196,20 @@ With Keycloak 13 two new authenticators have been added, namely `Allow Access` a
 Here are some reasons/thoughts
 * It is not really flexible. Since `Condition - User Role` only allows for checking one concrete (realm or client-specific) role, a very complex flow handling all clients, or a totally separate flow for each individual client would be needed.
 * It simply does not work well with federated authentication (ie. identity provider redirects), since there is no way to configure client specific behaviour for `First login flow` or `Post login flows`. In other words, there is no feature like `Authentication flow overrides` at an IdP level. Hence, the same flow will be used for all clients. As said before, this becomes very complicated.
+
+### Getting error KC-SERVICES0013: Failed authentication
+
+When getting an error or warning like this,
+```
+WARN  [org.keycloak.authentication.DefaultAuthenticationFlow] (default task-26) REQUIRED and ALTERNATIVE elements at same level! Those alternative executions will be ignored: [auth-cookie, identity-
+provider-redirector, null]
+WARN  [org.keycloak.services] (default task-26) KC-SERVICES0013: Failed authentication: org.keycloak.authentication.AuthenticationFlowException: authenticator: restrict-client-auth-authenticator
+```
+
+you have mostlikely mixed required and alternative subflows/steps/authenticators in your custom flow.
+Keycloak does not support this.
+
+Make sure you do not combine required and alternative authenticators at the same level.
+See the following image for details:
+
+![Flow explained](docs/images/flow_explained.jpg)
