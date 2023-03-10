@@ -43,6 +43,7 @@ jobs:
         body_path: "RELEASELOG.md"
         fail_on_unmatched_files: true
         tag_name: v${{ github.event.inputs.releaseVersion }}
+        generate_release_notes: true
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     - name: Create Pull Request
@@ -55,7 +56,7 @@ jobs:
         base: "main"
         title: "chore(release): Prepare next version after release ${{ github.event.inputs.releaseVersion }}"
         body: "Automated PR to prepare next version after release ${{ github.event.inputs.releaseVersion }}"
-        labels: "release"
+        labels: "release,ignore-for-release"
         assignees: "sventorben"
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
