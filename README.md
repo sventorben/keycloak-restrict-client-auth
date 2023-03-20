@@ -84,8 +84,10 @@ It may happen that I remove older packages without prior notice, because the sto
 
 ## How to configure?
 
-* Add the authenticator to the desired flow.
-* Mark the authenticator as `Required`.
+* Create a new flow
+* Add a sub-flow e.g. named `Login` and mark it as `Required`
+* Add an authenticator execution `Restrict user authentication on clients` and mark the execution as `Required`.
+* Within the `Login` sub-flow add authenticators/executions/conditionals and further sub-flows as needed (see [Keycload documentation for details](https://www.keycloak.org/docs/21.0.1/server_admin/#_authentication-flows)
 * Then bind your newly created flow as desired - either as a default for the whole realm or on a per-client basis.
 
   See the image below for an example.
