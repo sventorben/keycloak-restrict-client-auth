@@ -206,7 +206,7 @@ provider-redirector, null]
 WARN  [org.keycloak.services] (default task-26) KC-SERVICES0013: Failed authentication: org.keycloak.authentication.AuthenticationFlowException: authenticator: restrict-client-auth-authenticator
 ```
 
-you have mostlikely mixed required and alternative subflows/steps/authenticators in your custom flow.
+you have mostlikely mixed required and alternative subflows/steps/authenticators at the same level in your custom flow.
 Keycloak does not support this.
 
 Make sure you do not combine required and alternative authenticators at the same level.
