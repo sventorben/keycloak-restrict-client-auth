@@ -1,9 +1,11 @@
 package de.sventorben.keycloak.authorization.client;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import org.testcontainers.images.ImagePullPolicy;
+import org.testcontainers.images.PullPolicy;
 
 import static de.sventorben.keycloak.authorization.client.FullImageName.Distribution.quarkus;
-import static java.lang.module.ModuleDescriptor.*;
+import static java.lang.module.ModuleDescriptor.Version;
 
 class FullImageName {
 
@@ -11,7 +13,8 @@ class FullImageName {
         quarkus
     }
 
-    private static final Distribution KEYCLOAK_DIST = Distribution.valueOf(System.getProperty("keycloak.dist", quarkus.name()));
+    private static final Distribution KEYCLOAK_DIST = Distribution.valueOf(
+        System.getProperty("keycloak.dist", quarkus.name()));
 
     private static final String LATEST_VERSION = "latest";
     private static final String NIGHTLY_VERSION = "nightly";
@@ -54,7 +57,12 @@ class FullImageName {
 
     static KeycloakContainer createContainer() {
         String fullImage = FullImageName.get();
-        return new KeycloakContainer(fullImage);
+        ImagePullPolicy pullPolicy = PullPolicy.defaultPolicy();
+        if (isLatestVersion() || isNightlyVersion()) {
+            pullPolicy = PullPolicy.alwaysPull();
+        }
+        return new KeycloakContainer(fullImage)
+            .withImagePullPolicy(pullPolicy);
     }
 
 }
