@@ -13,7 +13,7 @@ This is a simple Keycloak authenticator to restrict user authorization on client
 
 ## What is it good for?
 
-Every now and then I get asked whether it is possible to restrict user authorization on certain clients.
+Sometimes I get asked whether it is possible to restrict user authorization on certain clients.
 
 Generally the question goes like this
 
@@ -81,10 +81,9 @@ Packages are being released to GitHub Packages. You find the coordinates [here](
 
 It may happen that I remove older packages without prior notice, because the storage is limited on the free tier.
 
-
 ## How to configure?
 
-* Create a new flow
+* Create a new flow per binding (e.g. browser flow, direct grant flow etc.)
 * Add a sub-flow e.g. named `Login` and mark it as `Required`
 * Add an authenticator execution `Restrict user authentication on clients` and mark the execution as `Required`.
 * Within the `Login` sub-flow add authenticators/executions/conditionals and further sub-flows as needed (see [Keycload documentation for details](https://www.keycloak.org/docs/21.0.1/server_admin/#_authentication-flows)
@@ -98,6 +97,22 @@ It may happen that I remove older packages without prior notice, because the sto
 > ⚠️ **User identity**:
 >
 > The authenticator needs a user identity to check whether the user has the desired role or not. Hence, ensure that you have steps/executions in your flow prior to this authenticator that can ensure user's identity.
+
+<div style="background-color: rgba(255, 0, 0, 0.25);">
+
+> 🛑️ **Security considerations**:
+>
+> Please be aware of the following when using this authenticator:
+>
+> * **Protect all possible flows:**
+>
+>  Ensure that you protect access to your clients in all flows, not just the browser flow. Failure to do so may allow malicious users to obtain access or identity tokens via other flows.
+>  Especially post login flows of identity providers and flows used in authentication flow overrides are often overlooked.
+> * **Disable the `Audience Resolve` mapper if necessary:**
+>
+>  The [`Audience Resolve` protocol mapper](https://www.keycloak.org/docs/latest/server_admin/#_audience_resolve) is enabled by default by client scope `roles`, but it may be necessary to remove it in some cases.
+>  Failing to set up audience claims correctly may result in a token containing the restricted client as an audience claim, even if the user does not have access to that client.
+</div>
 
 ### Client Role based mode
 
