@@ -13,14 +13,13 @@ This is a simple Keycloak authenticator to restrict user authorization on client
 
 ## What is it good for?
 
-Sometimes I get asked whether it is possible to restrict user authorization on certain clients.
+As a Keycloak consultant, I often receive inquiries about restricting user authorization for specific clients. People commonly ask,
 
-Generally the question goes like this
+> Can I allow certain users to authenticate with a client while denying access to others?
 
-> Is it possible to allow specific users to authenticate to a client while rejecting others?
+While the answer used to be "no" for out-of-the-box Keycloak, I have developed this extension to meet this need.  but I recommend taking the time to understand the potential security implications before using this extension.
 
-As of today, my general answer is _"no, at least not out of the box"_. And in general my advice is to redesign and relocate the policy enforcement point (PEP).
-However, since this question popped up so often, I wrote this simple authenticator to support this functionality.
+So, before using this extension, please take a moment to review the security considerations outlined in the  [security consideration](#security-considerations) section.
 
 ## How does it work?
 
@@ -98,22 +97,6 @@ It may happen that I remove older packages without prior notice, because the sto
 >
 > The authenticator needs a user identity to check whether the user has the desired role or not. Hence, ensure that you have steps/executions in your flow prior to this authenticator that can ensure user's identity.
 
-<div style="background-color: rgba(255, 0, 0, 0.25);">
-
-> 🛑️ **Security considerations**:
->
-> Please be aware of the following when using this authenticator:
->
-> * **Protect all possible flows:**
->
->  Ensure that you protect access to your clients in all flows, not just the browser flow. Failure to do so may allow malicious users to obtain access or identity tokens via other flows.
->  Especially post login flows of identity providers and flows used in authentication flow overrides are often overlooked.
-> * **Disable the `Audience Resolve` mapper if necessary:**
->
->  The [`Audience Resolve` protocol mapper](https://www.keycloak.org/docs/latest/server_admin/#_audience_resolve) is enabled by default by client scope `roles`, but it may be necessary to remove it in some cases.
->  Failing to set up audience claims correctly may result in a token containing the restricted client as an audience claim, even if the user does not have access to that client.
-</div>
-
 ### Client Role based mode
 
 1) Configure the authenticator by clicking on `Actions -> Config` and select `client-role` as the `Access Provider`.
@@ -187,6 +170,40 @@ This extension provides a [client policy condition](https://www.keycloak.org/doc
 
 ### Executors
 This extension provides a [client policy executor](https://www.keycfloak.org/docs/latest/server_admin/#executor) named `restrict-client-auth-auto-config` to automatically enable restricted access for clients. The executor can be cofigured to either enable restricted access based on resource policies or based on client role.
+
+## Security considerations
+
+### Policy enforcement
+To avoid any confusion, it is important to note that this extension is not a policy enforcement point (PEP).
+It does not enforce authorization decisions. It is part of making the authorization decision, but it does not enforce it.
+Clients must enforce decisions being made.
+
+According to the [OIDC specification/OpenID Connect Core 1.0 incorporating errata set 1](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation), it is the responsibility of the client to check the audience claims. Section 3.1.3.7. ID Token validation, point 3ff state that
+> The Client MUST validate that the `aud` (audience) Claim contains its `client_id` value registered at the Issuer identified by the `iss` (issuer) Claim as an audience. [...]
+
+And further it is very clear about the enforcement by the client:
+> The ID Token MUST be rejected if the ID Token does not list the Client as a valid audience, or if it contains additional audiences not trusted by the Client.
+> If the ID Token contains multiple audiences, the Client SHOULD verify that an `azp` Claim is present.
+> If an `azp` (authorized party) Claim is present, the Client SHOULD verify that its client_id is the Claim Value.
+
+So, by design this extension cannot be a PEP.
+
+What this extension supports you with is authorization decision-making and communicating the outcome to the user during login flow. If configured correctly, it will prevent issuance of tokens that contain an audience or authorized party claim for a client that users do not have access to.
+
+Token issuance or non-issuance is (beside claims in the token) just one way to communicate the outcome of authorization decision-making. It is not enforcement of the decision.
+
+Make sure your clients enforce decisions correctly and ensure validation auf `aud` (audience) and `azp` (authorized party) claims.
+
+If you are using a Keycloak adapter, make sure your clients are verifying the audience claim by enabling `verify-token-audience` in your [adapter config](https://www.keycloak.org/docs/latest/securing_apps/#_java_adapter_config).
+
+### Protect all possible flows
+
+Ensure that you protect access to your clients in all flows, not just the browser flow. Failure to do so may allow malicious users to obtain access or identity tokens via other flows.
+Especially post login flows of identity providers and flows used in authentication flow overrides are often overlooked.
+
+### Disable the `Audience Resolve` mapper if necessary
+The [`Audience Resolve` protocol mapper](https://www.keycloak.org/docs/latest/server_admin/#_audience_resolve) is enabled by default by client scope `roles`, but it may be necessary to remove it in some cases.
+Failing to set up audience claims correctly may result in a token containing the restricted client as an audience claim, even if the user does not have access to that client.
 
 ## Frequently asked questions
 
