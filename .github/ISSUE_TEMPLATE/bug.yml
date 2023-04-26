@@ -38,7 +38,7 @@ body:
     label: Version
     description: |
       examples:
-        - **Keycloak**: 21.1.0
+        - **Keycloak**: 21.1.1
         - **This extension**:  21.0.0
     value: |
         - Keycloak:
