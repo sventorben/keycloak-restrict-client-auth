@@ -2,6 +2,8 @@ package de.sventorben.keycloak.authorization.client;
 
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import de.sventorben.keycloak.authorization.client.access.role.ClientRoleBasedAccessProviderFactory;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -15,9 +17,6 @@ import org.keycloak.representations.idm.OAuth2ErrorRepresentation;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaTypeMatcher;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 final class RestrictClientAuthAuthenticator implements Authenticator {
 

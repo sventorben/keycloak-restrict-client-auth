@@ -1,8 +1,8 @@
 package de.sventorben.keycloak.authorization.client;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import jakarta.ws.rs.NotAuthorizedException;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -18,25 +18,12 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.ws.rs.NotAuthorizedException;
 import java.time.Duration;
-import java.util.Optional;
 import java.util.UUID;
 
-import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY;
-import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_RESTRICTED_BY_POLICY;
-import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_UNRESTRICTED;
-import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_ADMIN_PASS;
-import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_ADMIN_USER;
-import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_HTTP_PORT;
-import static de.sventorben.keycloak.authorization.client.TestConstants.PASS_TEST_RESTRICTED;
-import static de.sventorben.keycloak.authorization.client.TestConstants.PASS_TEST_UNRESTRICTED;
-import static de.sventorben.keycloak.authorization.client.TestConstants.REALM_TEST;
-import static de.sventorben.keycloak.authorization.client.TestConstants.USER_TEST_RESTRICTED;
-import static de.sventorben.keycloak.authorization.client.TestConstants.USER_TEST_UNRESTRICTED;
+import static de.sventorben.keycloak.authorization.client.TestConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assumptions.assumeThat;
 
 @Testcontainers
 class ClientPolicyIT {

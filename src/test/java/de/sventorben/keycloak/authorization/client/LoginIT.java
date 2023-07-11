@@ -1,6 +1,7 @@
 package de.sventorben.keycloak.authorization.client;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import jakarta.ws.rs.NotAuthorizedException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -16,23 +17,12 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.ws.rs.NotAuthorizedException;
 import java.time.Duration;
 import java.util.Map;
 
-import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY;
-import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_RESTRICTED;
-import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_RESTRICTED_BY_POLICY;
-import static de.sventorben.keycloak.authorization.client.TestConstants.CLIENT_TEST_UNRESTRICTED;
-import static de.sventorben.keycloak.authorization.client.TestConstants.KEYCLOAK_HTTP_PORT;
-import static de.sventorben.keycloak.authorization.client.TestConstants.PASS_TEST_RESTRICTED;
-import static de.sventorben.keycloak.authorization.client.TestConstants.PASS_TEST_UNRESTRICTED;
-import static de.sventorben.keycloak.authorization.client.TestConstants.REALM_TEST;
-import static de.sventorben.keycloak.authorization.client.TestConstants.USER_TEST_RESTRICTED;
-import static de.sventorben.keycloak.authorization.client.TestConstants.USER_TEST_UNRESTRICTED;
+import static de.sventorben.keycloak.authorization.client.TestConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assumptions.assumeThat;
 
 @Testcontainers
 class LoginIT {
@@ -66,7 +56,7 @@ class LoginIT {
         @CsvSource(value = {"client-role", "null"}, nullValues = "null")
         void accessForUserWithoutRoleIsDenied(String accessProviderId) {
             LoginIT.this.switchAccessProvider(accessProviderId);
-            try(Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED)) {
+            try (Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED)) {
                 assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
                     .isInstanceOf(NotAuthorizedException.class);
             }
@@ -101,7 +91,7 @@ class LoginIT {
 
         @Test
         void accessForUserWithRoleIsAllowed() {
-            try(Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
+            try (Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
                 CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY)) {
                 assertThat(keycloak.tokenManager().grantToken()).isNotNull();
             }
@@ -118,14 +108,14 @@ class LoginIT {
 
         @Test
         void accessForRestrictedUserIsAllowed() {
-            try(Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_UNRESTRICTED)) {
+            try (Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_UNRESTRICTED)) {
                 assertThat(keycloak.tokenManager().grantToken()).isNotNull();
             }
         }
 
         @Test
         void accessForUnrestrictedUserIsAllowed() {
-            try(Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_UNRESTRICTED)) {
+            try (Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_UNRESTRICTED)) {
                 assertThat(keycloak.tokenManager().grantToken()).isNotNull();
             }
         }
@@ -133,7 +123,7 @@ class LoginIT {
 
 
     private void switchAccessProvider(String accessProviderId) {
-        try(Keycloak admin = keycloakAdmin()) {
+        try (Keycloak admin = keycloakAdmin()) {
             AuthenticationManagementResource flows = admin.realm(REALM_TEST).flows();
             String authenticationConfigId = flows
                 .getExecutions("direct-grant-restrict-client-auth").stream()
