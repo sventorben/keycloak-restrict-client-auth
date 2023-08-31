@@ -11,6 +11,9 @@ This is a simple Keycloak authenticator to restrict user authorization on client
 ![open issues](https://img.shields.io/github/issues/sventorben/keycloak-restrict-client-auth)
 [![CodeScene general](https://img.shields.io/badge/CS-Analyzed%20by%20CodeScene-yellow)](https://codescene.io/projects/25589)
 
+## Quick introduction (Video interview with Niko Köbler)
+[![Youtube Video - Interview with Niko Köbler](https://img.youtube.com/vi/eQjOCrcit24/0.jpg)](https://www.youtube.com/watch?v=eQjOCrcit24)
+
 ## What is it good for?
 
 As a Keycloak consultant, I often receive inquiries about restricting user authorization for specific clients. People commonly ask,
