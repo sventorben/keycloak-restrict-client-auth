@@ -57,7 +57,7 @@
         <keycloak.version>${version.keycloak}</keycloak.version>
         <keycloak.dist>quarkus</keycloak.dist>
 
-        <version.mockito>5.8.0</version.mockito>
+        <version.mockito>5.9.0</version.mockito>
     </properties>
 
     <build>
