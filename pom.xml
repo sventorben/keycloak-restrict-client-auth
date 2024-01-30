@@ -56,6 +56,7 @@
         <!-- For compatibility tests -->
         <keycloak.version>${version.keycloak}</keycloak.version>
         <keycloak.dist>quarkus</keycloak.dist>
+        <useJar>false</useJar>
 
         <version.mockito>5.10.0</version.mockito>
     </properties>
@@ -87,6 +88,7 @@
                             <org.jboss.logging.provider>log4j2</org.jboss.logging.provider>
                             <keycloak.version>${keycloak.version}</keycloak.version>
                             <keycloak.dist>${keycloak.dist}</keycloak.dist>
+                            <useJar>${useJar}</useJar>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>

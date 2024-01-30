@@ -26,7 +26,6 @@ class ConfigIT {
 
     @Container
     private static final KeycloakContainer KEYCLOAK_CONTAINER = FullImageName.createContainer()
-        .withProviderClassesFrom("target/classes")
         .withExposedPorts(KEYCLOAK_HTTP_PORT)
         .withLogConsumer(new Slf4jLogConsumer(LOGGER).withSeparateOutputStreams())
         .withStartupTimeout(Duration.ofSeconds(90))

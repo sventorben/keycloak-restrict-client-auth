@@ -4,6 +4,9 @@ import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.testcontainers.images.ImagePullPolicy;
 import org.testcontainers.images.PullPolicy;
 
+import java.io.File;
+import java.util.List;
+
 import static de.sventorben.keycloak.authorization.client.FullImageName.Distribution.quarkus;
 import static java.lang.module.ModuleDescriptor.Version;
 
@@ -19,6 +22,8 @@ class FullImageName {
     private static final String LATEST_VERSION = "latest";
     private static final String NIGHTLY_VERSION = "nightly";
     private static final String KEYCLOAK_VERSION = System.getProperty("keycloak.version", LATEST_VERSION);
+
+    private static final boolean USE_JAR = Boolean.parseBoolean(System.getProperty("useJar", "false"));
 
     static String get() {
         String imageName = "keycloak";
@@ -61,8 +66,14 @@ class FullImageName {
         if (isLatestVersion() || isNightlyVersion()) {
             pullPolicy = PullPolicy.alwaysPull();
         }
-        return new KeycloakContainer(fullImage)
+        KeycloakContainer keycloakContainer = new KeycloakContainer(fullImage)
             .withImagePullPolicy(pullPolicy);
+        if (USE_JAR) {
+            keycloakContainer = keycloakContainer.withProviderLibsFrom(List.of(new File("target/keycloak-restrict-client-auth.jar")));
+        } else {
+            keycloakContainer = keycloakContainer.withProviderClassesFrom("target/classes");
+        }
+        return keycloakContainer;
     }
 
 }

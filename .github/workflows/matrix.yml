@@ -1,0 +1,29 @@
+name: Compatibility Matrix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        keycloak_version: [ 21.0.2, 21.1.2, 22.0.5, 23.0.5, latest, nightly ]
+        extension_version: [ 20.0.1, 21.0.0, 22.0.0, 23.0.0 ]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+            ref: v${{ matrix.extension_version }}
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'maven'
+      - name: Clean and compile
+        run: mvn -B -U clean test-compile --file pom.xml
+      - name: Download extension
+        run: curl -L -o target/keycloak-restrict-client-auth.jar https://github.com/sventorben/keycloak-restrict-client-auth/releases/download/v${{ matrix.extension_version }}/keycloak-restrict-client-auth.jar
+      - name: Compatibility tests
+        run: mvn -B -U failsafe:integration-test failsafe:verify --file pom.xml -Dkeycloak.version=${{ matrix.keycloak_version }} -DuseJar=true
