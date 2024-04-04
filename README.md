@@ -201,8 +201,7 @@ If you are using a Keycloak adapter, make sure your clients are verifying the au
 
 ### Protect all possible flows
 
-Ensure that you protect access to your clients in all flows, not just the browser flow. Failure to do so may allow malicious users to obtain access or identity tokens via other flows.
-Especially post login flows of identity providers and flows used in authentication flow overrides are often overlooked.
+Ensure that you protect authentication to your clients in all flows a user may access. This includes not just the realm-wide flows but also identity provider overrides and post login flows. Here is one example: suppose you configure this additional step at the end of the built-in browser flow. If the "Cookie" or "Forms" alternative happens to apply, the user will proceed to the "Restrict user authentication on clients" step as expected. But if it is the "Identity Provider Redirector" alternative which gets used, the subsequent steps will be skipped and the user will successfully authenticate into the client. In practice this means that if they try to log into the client without an existing session in Keycloak they will be allowed, but if they _do_ have a session they will be denied (after the "Cookie" alternative). This plugin must be configured separately on the identity provider's post login flow in order to apply (this is a general feature of how brokering works in Keycloak authentication flows, not specific to this plugin).
 
 ### Disable the `Audience Resolve` mapper if necessary
 The [`Audience Resolve` protocol mapper](https://www.keycloak.org/docs/latest/server_admin/#_audience_resolve) is enabled by default by client scope `roles`, but it may be necessary to remove it in some cases.
