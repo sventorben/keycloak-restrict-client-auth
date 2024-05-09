@@ -221,7 +221,7 @@ Hence, I dropped support for the Wildfly-based distro already. Though this libra
 ### Does it work with Keycloak version X.Y.Z?
 
 If you are using Keycloak version `X` (e.g. `X.y.z`), version `X.b.c` should be compatible.
-Keycloak SPIs are quite stable. So, there is a high chance this authenticator will work with other versions, too. Check the details of latest [build results](https://github.com/sventorben/keycloak-restrict-client-auth/actions/workflows/buildAndTest.yml) for an overview or simply give it a try.
+Keycloak SPIs are quite stable. So, there is a high chance this authenticator will work with other versions, too. Check the details of latest [compatibility test run](https://github.com/sventorben/keycloak-restrict-client-auth/actions/workflows/matrix.yml) for an overview or simply give it a try.
 
 Authenticator version `X.b.c` is compiled against Keycloak version `X.y.z`. For example, version `16.3.1` will be compiled against Keycloak version `16.y.z`.
 
