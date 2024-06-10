@@ -4,7 +4,7 @@
 
     <groupId>de.sventorben.keycloak</groupId>
     <artifactId>keycloak-restrict-client-auth</artifactId>
-    <version>24.0.1-SNAPSHOT</version>
+    <version>25.0.0</version>
 
     <name>Keycloak: Authenticator - Restrict client authentication</name>
     <description>A Keycloak authenticator to restrict authentication on clients</description>
@@ -28,7 +28,7 @@
         <developerConnection>scm:git:https://github.com/sventorben/keycloak-restrict-client-auth.git
         </developerConnection>
         <url>https://github.com/sventorben/keycloak-restrict-client-auth.git</url>
-        <tag>HEAD</tag>
+        <tag>v25.0.0</tag>
     </scm>
 
     <issueManagement>
