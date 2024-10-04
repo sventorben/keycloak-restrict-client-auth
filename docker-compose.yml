@@ -2,10 +2,10 @@ version: '3'
 services:
   keycloak:
     container_name: keycloak
-    image: quay.io/keycloak/keycloak:25.0.6
+    image: quay.io/keycloak/keycloak:26.0.0
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       DEBUG_PORT: '*:8787'
       DEBUG: 'true'
     command: ['start-dev', '--debug', '--import-realm', '--features=client-policies']
