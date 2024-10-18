@@ -51,7 +51,7 @@
         <maven.compiler.release>17</maven.compiler.release>
 
         <!-- For compilation -->
-        <version.keycloak>26.0.0</version.keycloak>
+        <version.keycloak>26.0.1</version.keycloak>
 
         <!-- For compatibility tests -->
         <keycloak.version>${version.keycloak}</keycloak.version>
@@ -238,7 +238,7 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-admin-client</artifactId>
-            <version>${version.keycloak}</version>
+            <version>26.0.0</version>
             <scope>test</scope>
         </dependency>
         <!-- Logging -->
