@@ -238,7 +238,7 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-admin-client</artifactId>
-            <version>26.0.0</version>
+            <version>26.0.1</version>
             <scope>test</scope>
         </dependency>
         <!-- Logging -->
