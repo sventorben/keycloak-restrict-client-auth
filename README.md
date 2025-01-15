@@ -205,6 +205,41 @@ Ensure that you protect authentication to your clients in all flows a user may a
 
 Here is one example: suppose a user tries to log in via the built-in browser flow, at the end of which you have added the "Restrict user authentication on clients" step. If the "Cookie" or "Forms" alternative is used, the user will proceed to this step and be evaluated. But if it is the "Identity Provider Redirector" alternative which gets used, the subsequent steps will be skipped and the user will not be subject to this validation (this is a general feature of how brokering works in Keycloak authentication flows, not specific to this plugin). This extension must also be configured in the identity provider's post login flow in order to apply.
 
+### Protect an identity provider
+
+1) Login to the Keycloak Admin Console and navigate to Authentication :
+
+Access the Keycloak Admin Console using your administrator credentials.
+In the left-hand menu, go to "Authentication".
+![AuthFlow_Authentication](https://github.com/user-attachments/assets/89021a3a-6961-4553-9556-705e74a04855)
+
+Under the "Flows" tab, you’ll see the various authentication flows used by Keycloak.
+
+
+2) Create a New Authentication Flow:
+![AuthFlow_CreateFlow](https://github.com/user-attachments/assets/5e1d0602-5c46-4583-83e2-7b9756a584a7)
+
+Click on "Create Flow".
+Give your flow a name, e.g., "Restrict User Authentication Flow".
+Choose "Generic" as the flow type and click "Save".
+Once your flow is created, you need to add steps to it. Click on "Add Step".
+Select "Restrict User Authentication on Clients".
+This step ensures that only authorized clients can proceed with the authentication process for the user.
+![AuthFlow](https://github.com/user-attachments/assets/d1cbb7ed-7141-4a79-88c7-6ae9277f89d9)
+
+
+3) Configure the Identity Provider:
+
+Now go to the "Identity Providers" section of Keycloak.
+Find the Identity Provider (IDP) that you want to protect with this new flow, for the example we will use "google".
+![AuthFlow_google](https://github.com/user-attachments/assets/2c8c6d17-007b-487c-8669-05c7c7827c1d)
+
+Under the IDP settings, find "Post login flow" and choose to use the newly created authentication flow.
+![image](https://github.com/user-attachments/assets/80e1d092-25c5-4a4b-9eb5-1f7db5a93a22)
+
+
+At this point your Identity provider is configured, this ensures that whenever authentication occurs through this IDP, the post-authentication flow you’ve configured will be applied preventing un-authorized clients to proceed with the authentication process.
+
 ### Disable the `Audience Resolve` mapper if necessary
 The [`Audience Resolve` protocol mapper](https://www.keycloak.org/docs/latest/server_admin/#_audience_resolve) is enabled by default by client scope `roles`, but it may be necessary to remove it in some cases.
 Failing to set up audience claims correctly may result in a token containing the restricted client as an audience claim, even if the user does not have access to that client.
