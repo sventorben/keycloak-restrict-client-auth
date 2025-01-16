@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        keycloak_version: [ 21.0.2, 21.1.2, 22.0.5, 23.0.7, 24.0.5, 25.0.6, 26.0.0, 26.0.1, 26.0.2, 26.0.4, 26.0.5, 26.0.6, 26.0.7, latest, nightly ]
+        keycloak_version: [ 21.0.2, 21.1.2, 22.0.5, 23.0.7, 24.0.5, 25.0.6, 26.0.8, 26.1.0, latest, nightly ]
         extension_version: [ 20.0.1, 21.0.0, 22.0.0, 23.0.0, 24.0.0, 25.0.0, 26.0.0 ]
     name: Compatibility (KC ${{ matrix.keycloak_version }}, Extension ${{ matrix.extension_version }})
     steps:

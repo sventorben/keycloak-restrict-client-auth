@@ -36,7 +36,7 @@ class ClientPolicyIT {
     private static final KeycloakContainer KEYCLOAK_CONTAINER = FullImageName.createContainer()
         .withExposedPorts(KEYCLOAK_HTTP_PORT)
         .withLogConsumer(new Slf4jLogConsumer(LOGGER).withSeparateOutputStreams())
-        .withRealmImportFile("/test-realm.json")
+        .withRealmImportFile("/test-realm-realm.json")
         .withStartupTimeout(Duration.ofSeconds(90));
 
     @BeforeAll
