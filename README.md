@@ -94,7 +94,7 @@ It may happen that I remove older packages without prior notice, because the sto
   See the image below for an example.
 ![Example flow](docs/images/flow.jpg)
 
-* Follow instructions below for the desired mode
+* Follow instructions below in section [Client Role based mode](#client-role-based-mode) or [Resource Policy based mode](#resource-policy-based-mode) for the desired mode, respectively.
 
 > ⚠️ **User identity**:
 >
@@ -159,6 +159,41 @@ restricted-access.denied=Zugriff verweigert. Dem Benutzer fehlt die notwendige R
 If the field is left blank, default property `access-denied` is used. In this case you do not need a custom theme, since this property comes with Keycloak out of the box.
 For details on how to add custom messages to Keycloak, please refer to section [Messages and Internationalization](https://www.keycloak.org/docs/latest/server_development/#messages) in the server developer guide.
 
+### Configuring Post-Authentication Flows for Identity Provider Redirects
+When your authentication flow includes an identity provider redirect (e.g., using the organization feature, Identity Provider Redirector, or Home IDP Discovery Extension), Keycloak does not execute subsequent steps in the authentication flow after the redirect. To work around this limitation, you can configure a post-login flow for the identity provider. This ensures that the required steps, such as authorization checks, are applied after authentication with the external identity provider.
+
+Follow these steps to configure your post-login flow:
+
+1) Create a Custom Authentication Flow:
+
+* Log in to the Keycloak Admin Console with your administrator credentials.
+* Go to `Authentication` from the left-hand menu.
+* Under the `Flows` tab, click `Create Flow`.
+* Enter a name for the flow, such as `Restrict Authentication Post Login Flow`, and select `Generic` as the flow type.
+* Click `Save`.
+* After creating the flow, click `Add Step` to add steps to the flow.
+* Add the step `Restrict User Authentication on Clients` to ensure authorization checks are applied.
+
+![AuthFlow_Authentication](https://github.com/user-attachments/assets/89021a3a-6961-4553-9556-705e74a04855)
+
+![AuthFlow_CreateFlow](https://github.com/user-attachments/assets/5e1d0602-5c46-4583-83e2-7b9756a584a7)
+
+2) Assign the Post-Login Flow to the Identity Provider:
+
+* Go to `Identity Providers` in the Keycloak Admin Console.
+* Select the identity provider (e.g., "Google") used in the redirect flow.
+* In the IDP settings, locate the `Post login flow` option.
+* Assign the newly created authentication flow (e.g., `Restrict Authentication Post Login Flow`) to this setting.
+
+![AuthFlow_google](https://github.com/user-attachments/assets/2c8c6d17-007b-487c-8669-05c7c7827c1d)
+
+![image](https://github.com/user-attachments/assets/80e1d092-25c5-4a4b-9eb5-1f7db5a93a22)
+
+This configuration ensures that the post-login flow is applied whenever the identity provider is used for authentication. It allows the necessary checks and steps to be enforced even though Keycloak does not execute steps following the identity provider redirect.
+
+#### Why This Configuration is Necessary
+Keycloak currently skips subsequent steps in the authentication flow after an identity provider redirect. This is a known issue tracked in the Keycloak repository [issue #10250](https://github.com/keycloak/keycloak/issues/10250#issuecomment-2556581319). Using a post-login flow as described above is the recommended workaround for scenarios where additional steps, such as client-specific authorization checks, are needed after authentication via an external identity provider.
+
 ## Client Policy support
 
 > ⚠️ **Feature preview**:
@@ -205,40 +240,8 @@ Ensure that you protect authentication to your clients in all flows a user may a
 
 Here is one example: suppose a user tries to log in via the built-in browser flow, at the end of which you have added the "Restrict user authentication on clients" step. If the "Cookie" or "Forms" alternative is used, the user will proceed to this step and be evaluated. But if it is the "Identity Provider Redirector" alternative which gets used, the subsequent steps will be skipped and the user will not be subject to this validation (this is a general feature of how brokering works in Keycloak authentication flows, not specific to this plugin). This extension must also be configured in the identity provider's post login flow in order to apply.
 
-### Protect an identity provider
-
-1) Login to the Keycloak Admin Console and navigate to Authentication :
-
-Access the Keycloak Admin Console using your administrator credentials.
-In the left-hand menu, go to "Authentication".
-![AuthFlow_Authentication](https://github.com/user-attachments/assets/89021a3a-6961-4553-9556-705e74a04855)
-
-Under the "Flows" tab, you’ll see the various authentication flows used by Keycloak.
-
-
-2) Create a New Authentication Flow:
-![AuthFlow_CreateFlow](https://github.com/user-attachments/assets/5e1d0602-5c46-4583-83e2-7b9756a584a7)
-
-Click on "Create Flow".
-Give your flow a name, e.g., "Restrict User Authentication Flow".
-Choose "Generic" as the flow type and click "Save".
-Once your flow is created, you need to add steps to it. Click on "Add Step".
-Select "Restrict User Authentication on Clients".
-This step ensures that only authorized clients can proceed with the authentication process for the user.
-![AuthFlow](https://github.com/user-attachments/assets/d1cbb7ed-7141-4a79-88c7-6ae9277f89d9)
-
-
-3) Configure the Identity Provider:
-
-Now go to the "Identity Providers" section of Keycloak.
-Find the Identity Provider (IDP) that you want to protect with this new flow, for the example we will use "google".
-![AuthFlow_google](https://github.com/user-attachments/assets/2c8c6d17-007b-487c-8669-05c7c7827c1d)
-
-Under the IDP settings, find "Post login flow" and choose to use the newly created authentication flow.
-![image](https://github.com/user-attachments/assets/80e1d092-25c5-4a4b-9eb5-1f7db5a93a22)
-
-
-At this point your Identity provider is configured, this ensures that whenever authentication occurs through this IDP, the post-authentication flow you’ve configured will be applied preventing un-authorized clients to proceed with the authentication process.
+#### Identity Provider redirects
+To ensure proper enforcement of authorization checks when using identity provider redirects in your authentication flow (e.g., with the Identity Provider Redirector, organization feature, or Home IDP Discovery Extension), Keycloak does not automatically execute subsequent steps after the redirect. You must configure a post-login flow for the identity provider to apply the necessary checks. For detailed steps, refer to [Configuring Post-Authentication Flows for Identity Provider Redirects](#configuring-post-authentication-flows-for-identity-provider-redirects).
 
 ### Disable the `Audience Resolve` mapper if necessary
 The [`Audience Resolve` protocol mapper](https://www.keycloak.org/docs/latest/server_admin/#_audience_resolve) is enabled by default by client scope `roles`, but it may be necessary to remove it in some cases.
