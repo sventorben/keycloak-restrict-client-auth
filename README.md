@@ -165,29 +165,25 @@ When your authentication flow includes an identity provider redirect (e.g., usin
 Follow these steps to configure your post-login flow:
 
 1) Create a Custom Authentication Flow:
+    * Log in to the Keycloak Admin Console with your administrator credentials.
+    * Go to `Authentication` from the left-hand menu.
+    ![AuthFlow_Authentication](https://github.com/user-attachments/assets/89021a3a-6961-4553-9556-705e74a04855)
+    * Under the `Flows` tab, click `Create Flow`.
+    ![AuthFlow_CreateFlow](https://github.com/user-attachments/assets/5e1d0602-5c46-4583-83e2-7b9756a584a7)
+    * Enter a name for the flow, such as `Restrict Authentication Post Login Flow`, and select `Generic` as the flow type.
+    * Click `Save`.
+    * After creating the flow, click `Add Step` to add steps to the flow.
+    * Add the step `Restrict User Authentication on Clients` to ensure authorization checks are applied.
 
-* Log in to the Keycloak Admin Console with your administrator credentials.
-* Go to `Authentication` from the left-hand menu.
-* Under the `Flows` tab, click `Create Flow`.
-* Enter a name for the flow, such as `Restrict Authentication Post Login Flow`, and select `Generic` as the flow type.
-* Click `Save`.
-* After creating the flow, click `Add Step` to add steps to the flow.
-* Add the step `Restrict User Authentication on Clients` to ensure authorization checks are applied.
-
-![AuthFlow_Authentication](https://github.com/user-attachments/assets/89021a3a-6961-4553-9556-705e74a04855)
-
-![AuthFlow_CreateFlow](https://github.com/user-attachments/assets/5e1d0602-5c46-4583-83e2-7b9756a584a7)
 
 2) Assign the Post-Login Flow to the Identity Provider:
 
-* Go to `Identity Providers` in the Keycloak Admin Console.
-* Select the identity provider (e.g., "Google") used in the redirect flow.
-* In the IDP settings, locate the `Post login flow` option.
-* Assign the newly created authentication flow (e.g., `Restrict Authentication Post Login Flow`) to this setting.
-
-![AuthFlow_google](https://github.com/user-attachments/assets/2c8c6d17-007b-487c-8669-05c7c7827c1d)
-
-![image](https://github.com/user-attachments/assets/80e1d092-25c5-4a4b-9eb5-1f7db5a93a22)
+    * Go to `Identity Providers` in the Keycloak Admin Console.
+    ![AuthFlow_google](https://github.com/user-attachments/assets/2c8c6d17-007b-487c-8669-05c7c7827c1d)
+    * Select the identity provider (e.g., "Google") used in the redirect flow.
+    * In the IDP settings, locate the `Post login flow` option.
+    * Assign the newly created authentication flow (e.g., `Restrict Authentication Post Login Flow`) to this setting.
+    ![image](https://github.com/user-attachments/assets/80e1d092-25c5-4a4b-9eb5-1f7db5a93a22)
 
 This configuration ensures that the post-login flow is applied whenever the identity provider is used for authentication. It allows the necessary checks and steps to be enforced even though Keycloak does not execute steps following the identity provider redirect.
 
