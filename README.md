@@ -249,13 +249,6 @@ Failing to set up audience claims correctly may result in a token containing the
 
 ## Frequently asked questions
 
-### Does it work with the legacy Wildfly-based Keycloak distro?
-Maybe! There is even a high chance it will, since this extension does not make use of any Quarkus-related functionality.
-For installation instructions, please refer to an [older version of this readme](https://github.com/sventorben/keycloak-restrict-client-auth/blob/v19.0.0/README.md).
-
-Please note that with the release of Keycloak 20.0.0 the Wildfly-based distro is no longer supported.
-Hence, I dropped support for the Wildfly-based distro already. Though this library may still work with the Wildfly-based distro, I will no longer put any efforts into keeping this extension compatible.
-
 ### Does it work with Keycloak version X.Y.Z?
 
 If you are using Keycloak version `X` (e.g. `X.y.z`), version `X.b.c` should be compatible.
