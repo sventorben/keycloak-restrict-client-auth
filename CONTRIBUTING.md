@@ -7,8 +7,8 @@ I kindly ask anyone who wants to contribute to this project to follow some basic
    https://github.com/sventorben/keycloak-restrict-client-auth/discussions/categories/ideas)
 2. Create a GitHub Issue with a good description associated with the PR
 4. One feature/change per PR
-5. One commit per PR 
-6. PR rebased on main (`git rebase`, not `git pull`) 
+5. One commit per PR
+6. PR rebased on main (`git rebase`, not `git pull`)
 7. Good descriptive [conventional commit message](https://www.conventionalcommits.org/en/v1.0.0/), with link to issue
 8. No changes to code not directly related to your PR
 9. Includes basic tests
@@ -36,4 +36,15 @@ See `git help commit`:
     certifies that committer has the rights to submit this work under the same
     license and agrees to a Developer Certificate of Origin (see
     http://developercertificate.org/ for more information).
+```
+
+## Commit Signing Requirement
+All commits to the `main` branch must be signed with a GitHub verified signature. This ensures authenticity and traceability of contributions.
+
+Please follow GitHub’s official documentation on how to configure commit signing: [Signing commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
+
+To verify that your commits are signed, you can run the following command:
+
+```sh
+git log --show-signature
 ```
