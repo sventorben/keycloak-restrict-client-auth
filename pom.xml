@@ -58,7 +58,7 @@
         <keycloak.dist>quarkus</keycloak.dist>
         <useJar>false</useJar>
 
-        <version.mockito>5.16.0</version.mockito>
+        <version.mockito>5.16.1</version.mockito>
     </properties>
 
     <build>
@@ -69,7 +69,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.2</version>
+                    <version>3.5.3</version>
                     <configuration>
                         <systemPropertyVariables>
                             <org.jboss.logging.provider>log4j2</org.jboss.logging.provider>
