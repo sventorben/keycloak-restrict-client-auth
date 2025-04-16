@@ -3,7 +3,7 @@
 This is a simple Keycloak authenticator to restrict user authorization on clients.
 
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/sventorben/keycloak-restrict-client-auth?sort=semver)
-![Keycloak Dependency Version](https://img.shields.io/badge/Keycloak-26.1.4-blue)
+![Keycloak Dependency Version](https://img.shields.io/badge/Keycloak-26.2.0-blue)
 ![GitHub Release Date](https://img.shields.io/github/release-date-pre/sventorben/keycloak-restrict-client-auth)
 ![Github Last Commit](https://img.shields.io/github/last-commit/sventorben/keycloak-restrict-client-auth)
 

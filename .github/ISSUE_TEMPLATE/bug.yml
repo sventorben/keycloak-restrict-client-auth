@@ -38,8 +38,8 @@ body:
     label: Version
     description: |
       examples:
-        - **Keycloak**: 26.1.4
-        - **This extension**: 26.0.0
+        - **Keycloak**: 26.2.0
+        - **This extension**: 26.1.0
     value: |
         - Keycloak:
         - This extension:
