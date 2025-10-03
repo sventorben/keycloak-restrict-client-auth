@@ -1,0 +1,31 @@
+name: Label ignore-for-release for PRs
+on:
+    pull_request_target:
+        types: [ opened, synchronize, reopened ]
+
+permissions:
+    pull-requests: write
+
+jobs:
+    add-label:
+        if: github.actor == 'dependabot[bot]'
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Add ignore-for-release to deps-dev PRs
+                uses: actions/github-script@v8
+                with:
+                    script: |
+                        const pr = context.payload.pull_request;
+                        const title = pr.title || "";
+                        const head = pr.head?.ref || "";
+
+                        const isDepsDev = /\bdeps-dev\b/i.test(title) || /\bdeps-dev\b/i.test(head);
+
+                        if (isDepsDev) {
+                          await github.rest.issues.addLabels({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            issue_number: pr.number,
+                            labels: ['ignore-for-release']
+                          });
+                        }
