@@ -15,6 +15,7 @@ updates:
       - "sventorben"
     commit-message:
       prefix: "chore"
+    labels: ["ignore-for-release", "github_actions", "dependencies"]
 
 
   # Maintain dependencies for maven
