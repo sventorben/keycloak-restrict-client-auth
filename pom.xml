@@ -58,7 +58,7 @@
         <keycloak.dist>quarkus</keycloak.dist>
         <useJar>false</useJar>
 
-        <version.mockito>5.20.0</version.mockito>
+        <version.mockito>5.21.0</version.mockito>
     </properties>
 
     <build>
