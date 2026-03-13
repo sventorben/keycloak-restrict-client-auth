@@ -193,6 +193,12 @@
             <version>${version.keycloak}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus.resteasy.reactive</groupId>
+            <artifactId>resteasy-reactive</artifactId>
+            <version>3.19.4</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Test -->
         <dependency>
