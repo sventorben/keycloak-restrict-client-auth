@@ -12,7 +12,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Add ignore-for-release to deps-dev PRs
-                uses: actions/github-script@v8
+                uses: actions/github-script@v9
                 with:
                     script: |
                         const pr = context.payload.pull_request;
