@@ -1,1 +1,2 @@
 de.sventorben.keycloak.authorization.client.access.RestrictClientAuthSpi
+de.sventorben.keycloak.authorization.client.account.AccountApplicationsFilterSpi

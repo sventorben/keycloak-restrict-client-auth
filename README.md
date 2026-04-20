@@ -206,6 +206,51 @@ This extension provides a [client policy condition](https://www.keycloak.org/doc
 ### Executors
 This extension provides a [client policy executor](https://www.keycfloak.org/docs/latest/server_admin/#executor) named `restrict-client-auth-auto-config` to automatically enable restricted access for clients. The executor can be cofigured to either enable restricted access based on resource policies or based on client role.
 
+## Account Console filtering
+
+By default, users can see all applications in their Keycloak Account Console (`/realms/{realm}/account/applications`), including applications they are restricted from accessing.
+
+This extension provides optional filtering to hide restricted applications from users who do not have permission to access them.
+
+### How it works
+
+The filter intercepts the Account Console's applications endpoint and removes clients that:
+1. Have restricted access enabled (via role or policy)
+2. The current user does not have permission to access
+
+Unrestricted clients are always shown. Restricted clients are only shown to users who have the required role or policy permission.
+
+### Configuration
+
+Account Console filtering is controlled by two configuration properties:
+
+```properties
+# Filter applications that appear dynamically (based on user sessions/consents)
+# Default: true
+spi-restrict-client-auth-account-filter-default-filter-dynamic-apps=true
+
+# Filter applications marked as "Always display in console"
+# Default: true
+spi-restrict-client-auth-account-filter-default-filter-always-display-apps=true
+```
+
+Both options default to `true` (filtering enabled). You can disable either independently:
+
+```properties
+# Example: Only filter dynamic apps, but always show "Always display in console" apps
+spi-restrict-client-auth-account-filter-default-filter-dynamic-apps=true
+spi-restrict-client-auth-account-filter-default-filter-always-display-apps=false
+```
+
+### Behavior summary
+
+| Client State | User Has Permission | Filtering Enabled | Visible in Account Console |
+|--------------|---------------------|-------------------|----------------------------|
+| Not restricted | N/A | N/A | Yes |
+| Restricted | Yes | N/A | Yes |
+| Restricted | No | Yes | No |
+| Restricted | No | No (opt-out) | Yes |
+
 ## Security considerations
 
 ### Policy enforcement
