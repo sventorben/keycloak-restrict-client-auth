@@ -17,6 +17,12 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write       # create the GitHub Release / push tag
+      packages: write        # publish to GitHub Packages
+      id-token: write        # build-provenance attestation
+      attestations: write    # build-provenance attestation
+
     steps:
     - name: Checkout
       uses: actions/checkout@v6
@@ -36,10 +42,19 @@ jobs:
         git push origin v${{ github.event.inputs.releaseVersion }}
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+    - name: Generate checksums
+      run: cd target && sha256sum keycloak-restrict-client-auth.jar > SHA256SUMS
+    - name: Attest build provenance
+      uses: actions/attest-build-provenance@v4
+      with:
+        subject-path: target/keycloak-restrict-client-auth.jar
     - name: Release to GitHub releases
       uses: softprops/action-gh-release@v3
       with:
-        files: "target/keycloak-restrict-client-auth.jar"
+        files: |
+          target/keycloak-restrict-client-auth.jar
+          target/SHA256SUMS
+          target/bom.json
         body_path: "RELEASELOG.md"
         fail_on_unmatched_files: true
         tag_name: v${{ github.event.inputs.releaseVersion }}
