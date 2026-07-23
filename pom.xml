@@ -123,7 +123,7 @@ Signed-off-by: GitHub Actions &lt;actions@github.com&gt;</scmDevelopmentCommitCo
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.5.1</version>
                 <configuration>
                     <archive>
                         <manifestFile>src${file.separator}main${file.separator}resources${file.separator}META-INF${file.separator}MANIFEST.MF</manifestFile>
