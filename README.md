@@ -206,6 +206,17 @@ This extension provides a [client policy condition](https://www.keycloak.org/doc
 ### Executors
 This extension provides a [client policy executor](https://www.keycfloak.org/docs/latest/server_admin/#executor) named `restrict-client-auth-auto-config` to automatically enable restricted access for clients. The executor can be cofigured to either enable restricted access based on resource policies or based on client role.
 
+This extension also provides a client policy executor named `restrict-client-auth-enforce` to deny refreshing tokens for users who do not have access to a restricted client (anymore).
+Keycloak does not run any authentication flow when a client refreshes a token. Hence, the authenticator cannot deny access in this case.
+The executor checks access whenever a token, including an offline token, is refreshed and responds with an `invalid_grant` error if access is denied.
+The executor can be configured with the access provider to use, just like the authenticator.
+
+To enable the executor:
+1) Create a client profile and add the `restrict-client-auth-enforce` executor to it.
+2) Create a client policy with the `any-client` condition and add the client profile to it.
+
+> **Note**: The `restrict-client-auth-enabled` condition only applies when clients are registered or updated. It cannot be used together with the `restrict-client-auth-enforce` executor.
+
 ## Security considerations
 
 ### Policy enforcement
@@ -236,6 +247,8 @@ If you are using a Keycloak adapter, make sure your clients are verifying the au
 Ensure that you protect authentication to your clients in all flows a user may access. This includes not just the browser flow or the other realm-wide flows, but also identity provider overrides and post login flows.
 
 Here is one example: suppose a user tries to log in via the built-in browser flow, at the end of which you have added the "Restrict user authentication on clients" step. If the "Cookie" or "Forms" alternative is used, the user will proceed to this step and be evaluated. But if it is the "Identity Provider Redirector" alternative which gets used, the subsequent steps will be skipped and the user will not be subject to this validation (this is a general feature of how brokering works in Keycloak authentication flows, not specific to this plugin). This extension must also be configured in the identity provider's post login flow in order to apply.
+
+Refreshing tokens does not run any authentication flow at all. If users should lose access when their roles or permissions change, configure the `restrict-client-auth-enforce` [client policy executor](#executors).
 
 #### Identity Provider redirects
 To ensure proper enforcement of authorization checks when using identity provider redirects in your authentication flow (e.g., with the Identity Provider Redirector, organization feature, or Home IDP Discovery Extension), Keycloak does not automatically execute subsequent steps after the redirect. You must configure a post-login flow for the identity provider to apply the necessary checks. For detailed steps, refer to [Configuring Post-Authentication Flows for Identity Provider Redirects](#configuring-post-authentication-flows-for-identity-provider-redirects).

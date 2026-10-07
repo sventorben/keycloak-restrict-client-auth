@@ -1,1 +1,2 @@
 de.sventorben.keycloak.authorization.client.clientpolicy.executor.AutoConfigClientPolicyExecutorFactory
+de.sventorben.keycloak.authorization.client.clientpolicy.executor.EnforceAccessClientPolicyExecutorFactory
