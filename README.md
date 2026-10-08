@@ -191,6 +191,25 @@ This configuration ensures that the post-login flow is applied whenever the iden
 #### Why This Configuration is Necessary
 Keycloak currently skips subsequent steps in the authentication flow after an identity provider redirect. This is a known issue tracked in the Keycloak repository [issue #10250](https://github.com/keycloak/keycloak/issues/10250#issuecomment-2556581319). Using a post-login flow as described above is the recommended workaround for scenarios where additional steps, such as client-specific authorization checks, are needed after authentication via an external identity provider.
 
+## Required action support
+
+This extension provides a [required action](https://www.keycloak.org/docs/latest/server_admin/#con-required-actions_server_administration_guide) named `Restrict user authentication on clients` (`restrict-client-auth-enforce`).
+Unlike the authenticator, the required action does not need to be added to any authentication flow.
+Keycloak evaluates it whenever a user authenticates, no matter which authentication flow has been used, e.g. for login via username and password, single sign-on, identity providers, registration, credential reset, or links sent via email.
+
+Since Keycloak runs required actions after the authentication flow, access is checked after other required actions have been completed.
+For example, users are able to reset their password before access to the client is denied.
+
+To enable the required action:
+1) Go to `Authentication` and choose the `Required actions` tab.
+2) Enable `Restrict user authentication on clients`.
+3) Keep it at the bottom of the list, so that other required actions run first. Keycloak puts newly enabled required actions at the bottom by default.
+4) Optionally, configure the access provider and error message just like for the authenticator.
+
+Please note:
+* Applications cannot initiate the required action via the `kc_action` parameter.
+* For the resource owner password credentials grant (direct access grant), Keycloak denies access with an `Account is not fully set up` error instead. Add the authenticator to the direct grant flow or use the `restrict-client-auth-enforce` [client policy executor](#executors) for a dedicated error.
+
 ## Client Policy support
 
 > ⚠️ **Feature preview**:
@@ -254,6 +273,8 @@ If you are using a Keycloak adapter, make sure your clients are verifying the au
 Ensure that you protect authentication to your clients in all flows a user may access. This includes not just the browser flow or the other realm-wide flows, but also identity provider overrides and post login flows.
 
 Here is one example: suppose a user tries to log in via the built-in browser flow, at the end of which you have added the "Restrict user authentication on clients" step. If the "Cookie" or "Forms" alternative is used, the user will proceed to this step and be evaluated. But if it is the "Identity Provider Redirector" alternative which gets used, the subsequent steps will be skipped and the user will not be subject to this validation (this is a general feature of how brokering works in Keycloak authentication flows, not specific to this plugin). This extension must also be configured in the identity provider's post login flow in order to apply.
+
+To check access no matter which authentication flow has been used, enable the [required action](#required-action-support) in addition to or instead of the authenticator.
 
 Refreshing or exchanging tokens does not run any authentication flow at all. If users should lose access when their roles or permissions change, configure the `restrict-client-auth-enforce` [client policy executor](#executors). For OpenID Connect clients, the executor also denies issuing tokens if the authenticator has been skipped during login.
 
