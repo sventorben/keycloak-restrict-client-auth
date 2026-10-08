@@ -1,6 +1,7 @@
 package de.sventorben.keycloak.authorization.client;
 
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
+import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
 import de.sventorben.keycloak.authorization.client.common.OperationalInfo;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
@@ -67,7 +68,7 @@ public final class RestrictClientAuthAuthenticatorFactory implements Authenticat
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return new RestrictClientAuthAuthenticator();
+        return new RestrictClientAuthAuthenticator(new AccessProviderResolver(session));
     }
 
     @Override

@@ -22,7 +22,10 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
 
     private static final Logger LOG = Logger.getLogger(RestrictClientAuthAuthenticator.class);
 
-    RestrictClientAuthAuthenticator() {
+    private final AccessProviderResolver accessProviderResolver;
+
+    RestrictClientAuthAuthenticator(AccessProviderResolver accessProviderResolver) {
+        this.accessProviderResolver = accessProviderResolver;
     }
 
     @Override
@@ -30,8 +33,8 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
         final ClientModel client = context.getSession().getContext().getClient();
         final RestrictClientAuthConfig config = new RestrictClientAuthConfig(context.getAuthenticatorConfig());
 
-        final AccessProvider access = new AccessProviderResolver(context.getSession())
-            .resolve(config.getAccessProviderId(), config.getAuthenticatorConfigAlias());
+        final AccessProvider access = accessProviderResolver.resolve(
+            config.getAccessProviderId(), config.getAuthenticatorConfigAlias());
 
         if (!access.isRestricted(client)) {
             context.success();

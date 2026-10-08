@@ -2,6 +2,7 @@ package de.sventorben.keycloak.authorization.client.clientpolicy.executor;
 
 import de.sventorben.keycloak.authorization.client.RestrictClientAuthConfigProperties;
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
+import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
 import de.sventorben.keycloak.authorization.client.common.OperationalInfo;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
@@ -27,7 +28,8 @@ public class EnforceAccessClientPolicyExecutorFactory implements ClientPolicyExe
 
     @Override
     public String getHelpText() {
-        return "The executor denies refreshing tokens of users who do not have access to a restricted client.";
+        return "The executor denies refreshing and exchanging tokens for users " +
+            "who do not have access to a restricted client.";
     }
 
     @Override
@@ -37,7 +39,7 @@ public class EnforceAccessClientPolicyExecutorFactory implements ClientPolicyExe
 
     @Override
     public ClientPolicyExecutorProvider create(KeycloakSession keycloakSession) {
-        return new EnforceAccessClientPolicyExecutor(keycloakSession);
+        return new EnforceAccessClientPolicyExecutor(keycloakSession, new AccessProviderResolver(keycloakSession));
     }
 
     @Override

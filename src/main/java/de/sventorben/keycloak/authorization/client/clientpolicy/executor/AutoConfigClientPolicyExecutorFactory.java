@@ -2,6 +2,7 @@ package de.sventorben.keycloak.authorization.client.clientpolicy.executor;
 
 import de.sventorben.keycloak.authorization.client.RestrictClientAuthConfigProperties;
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
+import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
 import de.sventorben.keycloak.authorization.client.common.OperationalInfo;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
@@ -37,7 +38,7 @@ public class AutoConfigClientPolicyExecutorFactory implements ClientPolicyExecut
 
     @Override
     public ClientPolicyExecutorProvider create(KeycloakSession keycloakSession) {
-        return new AutoConfigClientPolicyExecutor(keycloakSession);
+        return new AutoConfigClientPolicyExecutor(keycloakSession, new AccessProviderResolver(keycloakSession));
     }
 
     @Override

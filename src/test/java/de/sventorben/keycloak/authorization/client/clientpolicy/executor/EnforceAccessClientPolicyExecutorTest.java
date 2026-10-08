@@ -1,6 +1,7 @@
 package de.sventorben.keycloak.authorization.client.clientpolicy.executor;
 
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
+import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +13,10 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.OAuthErrorException;
 import org.keycloak.jose.jws.JWSBuilder;
+import org.keycloak.models.AuthenticatedClientSessionModel;
 import org.keycloak.models.ClientModel;
+import org.keycloak.models.ClientSessionContext;
+import org.keycloak.models.Constants;
 import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -21,6 +25,7 @@ import org.keycloak.models.UserSessionModel;
 import org.keycloak.models.UserSessionProvider;
 import org.keycloak.services.clientpolicy.ClientPolicyEvent;
 import org.keycloak.services.clientpolicy.ClientPolicyException;
+import org.keycloak.services.clientpolicy.context.TokenExchangeResponseContext;
 import org.keycloak.services.clientpolicy.context.TokenRefreshResponseContext;
 import org.keycloak.util.TokenUtil;
 import org.mockito.InjectMocks;
@@ -41,6 +46,9 @@ class EnforceAccessClientPolicyExecutorTest {
     KeycloakSession keycloakSession;
 
     @Mock
+    AccessProviderResolver accessProviderResolver;
+
+    @Mock
     AccessProvider accessProvider;
 
     @InjectMocks
@@ -48,6 +56,7 @@ class EnforceAccessClientPolicyExecutorTest {
 
     @BeforeEach
     void setUp() {
+        given(accessProviderResolver.resolve("client-role", "restrict-client-auth-enforce")).willReturn(accessProvider);
         cut.setupConfiguration(null);
     }
 
@@ -76,7 +85,6 @@ class EnforceAccessClientPolicyExecutorTest {
 
         @BeforeEach
         void setUp() {
-            given(keycloakSession.getProvider(AccessProvider.class, "client-role")).willReturn(accessProvider);
             given(keycloakSession.getContext()).willReturn(keycloakContext);
             given(keycloakSession.sessions()).willReturn(userSessionProvider);
             given(keycloakContext.getClient()).willReturn(client);
@@ -149,8 +157,93 @@ class EnforceAccessClientPolicyExecutorTest {
         }
     }
 
+    @Nested
+    class TokenExchange {
+
+        @Mock
+        ClientSessionContext clientSessionContext;
+
+        @Mock
+        AuthenticatedClientSessionModel clientSession;
+
+        @Mock
+        UserSessionModel userSession;
+
+        @Mock
+        ClientModel requester;
+
+        @Mock
+        ClientModel audience;
+
+        @Mock
+        UserModel user;
+
+        @BeforeEach
+        void setUp() {
+            given(clientSessionContext.getClientSession()).willReturn(clientSession);
+            given(clientSession.getUserSession()).willReturn(userSession);
+            given(userSession.getUser()).willReturn(user);
+            given(clientSession.getClient()).willReturn(requester);
+        }
+
+        @Test
+        void allowsExchangeOnUnrestrictedRequesterWithoutAudience() {
+            givenAudience((ClientModel[]) null);
+            given(accessProvider.isRestricted(requester)).willReturn(false);
+
+            assertThatCode(() -> cut.executeOnEvent(exchangeContext())).doesNotThrowAnyException();
+        }
+
+        @Test
+        void allowsExchangeForPermittedUser() {
+            givenAudience(audience);
+            givenAccess(requester, true);
+            givenAccess(audience, true);
+
+            assertThatCode(() -> cut.executeOnEvent(exchangeContext())).doesNotThrowAnyException();
+        }
+
+        @Test
+        void deniesExchangeIfUserHasNoAccessToRequester() {
+            givenAudience(audience);
+            givenAccess(requester, false);
+
+            assertExchangeDenied();
+        }
+
+        @Test
+        void deniesExchangeIfUserHasNoAccessToAudience() {
+            givenAudience(audience);
+            givenAccess(requester, true);
+            givenAccess(audience, false);
+
+            assertExchangeDenied();
+        }
+
+        private void givenAudience(ClientModel... audienceClients) {
+            given(clientSessionContext.getAttribute(Constants.REQUESTED_AUDIENCE_CLIENTS, ClientModel[].class))
+                .willReturn(audienceClients);
+        }
+
+        private void givenAccess(ClientModel client, boolean permitted) {
+            given(accessProvider.isRestricted(client)).willReturn(true);
+            given(accessProvider.isPermitted(client, user)).willReturn(permitted);
+        }
+
+        private void assertExchangeDenied() {
+            assertThatThrownBy(() -> cut.executeOnEvent(exchangeContext()))
+                .isInstanceOf(ClientPolicyException.class)
+                .hasFieldOrPropertyWithValue("error", OAuthErrorException.ACCESS_DENIED);
+        }
+
+        private TokenExchangeResponseContext exchangeContext() {
+            return new TokenExchangeResponseContext(null, clientSessionContext, null);
+        }
+    }
+
     @ParameterizedTest
-    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.EXCLUDE, names = {"TOKEN_REFRESH_RESPONSE"})
+    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.EXCLUDE,
+        names = {"TOKEN_REFRESH_RESPONSE", "TOKEN_EXCHANGE_RESPONSE"})
     void doNothing(ClientPolicyEvent event) {
         assertThatCode(() -> cut.executeOnEvent(() -> event)).doesNotThrowAnyException();
         verifyNoInteractions(accessProvider);
