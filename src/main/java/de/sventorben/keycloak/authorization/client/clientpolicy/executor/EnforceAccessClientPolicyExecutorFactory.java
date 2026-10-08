@@ -28,8 +28,8 @@ public class EnforceAccessClientPolicyExecutorFactory implements ClientPolicyExe
 
     @Override
     public String getHelpText() {
-        return "The executor denies refreshing and exchanging tokens for users " +
-            "who do not have access to a restricted client.";
+        return "The executor denies issuing tokens for users who do not have access to a restricted client, " +
+            "e.g. when exchanging an authorization code, refreshing or exchanging a token.";
     }
 
     @Override
