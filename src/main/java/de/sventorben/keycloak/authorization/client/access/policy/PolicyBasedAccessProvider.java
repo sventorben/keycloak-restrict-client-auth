@@ -82,12 +82,14 @@ public final class PolicyBasedAccessProvider implements AccessProvider {
     public void enableFor(ClientModel client) {
         if (isRestricted(client)) return;
 
-        client.setPublicClient(false);
-        client.setBearerOnly(false);
-
         AuthorizationProvider authorization = keycloakSession.getProvider(AuthorizationProvider.class);
         StoreFactory storeFactory = authorization.getStoreFactory();
         ResourceServer resourceServer = storeFactory.getResourceServerStore().findByClient(client);
+        if (resourceServer == null) {
+            LOG.warnf("Cannot restrict access to client '%s' in realm '%s', since authorization is not enabled for it.",
+                client.getClientId(), client.getRealm().getName());
+            return;
+        }
         storeFactory.getResourceStore().create(resourceServer, RESOURCE_NAME, resourceServer.getClientId());
     }
 
