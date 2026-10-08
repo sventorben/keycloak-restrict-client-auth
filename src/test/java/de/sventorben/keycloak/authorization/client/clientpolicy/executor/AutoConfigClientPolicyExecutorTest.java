@@ -1,6 +1,7 @@
 package de.sventorben.keycloak.authorization.client.clientpolicy.executor;
 
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
+import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,6 +26,9 @@ class AutoConfigClientPolicyExecutorTest {
     KeycloakSession keycloakSession;
 
     @Mock
+    AccessProviderResolver accessProviderResolver;
+
+    @Mock
     AccessProvider accessProvider;
 
     @Mock
@@ -35,13 +39,14 @@ class AutoConfigClientPolicyExecutorTest {
 
     @BeforeEach
     void setUp() {
+        given(accessProviderResolver.resolve("client-role", "restrict-client-auth-auto-config"))
+            .willReturn(accessProvider);
         cut.setupConfiguration(null);
     }
 
     @ParameterizedTest
     @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.INCLUDE, names = {"REGISTER", "REGISTERED", "UPDATE", "UPDATED"})
     void enable(ClientPolicyEvent event) {
-        given(keycloakSession.getProvider(AccessProvider.class, "client-role")).willReturn(accessProvider);
         cut.executeOnEvent(new ClientCRUDContext() {
             @Override
             public ClientPolicyEvent getEvent() {
