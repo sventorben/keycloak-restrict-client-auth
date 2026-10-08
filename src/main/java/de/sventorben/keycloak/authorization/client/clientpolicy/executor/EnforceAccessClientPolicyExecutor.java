@@ -8,17 +8,25 @@ import org.keycloak.OAuth2Constants;
 import org.keycloak.OAuthErrorException;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
+import org.keycloak.models.AuthenticatedClientSessionModel;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.Constants;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
+import org.keycloak.protocol.oidc.grants.ciba.clientpolicy.context.BackchannelTokenResponseContext;
+import org.keycloak.protocol.oidc.grants.device.clientpolicy.context.DeviceTokenResponseContext;
 import org.keycloak.representations.RefreshToken;
 import org.keycloak.services.clientpolicy.ClientPolicyContext;
+import org.keycloak.services.clientpolicy.ClientPolicyEvent;
 import org.keycloak.services.clientpolicy.ClientPolicyException;
+import org.keycloak.services.clientpolicy.context.ImplicitHybridTokenResponse;
+import org.keycloak.services.clientpolicy.context.JWTAuthorizationGrantResponseContext;
+import org.keycloak.services.clientpolicy.context.ResourceOwnerPasswordCredentialsResponseContext;
 import org.keycloak.services.clientpolicy.context.TokenExchangeResponseContext;
 import org.keycloak.services.clientpolicy.context.TokenRefreshResponseContext;
+import org.keycloak.services.clientpolicy.context.TokenResponseContext;
 import org.keycloak.services.clientpolicy.executor.ClientPolicyExecutorProvider;
 import org.keycloak.util.TokenUtil;
 
@@ -32,6 +40,8 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
     private static final Logger LOG = Logger.getLogger(EnforceAccessClientPolicyExecutor.class);
 
     static final String PROVIDER_ID = "restrict-client-auth-enforce";
+
+    private static final String ACCESS_DENIED_MESSAGE = "Access to client is denied.";
 
     private final KeycloakSession keycloakSession;
     private final AccessProviderResolver accessProviderResolver;
@@ -56,12 +66,15 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
             case TOKEN_EXCHANGE_RESPONSE:
                 enforceOnExchange((TokenExchangeResponseContext) context);
                 break;
+            default:
+                enforceOnTokenResponse(context);
+                break;
         }
     }
 
     private void enforceOnRefresh(TokenRefreshResponseContext context) throws ClientPolicyException {
         if (!isPermitted(keycloakSession.getContext().getClient(), getUser(context))) {
-            throw new ClientPolicyException(OAuthErrorException.INVALID_GRANT, "Access to client is denied.");
+            throw new ClientPolicyException(OAuthErrorException.INVALID_GRANT, ACCESS_DENIED_MESSAGE);
         }
     }
 
@@ -78,8 +91,50 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
         for (ClientModel client : clients) {
             if (!isPermitted(client, user)) {
                 throw new ClientPolicyException(OAuthErrorException.ACCESS_DENIED,
-                    "Access to client is denied.", Response.Status.FORBIDDEN);
+                    ACCESS_DENIED_MESSAGE, Response.Status.FORBIDDEN);
             }
+        }
+    }
+
+    private void enforceOnTokenResponse(ClientPolicyContext context) throws ClientPolicyException {
+        AuthenticatedClientSessionModel clientSession = getClientSession(context);
+        if (clientSession == null) {
+            return;
+        }
+        if (!isPermitted(clientSession.getClient(), clientSession.getUserSession().getUser())) {
+            throw new ClientPolicyException(getError(context.getEvent()), ACCESS_DENIED_MESSAGE);
+        }
+    }
+
+    // Use the getters of the concrete context classes, since older Keycloak versions lack a common base class.
+    private static AuthenticatedClientSessionModel getClientSession(ClientPolicyContext context) {
+        switch (context.getEvent()) {
+            case TOKEN_RESPONSE:
+                return ((TokenResponseContext) context).getClientSessionContext().getClientSession();
+            case RESOURCE_OWNER_PASSWORD_CREDENTIALS_RESPONSE:
+                return ((ResourceOwnerPasswordCredentialsResponseContext) context).getClientSessionContext()
+                    .getClientSession();
+            case JWT_AUTHORIZATION_GRANT_RESPONSE:
+                return ((JWTAuthorizationGrantResponseContext) context).getClientSessionContext().getClientSession();
+            case DEVICE_TOKEN_RESPONSE:
+                return ((DeviceTokenResponseContext) context).getClientSession();
+            case BACKCHANNEL_TOKEN_RESPONSE:
+                return ((BackchannelTokenResponseContext) context).getClientSessionContext().getClientSession();
+            case IMPLICIT_HYBRID_TOKEN_RESPONSE:
+                return ((ImplicitHybridTokenResponse) context).getClientSessionContext().getClientSession();
+            default:
+                return null;
+        }
+    }
+
+    private static String getError(ClientPolicyEvent event) {
+        switch (event) {
+            case DEVICE_TOKEN_RESPONSE:
+            case BACKCHANNEL_TOKEN_RESPONSE:
+            case IMPLICIT_HYBRID_TOKEN_RESPONSE:
+                return OAuthErrorException.ACCESS_DENIED;
+            default:
+                return OAuthErrorException.INVALID_GRANT;
         }
     }
 

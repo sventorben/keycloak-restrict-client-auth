@@ -32,15 +32,30 @@ class TokenEndpoint {
 
     AccessTokenResponse grantToken(String username, String password, String client, String scope)
         throws IOException, InterruptedException {
+        HttpResponse<String> response = passwordGrant(username, password, client, scope);
+        assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
+        return JsonSerialization.readValue(response.body(), AccessTokenResponse.class);
+    }
+
+    HttpResponse<String> passwordGrant(String username, String password, String client, String scope)
+        throws IOException, InterruptedException {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("grant_type", "password");
         params.put("client_id", client);
         params.put("username", username);
         params.put("password", password);
         params.put("scope", scope);
-        HttpResponse<String> response = post(params);
-        assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
-        return JsonSerialization.readValue(response.body(), AccessTokenResponse.class);
+        return post(params);
+    }
+
+    HttpResponse<String> exchangeCode(String client, String code, String redirectUri)
+        throws IOException, InterruptedException {
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("grant_type", "authorization_code");
+        params.put("client_id", client);
+        params.put("code", code);
+        params.put("redirect_uri", redirectUri);
+        return post(params);
     }
 
     HttpResponse<String> refresh(String client, String refreshToken) throws IOException, InterruptedException {
