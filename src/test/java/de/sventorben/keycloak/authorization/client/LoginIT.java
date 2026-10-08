@@ -10,7 +10,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.AuthenticationManagementResource;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.AuthenticatorConfigRepresentation;
+import org.keycloak.representations.idm.authorization.DecisionStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
@@ -93,6 +95,30 @@ class LoginIT {
             try (Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
                 CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY)) {
                 assertThat(keycloak.tokenManager().grantToken()).isNotNull();
+            }
+        }
+
+        @Test
+        void accessForUserWithRoleIsDeniedIfAnotherPolicyDeniesAndDecisionStrategyIsUnanimous() {
+            assertThatThrownBy(() -> grantTokenWithDenyingPolicy(DecisionStrategy.UNANIMOUS))
+                .isInstanceOf(NotAuthorizedException.class);
+        }
+
+        @Test
+        void accessForUserWithRoleIsAllowedIfAnotherPolicyDeniesAndDecisionStrategyIsAffirmative() {
+            assertThat(grantTokenWithDenyingPolicy(DecisionStrategy.AFFIRMATIVE)).isNotNull();
+        }
+
+        private AccessTokenResponse grantTokenWithDenyingPolicy(DecisionStrategy decisionStrategy) {
+            try (Keycloak admin = keycloakAdmin()) {
+                ClientResourcePermission permission = new ClientResourcePermission(admin);
+                permission.addDenyingPolicy(decisionStrategy);
+                try (Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
+                    CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY)) {
+                    return keycloak.tokenManager().grantToken();
+                } finally {
+                    permission.removeDenyingPolicy();
+                }
             }
         }
     }
