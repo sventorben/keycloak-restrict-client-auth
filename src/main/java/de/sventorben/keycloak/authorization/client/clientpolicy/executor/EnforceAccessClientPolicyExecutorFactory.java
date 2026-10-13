@@ -24,6 +24,14 @@ public class EnforceAccessClientPolicyExecutorFactory implements ClientPolicyExe
 
     private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = ProviderConfigurationBuilder.create()
         .property(ACCESS_PROVIDER_ID_PROPERTY)
+        .property()
+        .name(EnforceAccessClientPolicyExecutorConfiguration.CHECK_AUDIENCE)
+        .label("Check audience")
+        .helpText("If enabled, access is also checked for all clients in the audience of the access token. "
+            + "Tokens are denied if the user does not have access to any of them.")
+        .type(ProviderConfigProperty.BOOLEAN_TYPE)
+        .defaultValue(false)
+        .add()
         .build();
 
     @Override

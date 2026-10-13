@@ -15,9 +15,13 @@ import java.util.Map;
 class EnforceAccessPolicy {
 
     static void enable(RealmResource realm) {
+        enable(realm, Map.of("accessProviderId", "client-role"));
+    }
+
+    static void enable(RealmResource realm, Map<String, Object> executorConfiguration) {
         ClientPolicyExecutorRepresentation executor = new ClientPolicyExecutorRepresentation();
         executor.setExecutorProviderId("restrict-client-auth-enforce");
-        executor.setConfiguration(RawJsonValue.of(Map.of("accessProviderId", "client-role")));
+        executor.setConfiguration(RawJsonValue.of(executorConfiguration));
         ClientProfileRepresentation profile = new ClientProfileRepresentation();
         profile.setName("Enforce restricted access");
         profile.setExecutors(List.of(executor));

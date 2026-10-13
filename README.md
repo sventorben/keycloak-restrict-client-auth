@@ -237,6 +237,10 @@ Tokens for service accounts (client credentials grant) are not checked. SAML cli
 
 The executor can be configured with the access provider to use, just like the authenticator.
 
+By default, the executor checks access to the client the tokens are issued for, i.e. the authorized party (`azp`), and, for token exchange, to the requested audience.
+Access tokens may contain further clients in their audience (`aud`), e.g. added by audience mappers or because the user has roles of these clients.
+Enable the `Check audience` option (`checkAudience`) to also check access to all clients in the audience of the access token. Tokens are denied if the user does not have access to any of them. Audience values that are no client IDs of the realm are ignored.
+
 To enable the executor:
 1) Create a client profile and add the `restrict-client-auth-enforce` executor to it.
 2) Create a client policy with the `any-client` condition and add the client profile to it.
@@ -260,7 +264,7 @@ And further it is very clear about the enforcement by the client:
 
 So, by design this extension cannot be a PEP.
 
-What this extension supports you with is authorization decision-making and communicating the outcome to the user during login flow. If configured correctly, it will prevent issuance of tokens that contain an audience or authorized party claim for a client that users do not have access to.
+What this extension supports you with is authorization decision-making and communicating the outcome to the user during login flow. If configured correctly, it will prevent issuance of tokens that contain an authorized party claim for a client that users do not have access to. To also prevent issuance of tokens that contain such a client in their audience, enable the `Check audience` option of the `restrict-client-auth-enforce` [client policy executor](#executors).
 
 Token issuance or non-issuance is (beside claims in the token) just one way to communicate the outcome of authorization decision-making. It is not enforcement of the decision.
 

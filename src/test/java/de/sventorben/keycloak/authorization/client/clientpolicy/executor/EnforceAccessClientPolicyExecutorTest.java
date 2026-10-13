@@ -1,5 +1,6 @@
 package de.sventorben.keycloak.authorization.client.clientpolicy.executor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
 import jakarta.ws.rs.core.MultivaluedHashMap;
@@ -25,8 +26,10 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
 import org.keycloak.models.UserSessionProvider;
+import org.keycloak.protocol.oidc.TokenManager;
 import org.keycloak.protocol.oidc.grants.ciba.clientpolicy.context.BackchannelTokenResponseContext;
 import org.keycloak.protocol.oidc.grants.device.clientpolicy.context.DeviceTokenResponseContext;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.services.clientpolicy.ClientPolicyContext;
 import org.keycloak.services.clientpolicy.ClientPolicyEvent;
 import org.keycloak.services.clientpolicy.ClientPolicyException;
@@ -56,6 +59,8 @@ import static org.keycloak.services.clientpolicy.ClientPolicyEvent.TOKEN_RESPONS
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
@@ -329,6 +334,96 @@ class EnforceAccessClientPolicyExecutorTest {
                     .willReturn(clientSessionContext);
                 given(clientSessionContext.getClientSession()).willReturn(clientSession);
             }
+            return context;
+        }
+    }
+
+    @Nested
+    class Audience {
+
+        private static final String AUDIENCE = "audience-client";
+
+        @Mock
+        ClientSessionContext clientSessionContext;
+
+        @Mock
+        AuthenticatedClientSessionModel clientSession;
+
+        @Mock
+        UserSessionModel userSession;
+
+        @Mock
+        ClientModel client;
+
+        @Mock
+        ClientModel audienceClient;
+
+        @Mock
+        UserModel user;
+
+        @Mock
+        TokenManager.AccessTokenResponseBuilder responseBuilder;
+
+        @BeforeEach
+        void setUp() {
+            given(clientSessionContext.getClientSession()).willReturn(clientSession);
+            given(clientSession.getClient()).willReturn(client);
+            given(clientSession.getUserSession()).willReturn(userSession);
+            given(userSession.getUser()).willReturn(user);
+            given(accessProvider.isRestricted(client)).willReturn(false);
+        }
+
+        @Test
+        void ignoresAudienceByDefault() {
+            assertThatCode(() -> cut.executeOnEvent(tokenResponse())).doesNotThrowAnyException();
+            verify(responseBuilder, never()).getAccessToken();
+        }
+
+        @Test
+        void deniesTokenIfUserHasNoAccessToClientInAudience(@Mock KeycloakContext keycloakContext,
+                                                            @Mock RealmModel realm) {
+            givenAudienceClient(keycloakContext, realm, audienceClient);
+            given(accessProvider.isRestricted(audienceClient)).willReturn(true);
+            given(accessProvider.isPermitted(audienceClient, user)).willReturn(false);
+
+            assertThatThrownBy(() -> cut.executeOnEvent(tokenResponse()))
+                .isInstanceOf(ClientPolicyException.class)
+                .hasFieldOrPropertyWithValue("error", OAuthErrorException.INVALID_GRANT);
+        }
+
+        @Test
+        void allowsTokenIfUserHasAccessToClientInAudience(@Mock KeycloakContext keycloakContext,
+                                                          @Mock RealmModel realm) {
+            givenAudienceClient(keycloakContext, realm, audienceClient);
+            given(accessProvider.isRestricted(audienceClient)).willReturn(true);
+            given(accessProvider.isPermitted(audienceClient, user)).willReturn(true);
+
+            assertThatCode(() -> cut.executeOnEvent(tokenResponse())).doesNotThrowAnyException();
+        }
+
+        @Test
+        void ignoresAudienceThatIsNoClient(@Mock KeycloakContext keycloakContext, @Mock RealmModel realm) {
+            givenAudienceClient(keycloakContext, realm, null);
+
+            assertThatCode(() -> cut.executeOnEvent(tokenResponse())).doesNotThrowAnyException();
+        }
+
+        private void givenAudienceClient(KeycloakContext keycloakContext, RealmModel realm, ClientModel client) {
+            cut.setupConfiguration(new ObjectMapper().convertValue(Map.of("checkAudience", true),
+                EnforceAccessClientPolicyExecutorConfiguration.class));
+            AccessToken accessToken = new AccessToken();
+            accessToken.audience(AUDIENCE);
+            given(responseBuilder.getAccessToken()).willReturn(accessToken);
+            given(keycloakSession.getContext()).willReturn(keycloakContext);
+            given(keycloakContext.getRealm()).willReturn(realm);
+            given(realm.getClientByClientId(AUDIENCE)).willReturn(client);
+        }
+
+        private ClientPolicyContext tokenResponse() {
+            TokenResponseContext context = mock(TokenResponseContext.class);
+            given(context.getEvent()).willReturn(TOKEN_RESPONSE);
+            given(context.getClientSessionContext()).willReturn(clientSessionContext);
+            given(context.getAccessTokenResponseBuilder()).willReturn(responseBuilder);
             return context;
         }
     }
