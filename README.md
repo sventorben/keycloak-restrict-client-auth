@@ -204,11 +204,111 @@ To enable the required action:
 1) Go to `Authentication` and choose the `Required actions` tab.
 2) Enable `Restrict user authentication on clients`.
 3) Keep it at the bottom of the list, so that other required actions run first. Keycloak puts newly enabled required actions at the bottom by default.
-4) Optionally, configure the access provider and error message just like for the authenticator.
+4) Optionally, configure the [realm settings](#realm-settings) and the error message.
 
 Please note:
 * Applications cannot initiate the required action via the `kc_action` parameter.
 * For the resource owner password credentials grant (direct access grant), Keycloak denies access with an `Account is not fully set up` error instead. Add the authenticator to the direct grant flow or use the `restrict-client-auth-enforce` [client policy executor](#executors) for a dedicated error.
+
+### Realm settings
+
+The configuration of the required action also holds settings for the whole realm.
+`Deny access by default` and `Default access role` apply to all enforcement points of the realm: the authenticator, the required action, and the `restrict-client-auth-enforce` and `restrict-client-auth-auto-config` [client policy executors](#executors).
+They apply even if the required action is disabled. It only has to be registered.
+
+| Setting | Key | Applies to | Description |
+|---|---|---|---|
+| Error message | `restrictClientAuthErrorMessage` | Required action | The error message shown by the required action, see [Using a custom error message](#using-a-custom-error-message). |
+| Access Provider | `accessProviderId` | Required action | The access provider used by the required action. Authenticators and client policy executors are configured with their own access provider. |
+| Deny access by default | `defaultDeny` | Whole realm | If enabled, all clients of the realm are restricted. See [Denying access by default](#denying-access-by-default). |
+| Default access role | `defaultAccessRole` | Whole realm | If access is denied by default, users with this role may access all clients that are not restricted by the access provider. Use the role name for realm roles and `client-id.role-name` for client roles. |
+
+Without these settings, the extension behaves exactly as before.
+
+If the default access role does not exist, access to clients that are not restricted by the access provider is denied and a warning is logged.
+
+#### Configuring realm settings in the admin console
+
+1) Go to `Authentication` and choose the `Required actions` tab.
+2) If `Restrict user authentication on clients` is not registered yet, enable it. If you only want to use the realm settings, disable it again afterwards.
+3) Choose the gear icon of `Restrict user authentication on clients` and configure the settings.
+
+The admin console validates the settings when saving. Access providers and default access roles that do not exist are rejected.
+
+#### Configuring realm settings via the admin REST API
+
+```shell
+# Register the required action, if not registered yet
+curl -X POST "$KEYCLOAK_URL/admin/realms/$REALM/authentication/register-required-action" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"providerId": "restrict-client-auth-enforce", "name": "Restrict user authentication on clients"}'
+
+# Configure the realm settings
+curl -X PUT "$KEYCLOAK_URL/admin/realms/$REALM/authentication/required-actions/restrict-client-auth-enforce/config" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"config": {"accessProviderId": "client-role", "defaultDeny": "true", "defaultAccessRole": "default-access"}}'
+```
+
+The `config` endpoint validates the settings and responds with `400 Bad Request` if an access provider or default access role does not exist.
+
+#### Configuring realm settings via Terraform
+
+Use the `keycloak_required_action` resource of the [Keycloak Terraform provider](https://registry.terraform.io/providers/keycloak/keycloak/latest/docs/resources/required_action):
+
+```hcl
+resource "keycloak_required_action" "restrict_client_auth" {
+  realm_id = keycloak_realm.realm.realm
+  alias    = "restrict-client-auth-enforce"
+  name     = "Restrict user authentication on clients"
+  enabled  = true
+  config = {
+    accessProviderId  = "client-role"
+    defaultDeny       = "true"
+    defaultAccessRole = "default-access"
+  }
+}
+```
+
+#### Realm export and import
+
+The realm settings are part of the required action in the realm representation and hence part of realm exports and imports, e.g. with [keycloak-config-cli](https://github.com/adorsys/keycloak-config-cli):
+
+```json
+"requiredActions": [
+  {
+    "alias": "restrict-client-auth-enforce",
+    "name": "Restrict user authentication on clients",
+    "providerId": "restrict-client-auth-enforce",
+    "enabled": true,
+    "config": {
+      "accessProviderId": "client-role",
+      "defaultDeny": "true",
+      "defaultAccessRole": "default-access"
+    }
+  }
+]
+```
+
+> ⚠️ **Validation**: Keycloak only validates the realm settings when they are saved via the admin console or the `config` endpoint. Settings applied via Terraform, which uses the required action endpoint, or via realm import are not validated. Invalid settings deny access at runtime and are logged as warnings, so check the logs after applying them.
+
+### Denying access by default
+
+By default, only restricted clients restrict access, i.e. clients that have the client role (client role based mode) or the resource (resource policy based mode). All other clients are accessible to all users. If you forget to restrict a client, e.g. when introducing a new user pool, all users can access it.
+
+If you enable `Deny access by default` in the realm settings, all clients of the realm are restricted:
+* Access to clients that are restricted by the access provider is decided as usual.
+* Access to all other clients is only permitted for users with the default access role. If no default access role is set, access to these clients is denied.
+* If the access provider of an authenticator, the required action, or a client policy executor does not exist, it denies access to all clients.
+
+Each authenticator, the required action, and each client policy executor applies this to its own access provider. If you use different access providers in the same realm, e.g. client roles for public clients and policies for confidential clients in different flows, keep in mind that the required action and each client policy executor only use one access provider. Clients that are restricted by another access provider are not restricted for them, i.e. only users with the default access role may access these clients via the required action or executor.
+
+For example, assign the default access role to your existing users via a group. They keep access to all existing clients. Users without the role, e.g. users of a new user pool, may only access clients that are restricted and that they have been granted access to. If you forget to restrict a client, users without the default access role cannot access it.
+
+Do not add the default access role to the realm's default roles, since all new users get these roles.
+
+> ⚠️ **Built-in clients**:
+>
+> Denying access by default also applies to Keycloak's built-in clients, e.g. `account-console`. In the admin realm (`master` by default), it also applies to `security-admin-console` and `admin-cli`. Make sure that administrators can still access the admin console and admin REST API before denying access by default in the admin realm. Keycloak logs a warning if access is denied by default in the admin realm.
 
 ## Client Policy support
 
@@ -284,6 +384,20 @@ Refreshing or exchanging tokens does not run any authentication flow at all. If 
 
 #### Identity Provider redirects
 To ensure proper enforcement of authorization checks when using identity provider redirects in your authentication flow (e.g., with the Identity Provider Redirector, organization feature, or Home IDP Discovery Extension), Keycloak does not automatically execute subsequent steps after the redirect. You must configure a post-login flow for the identity provider to apply the necessary checks. For detailed steps, refer to [Configuring Post-Authentication Flows for Identity Provider Redirects](#configuring-post-authentication-flows-for-identity-provider-redirects).
+
+### Permissions to change access
+
+Keycloak's [fine-grained admin permissions](https://www.keycloak.org/docs/latest/server_admin/#_fine_grained_permissions) control who may change which part of the access control:
+
+| What | Required permission |
+|---|---|
+| Change the [realm settings](#realm-settings) | Realm role `manage-realm` of the `realm-management` client. Fine-grained admin permissions do not cover realm settings. |
+| Restrict a client or remove the restriction, i.e. create or delete the client role or the resource | `manage` on the client |
+| Grant a user access to a restricted client via the client role | `map-roles` on the user and `map-role` on the client role |
+| Grant access via a group | `manage-membership` on the group |
+| Grant the default access role, i.e. access to all clients that are not restricted | `map-role` on the default access role. Restrict this permission to as few administrators as possible. |
+
+Without [denying access by default](#denying-access-by-default), administrators who may manage a client can remove its restriction and thereby grant access to all users. If access is denied by default, removing the restriction only grants access to users with the default access role.
 
 ### Disable the `Audience Resolve` mapper if necessary
 The [`Audience Resolve` protocol mapper](https://www.keycloak.org/docs/latest/server_admin/#_audience_resolve) is enabled by default by client scope `roles`, but it may be necessary to remove it in some cases.
