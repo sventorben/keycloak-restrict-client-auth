@@ -34,6 +34,7 @@ public final class AutoAccessProvider implements AccessProvider {
         List<AccessProvider> restrictingAccessProviders = otherAccessProviders().stream()
             .filter(it -> it.isRestricted(client))
             .collect(Collectors.toList());
+        // deny access to clients no access provider restricts, as required by the contract of isPermitted
         return !restrictingAccessProviders.isEmpty()
             && restrictingAccessProviders.stream().allMatch(it -> it.isPermitted(client, user));
     }
