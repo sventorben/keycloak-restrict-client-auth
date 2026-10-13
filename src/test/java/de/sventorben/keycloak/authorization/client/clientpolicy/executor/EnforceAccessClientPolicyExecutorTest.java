@@ -83,7 +83,7 @@ class EnforceAccessClientPolicyExecutorTest {
 
     @BeforeEach
     void setUp() {
-        given(accessProviderResolver.resolve("client-role", "restrict-client-auth-enforce")).willReturn(accessProvider);
+        given(accessProviderResolver.resolve("auto", "restrict-client-auth-enforce")).willReturn(accessProvider);
         cut.setupConfiguration(null);
     }
 

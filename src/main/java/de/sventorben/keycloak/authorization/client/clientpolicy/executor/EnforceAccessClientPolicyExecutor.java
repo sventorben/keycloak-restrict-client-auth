@@ -2,6 +2,7 @@ package de.sventorben.keycloak.authorization.client.clientpolicy.executor;
 
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
+import de.sventorben.keycloak.authorization.client.access.auto.AutoAccessProviderFactory;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.keycloak.OAuth2Constants;
@@ -221,8 +222,8 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
     @Override
     public void setupConfiguration(EnforceAccessClientPolicyExecutorConfiguration config) {
         EnforceAccessClientPolicyExecutorConfiguration configuration = Objects.requireNonNullElseGet(config,
-            EnforceAccessClientPolicyExecutorConfiguration::new).parseWithDefaultValues();
-        accessProvider = accessProviderResolver.resolve(configuration.getAccessProviderId(), PROVIDER_ID);
+            EnforceAccessClientPolicyExecutorConfiguration::new);
+        accessProvider = accessProviderResolver.resolve(AutoAccessProviderFactory.PROVIDER_ID, PROVIDER_ID);
         checkAudience = configuration.isCheckAudience();
     }
 

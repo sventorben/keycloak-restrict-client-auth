@@ -2,6 +2,7 @@ package de.sventorben.keycloak.authorization.client;
 
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
+import de.sventorben.keycloak.authorization.client.access.auto.AutoAccessProviderFactory;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.authentication.InitiatedActionSupport;
 import org.keycloak.authentication.RequiredActionContext;
@@ -51,7 +52,7 @@ final class RestrictClientAuthRequiredAction implements RequiredActionProvider {
     private boolean isPermitted(RequiredActionContext context) {
         final RestrictClientAuthConfig config = new RestrictClientAuthConfig(context.getConfig());
         final AccessProvider access = accessProviderResolver.resolve(
-            config.getAccessProviderId(), config.getAuthenticatorConfigAlias());
+            AutoAccessProviderFactory.PROVIDER_ID, config.getAuthenticatorConfigAlias());
         final ClientModel client = context.getAuthenticationSession().getClient();
         return !access.isRestricted(client) || access.isPermitted(client, context.getUser());
     }

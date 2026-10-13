@@ -5,7 +5,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RequiredActionProviderSimpleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
@@ -53,6 +55,7 @@ class RequiredActionIT {
             requiredAction.setProviderId("restrict-client-auth-enforce");
             requiredAction.setName("Restrict user authentication on clients");
             admin.realm(REALM_TEST).flows().registerRequiredAction(requiredAction);
+            allowRedirectsOfUnrestrictedClient(admin.realm(REALM_TEST));
         }
     }
 
@@ -81,13 +84,10 @@ class RequiredActionIT {
         assertDenied(response);
     }
 
-    /**
-     * The client restricted by policy is not restricted when using the default 'client-role' access provider.
-     */
     @Test
     void singleSignOnForUserWithoutAccessIsDenied() throws Exception {
         BrowserLogin browser = new BrowserLogin(KEYCLOAK_AUTH_URL);
-        browser.authorizationCode(CLIENT_TEST_RESTRICTED_BY_POLICY, REDIRECT_URI,
+        browser.authorizationCode(CLIENT_TEST_UNRESTRICTED, REDIRECT_URI,
             USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED);
 
         HttpResponse<String> response = browser.authorize(CLIENT_TEST_RESTRICTED, REDIRECT_URI);
@@ -106,6 +106,22 @@ class RequiredActionIT {
             Map.of("password-new", PASS_TEST_RESTRICTED, "password-confirm", PASS_TEST_RESTRICTED));
 
         assertDenied(response);
+    }
+
+    @Test
+    void loginToClientRestrictedByPolicyForUserWithoutPermissionIsDenied() throws Exception {
+        BrowserLogin browser = new BrowserLogin(KEYCLOAK_AUTH_URL);
+
+        HttpResponse<String> response = browser.login(browser.authorize(CLIENT_TEST_RESTRICTED_BY_POLICY, REDIRECT_URI),
+            USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED);
+
+        assertDenied(response);
+    }
+
+    private static void allowRedirectsOfUnrestrictedClient(RealmResource testRealm) {
+        ClientRepresentation client = testRealm.clients().findByClientId(CLIENT_TEST_UNRESTRICTED).get(0);
+        client.setRedirectUris(List.of(REDIRECT_URI));
+        testRealm.clients().get(client.getId()).update(client);
     }
 
     private static void assertDenied(HttpResponse<String> response) {

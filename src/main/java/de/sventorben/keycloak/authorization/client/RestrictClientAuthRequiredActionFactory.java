@@ -1,6 +1,5 @@
 package de.sventorben.keycloak.authorization.client;
 
-import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
 import de.sventorben.keycloak.authorization.client.access.RealmSettings;
 import de.sventorben.keycloak.authorization.client.common.OperationalInfo;
@@ -13,7 +12,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.RequiredActionConfigModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.provider.ProviderConfigProperty;
-import org.keycloak.provider.ProviderFactory;
 import org.keycloak.provider.ServerInfoAwareProviderFactory;
 import org.keycloak.userprofile.ValidationException;
 import org.keycloak.validate.ValidationError;
@@ -21,7 +19,6 @@ import org.keycloak.validate.ValidationError;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class RestrictClientAuthRequiredActionFactory implements RequiredActionFactory, ServerInfoAwareProviderFactory {
 
@@ -41,16 +38,7 @@ public final class RestrictClientAuthRequiredActionFactory implements RequiredAc
     public void validateConfig(KeycloakSession session, RealmModel realm, RequiredActionConfigModel model) {
         RequiredActionFactory.super.validateConfig(session, realm, model);
         Map<String, String> config = Optional.ofNullable(model.getConfig()).orElse(Map.of());
-        validateAccessProvider(session, config.get(RestrictClientAuthConfig.ACCESS_PROVIDER_ID));
         validateDefaultAccessRole(realm, config.get(RealmSettings.DEFAULT_ACCESS_ROLE));
-    }
-
-    private void validateAccessProvider(KeycloakSession session, String accessProviderId) {
-        if (accessProviderId != null
-            && session.getKeycloakSessionFactory().getProviderFactory(AccessProvider.class, accessProviderId) == null) {
-            throw new ValidationException(new ValidationError(getId(), RestrictClientAuthConfig.ACCESS_PROVIDER_ID,
-                "Access provider '" + accessProviderId + "' does not exist."));
-        }
     }
 
     private void validateDefaultAccessRole(RealmModel realm, String defaultAccessRole) {
@@ -71,10 +59,6 @@ public final class RestrictClientAuthRequiredActionFactory implements RequiredAc
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
-        RestrictClientAuthConfigProperties.ACCESS_PROVIDER_ID_PROPERTY.setOptions(
-            factory.getProviderFactoriesStream(AccessProvider.class)
-                .map(ProviderFactory::getId)
-                .collect(Collectors.toList()));
     }
 
     @Override
