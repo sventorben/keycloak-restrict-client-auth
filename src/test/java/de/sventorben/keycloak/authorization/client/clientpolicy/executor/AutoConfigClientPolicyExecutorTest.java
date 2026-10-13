@@ -1,8 +1,10 @@
 package de.sventorben.keycloak.authorization.client.clientpolicy.executor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -14,6 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mock.Strictness.LENIENT;
 import static org.mockito.Mockito.never;
@@ -76,6 +81,21 @@ class AutoConfigClientPolicyExecutorTest {
             }
         });
         verify(accessProvider, never()).enableFor(targetClient);
+    }
+
+    @Test
+    void rejectsAutoAccessProvider() {
+        assertThat(configuration("auto").validateConfig()).isFalse();
+    }
+
+    @Test
+    void acceptsOtherAccessProviders() {
+        assertThat(configuration("client-role").validateConfig()).isTrue();
+    }
+
+    private static AutoConfigClientPolicyExecutorConfiguration configuration(String accessProviderId) {
+        return new ObjectMapper().convertValue(Map.of("accessProviderId", accessProviderId),
+            AutoConfigClientPolicyExecutorConfiguration.class);
     }
 
 }

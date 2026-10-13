@@ -141,6 +141,18 @@ For details on SPI and provider configuration, please refer to [Configuring prov
 7) Click `Create Permission` to add permissions and policies (see [Authorization Services Guide](https://www.keycloak.org/docs/latest/authorization_services/#_permission_overview) for details)
 8) Afterwards, no user can authenticate to this client unless permissions have been granted by configured policies.
 
+### Automatic mode
+
+If you use both modes in the same realm, select the access provider `auto`. For example, use client roles for public clients and policies for confidential clients, since Keycloak does not allow authorization services for public clients.
+
+The `auto` access provider determines per client which restriction applies:
+* A client is restricted if any installed access provider restricts it, e.g. if it has the client role or the resource.
+* Access is only permitted if all access providers that restrict the client permit it.
+
+`auto` considers all installed access providers, including custom ones. Select it for the authenticator, the [required action](#required-action-support), or the `restrict-client-auth-enforce` [client policy executor](#executors). The default access provider remains `client-role`.
+
+The `restrict-client-auth-auto-config` client policy executor does not support `auto`, since it needs to know how to restrict access to a client.
+
 ### Using a custom error message
 
 If a user tries to log in via a browser-based flow and access gets denied by the authenticator, a custom error message can be displayed.
