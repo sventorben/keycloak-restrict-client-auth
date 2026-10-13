@@ -15,8 +15,10 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
+import org.keycloak.protocol.oidc.TokenManager;
 import org.keycloak.protocol.oidc.grants.ciba.clientpolicy.context.BackchannelTokenResponseContext;
 import org.keycloak.protocol.oidc.grants.device.clientpolicy.context.DeviceTokenResponseContext;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.RefreshToken;
 import org.keycloak.services.clientpolicy.ClientPolicyContext;
 import org.keycloak.services.clientpolicy.ClientPolicyEvent;
@@ -34,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<EnforceAccessClientPolicyExecutorConfiguration> {
 
@@ -46,6 +50,7 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
     private final KeycloakSession keycloakSession;
     private final AccessProviderResolver accessProviderResolver;
     private AccessProvider accessProvider;
+    private boolean checkAudience;
 
     EnforceAccessClientPolicyExecutor(KeycloakSession keycloakSession, AccessProviderResolver accessProviderResolver) {
         this.keycloakSession = keycloakSession;
@@ -73,7 +78,8 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
     }
 
     private void enforceOnRefresh(TokenRefreshResponseContext context) throws ClientPolicyException {
-        if (!isPermitted(keycloakSession.getContext().getClient(), getUser(context))) {
+        if (!isPermitted(List.of(keycloakSession.getContext().getClient()), getUser(context),
+            context.getAccessTokenResponseBuilder())) {
             throw new ClientPolicyException(OAuthErrorException.INVALID_GRANT, ACCESS_DENIED_MESSAGE);
         }
     }
@@ -88,40 +94,58 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
             clients.addAll(Arrays.asList(audienceClients));
         }
 
-        for (ClientModel client : clients) {
-            if (!isPermitted(client, user)) {
-                throw new ClientPolicyException(OAuthErrorException.ACCESS_DENIED,
-                    ACCESS_DENIED_MESSAGE, Response.Status.FORBIDDEN);
-            }
+        if (!isPermitted(clients, user, context.getAccessTokenResponseBuilder())) {
+            throw new ClientPolicyException(OAuthErrorException.ACCESS_DENIED,
+                ACCESS_DENIED_MESSAGE, Response.Status.FORBIDDEN);
         }
     }
 
     private void enforceOnTokenResponse(ClientPolicyContext context) throws ClientPolicyException {
-        AuthenticatedClientSessionModel clientSession = getClientSession(context);
-        if (clientSession == null) {
+        IssuedToken issuedToken = getIssuedToken(context);
+        if (issuedToken == null) {
             return;
         }
-        if (!isPermitted(clientSession.getClient(), clientSession.getUserSession().getUser())) {
+        AuthenticatedClientSessionModel clientSession = issuedToken.clientSession();
+        if (!isPermitted(List.of(clientSession.getClient()), clientSession.getUserSession().getUser(),
+            issuedToken.responseBuilder())) {
             throw new ClientPolicyException(getError(context.getEvent()), ACCESS_DENIED_MESSAGE);
         }
     }
 
     // Use the getters of the concrete context classes, since older Keycloak versions lack a common base class.
-    private static AuthenticatedClientSessionModel getClientSession(ClientPolicyContext context) {
+    private static IssuedToken getIssuedToken(ClientPolicyContext context) {
         switch (context.getEvent()) {
-            case TOKEN_RESPONSE:
-                return ((TokenResponseContext) context).getClientSessionContext().getClientSession();
-            case RESOURCE_OWNER_PASSWORD_CREDENTIALS_RESPONSE:
-                return ((ResourceOwnerPasswordCredentialsResponseContext) context).getClientSessionContext()
-                    .getClientSession();
-            case JWT_AUTHORIZATION_GRANT_RESPONSE:
-                return ((JWTAuthorizationGrantResponseContext) context).getClientSessionContext().getClientSession();
-            case DEVICE_TOKEN_RESPONSE:
-                return ((DeviceTokenResponseContext) context).getClientSession();
-            case BACKCHANNEL_TOKEN_RESPONSE:
-                return ((BackchannelTokenResponseContext) context).getClientSessionContext().getClientSession();
-            case IMPLICIT_HYBRID_TOKEN_RESPONSE:
-                return ((ImplicitHybridTokenResponse) context).getClientSessionContext().getClientSession();
+            case TOKEN_RESPONSE: {
+                TokenResponseContext tokenResponse = (TokenResponseContext) context;
+                return new IssuedToken(tokenResponse.getClientSessionContext().getClientSession(),
+                    tokenResponse.getAccessTokenResponseBuilder());
+            }
+            case RESOURCE_OWNER_PASSWORD_CREDENTIALS_RESPONSE: {
+                ResourceOwnerPasswordCredentialsResponseContext passwordResponse =
+                    (ResourceOwnerPasswordCredentialsResponseContext) context;
+                return new IssuedToken(passwordResponse.getClientSessionContext().getClientSession(),
+                    passwordResponse.getAccessTokenResponseBuilder());
+            }
+            case JWT_AUTHORIZATION_GRANT_RESPONSE: {
+                JWTAuthorizationGrantResponseContext jwtResponse = (JWTAuthorizationGrantResponseContext) context;
+                return new IssuedToken(jwtResponse.getClientSessionContext().getClientSession(),
+                    jwtResponse.getAccessTokenResponseBuilder());
+            }
+            case DEVICE_TOKEN_RESPONSE: {
+                DeviceTokenResponseContext deviceResponse = (DeviceTokenResponseContext) context;
+                return new IssuedToken(deviceResponse.getClientSession(),
+                    deviceResponse.getAccessTokenResponseBuilder());
+            }
+            case BACKCHANNEL_TOKEN_RESPONSE: {
+                BackchannelTokenResponseContext backchannelResponse = (BackchannelTokenResponseContext) context;
+                return new IssuedToken(backchannelResponse.getClientSessionContext().getClientSession(),
+                    backchannelResponse.getAccessTokenResponseBuilder());
+            }
+            case IMPLICIT_HYBRID_TOKEN_RESPONSE: {
+                ImplicitHybridTokenResponse implicitResponse = (ImplicitHybridTokenResponse) context;
+                return new IssuedToken(implicitResponse.getClientSessionContext().getClientSession(),
+                    implicitResponse.getAccessTokenResponseBuilder());
+            }
             default:
                 return null;
         }
@@ -136,6 +160,26 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
             default:
                 return OAuthErrorException.INVALID_GRANT;
         }
+    }
+
+    private boolean isPermitted(List<ClientModel> clients, UserModel user,
+                                TokenManager.AccessTokenResponseBuilder responseBuilder) {
+        return Stream.concat(clients.stream(), getAudienceClients(responseBuilder))
+            .allMatch(client -> isPermitted(client, user));
+    }
+
+    private Stream<ClientModel> getAudienceClients(TokenManager.AccessTokenResponseBuilder responseBuilder) {
+        if (!checkAudience) {
+            return Stream.empty();
+        }
+        String[] audience = Optional.ofNullable(responseBuilder)
+            .map(TokenManager.AccessTokenResponseBuilder::getAccessToken)
+            .map(AccessToken::getAudience)
+            .orElse(new String[0]);
+        RealmModel realm = keycloakSession.getContext().getRealm();
+        return Arrays.stream(audience)
+            .map(realm::getClientByClientId)
+            .filter(Objects::nonNull);
     }
 
     private boolean isPermitted(ClientModel client, UserModel user) {
@@ -179,10 +223,15 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
         EnforceAccessClientPolicyExecutorConfiguration configuration = Objects.requireNonNullElseGet(config,
             EnforceAccessClientPolicyExecutorConfiguration::new).parseWithDefaultValues();
         accessProvider = accessProviderResolver.resolve(configuration.getAccessProviderId(), PROVIDER_ID);
+        checkAudience = configuration.isCheckAudience();
     }
 
     @Override
     public String getProviderId() {
         return PROVIDER_ID;
+    }
+
+    private record IssuedToken(AuthenticatedClientSessionModel clientSession,
+                               TokenManager.AccessTokenResponseBuilder responseBuilder) {
     }
 }

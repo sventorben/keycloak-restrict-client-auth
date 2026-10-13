@@ -8,11 +8,20 @@ import static de.sventorben.keycloak.authorization.client.RestrictClientAuthConf
 
 class EnforceAccessClientPolicyExecutorConfiguration extends ClientPolicyExecutorConfigurationRepresentation {
 
+    static final String CHECK_AUDIENCE = "checkAudience";
+
     @JsonProperty(ACCESS_PROVIDER_ID)
     private String accessProviderId;
 
+    @JsonProperty(CHECK_AUDIENCE)
+    private Boolean checkAudience;
+
     String getAccessProviderId() {
         return accessProviderId;
+    }
+
+    boolean isCheckAudience() {
+        return Boolean.TRUE.equals(checkAudience);
     }
 
     public EnforceAccessClientPolicyExecutorConfiguration parseWithDefaultValues() {
