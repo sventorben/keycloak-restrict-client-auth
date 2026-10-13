@@ -71,7 +71,7 @@ class RestrictClientAuthRequiredActionTest {
 
         @BeforeEach
         void setUp() {
-            given(accessProviderResolver.resolve("client-role", null)).willReturn(accessProvider);
+            given(accessProviderResolver.resolve("auto", null)).willReturn(accessProvider);
             given(accessProvider.isRestricted(client)).willReturn(true);
         }
 

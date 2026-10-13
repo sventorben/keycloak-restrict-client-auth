@@ -15,7 +15,7 @@ import java.util.Map;
 class EnforceAccessPolicy {
 
     static void enable(RealmResource realm) {
-        enable(realm, Map.of("accessProviderId", "client-role"));
+        enable(realm, Map.of());
     }
 
     static void enable(RealmResource realm, Map<String, Object> executorConfiguration) {

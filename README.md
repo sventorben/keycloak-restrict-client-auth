@@ -56,6 +56,35 @@ It works like this:
 This means that you can enable the authenticator on a per-client basis by adding a resource named `Keycloak Client Resource` to your client.
 A client with that resource has the authenticator enabled. Users will only be able to authenticate to such a client if the associated policies and permission permit access.
 
+## Restrict clients, not flows
+
+The extension started as an authenticator: access was checked wherever you added it to an authentication flow, using the access provider you configured for it. Every path that did not run through such a flow, e.g. single sign-on, identity provider redirects, password reset, refreshing or exchanging tokens, was not checked.
+
+The extension now follows a different approach: **the restriction belongs to the client, and access is checked on every path.**
+You restrict a client by adding the client role or the resource. You no longer need to make sure that every flow contains the authenticator and that each authenticator uses the right access provider.
+
+| | Authenticator only | Required action and client policy executor |
+|---|---|---|
+| Where restrictions are defined | Per client: client role or resource | Per client: client role or resource |
+| Where access is checked | Only in flows that contain the authenticator | At the end of every login, no matter which flow, and whenever tokens are issued, incl. refresh and token exchange |
+| Which restrictions are checked | Only those of the configured access provider | All restrictions a client has (`auto` access provider) |
+| Configuration | Per flow and per authenticator | Once per realm |
+
+[Denying access by default](#denying-access-by-default) takes this one step further: instead of protecting the clients you restrict, it protects all clients and lets you decide who may access the clients you have not restricted.
+
+This is more secure, but you need to think about access differently:
+* **Restricting a client restricts it everywhere.** If a client has the client role or the resource, users without access cannot get tokens for it anymore, no matter how they log in. Restrictions you only meant for one flow apply to all paths.
+* **Leftovers count.** A `Keycloak Client Resource` without a permission, e.g. from an experiment, denies access to everyone. Remove restrictions you do not use.
+* **Losing access takes effect immediately.** If you remove a user's role, the next token refresh fails, instead of the user keeping access until the session ends.
+
+### Recommended setup
+
+1) Restrict clients by adding the client role or the resource, manually or via the `restrict-client-auth-auto-config` [client policy executor](#executors).
+2) Enable the [required action](#required-action-support). It checks access at the end of every login.
+3) Create a client policy with the `any-client` condition and the `restrict-client-auth-enforce` [client policy executor](#executors). It checks access whenever tokens are issued.
+4) Optionally, [deny access by default](#denying-access-by-default).
+5) Optionally, keep the authenticator in your flows, e.g. to deny access before other required actions run, or to return a dedicated error for the resource owner password credentials grant.
+
 ## How to install?
 
 Download a release (*.jar file) that works with your Keycloak version from the [list of releases](https://github.com/sventorben/keycloak-restrict-client-auth/releases).
@@ -141,6 +170,18 @@ For details on SPI and provider configuration, please refer to [Configuring prov
 7) Click `Create Permission` to add permissions and policies (see [Authorization Services Guide](https://www.keycloak.org/docs/latest/authorization_services/#_permission_overview) for details)
 8) Afterwards, no user can authenticate to this client unless permissions have been granted by configured policies.
 
+### Automatic mode
+
+If you use both modes in the same realm, select the access provider `auto`. For example, use client roles for public clients and policies for confidential clients, since Keycloak does not allow authorization services for public clients.
+
+The `auto` access provider determines per client which restriction applies:
+* A client is restricted if any installed access provider restricts it, e.g. if it has the client role or the resource.
+* Access is only permitted if all access providers that restrict the client permit it.
+
+`auto` considers all installed access providers, including custom ones. The [required action](#required-action-support) and the `restrict-client-auth-enforce` [client policy executor](#executors) always use `auto`. For the authenticator, select `auto` explicitly; its default access provider remains `client-role`.
+
+The `restrict-client-auth-auto-config` client policy executor does not support `auto`, since it needs to know how to restrict access to a client.
+
 ### Using a custom error message
 
 If a user tries to log in via a browser-based flow and access gets denied by the authenticator, a custom error message can be displayed.
@@ -197,6 +238,8 @@ This extension provides a [required action](https://www.keycloak.org/docs/latest
 Unlike the authenticator, the required action does not need to be added to any authentication flow.
 Keycloak evaluates it whenever a user authenticates, no matter which authentication flow has been used, e.g. for login via username and password, single sign-on, identity providers, registration, credential reset, or links sent via email.
 
+The required action always uses the [`auto` access provider](#automatic-mode), i.e. it checks all restrictions a client has.
+
 Since Keycloak runs required actions after the authentication flow, access is checked after other required actions have been completed.
 For example, users are able to reset their password before access to the client is denied.
 
@@ -219,7 +262,6 @@ They apply even if the required action is disabled. It only has to be registered
 | Setting | Key | Applies to | Description |
 |---|---|---|---|
 | Error message | `restrictClientAuthErrorMessage` | Required action | The error message shown by the required action, see [Using a custom error message](#using-a-custom-error-message). |
-| Access Provider | `accessProviderId` | Required action | The access provider used by the required action. Authenticators and client policy executors are configured with their own access provider. |
 | Deny access by default | `defaultDeny` | Whole realm | If enabled, all clients of the realm are restricted. See [Denying access by default](#denying-access-by-default). |
 | Default access role | `defaultAccessRole` | Whole realm | If access is denied by default, users with this role may access all clients that are not restricted by the access provider. Use the role name for realm roles and `client-id.role-name` for client roles. |
 
@@ -300,7 +342,7 @@ If you enable `Deny access by default` in the realm settings, all clients of the
 * Access to all other clients is only permitted for users with the default access role. If no default access role is set, access to these clients is denied.
 * If the access provider of an authenticator, the required action, or a client policy executor does not exist, it denies access to all clients.
 
-Each authenticator, the required action, and each client policy executor applies this to its own access provider. If you use different access providers in the same realm, e.g. client roles for public clients and policies for confidential clients in different flows, keep in mind that the required action and each client policy executor only use one access provider. Clients that are restricted by another access provider are not restricted for them, i.e. only users with the default access role may access these clients via the required action or executor.
+The required action and the `restrict-client-auth-enforce` client policy executor apply this to all restrictions a client has, since they always use the [`auto` access provider](#automatic-mode). Each authenticator applies it to its own access provider. If you use different access providers in the same realm, select `auto` for your authenticators as well.
 
 For example, assign the default access role to your existing users via a group. They keep access to all existing clients. Users without the role, e.g. users of a new user pool, may only access clients that are restricted and that they have been granted access to. If you forget to restrict a client, users without the default access role cannot access it.
 
@@ -335,7 +377,7 @@ The executor checks access
 
 Tokens for service accounts (client credentials grant) are not checked. SAML clients are not covered either, since SAML does not use the token endpoint.
 
-The executor can be configured with the access provider to use, just like the authenticator.
+The executor always uses the [`auto` access provider](#automatic-mode), i.e. it checks all restrictions a client has.
 
 By default, the executor checks access to the client the tokens are issued for, i.e. the authorized party (`azp`), and, for token exchange, to the requested audience.
 Access tokens may contain further clients in their audience (`aud`), e.g. added by audience mappers or because the user has roles of these clients.
@@ -374,7 +416,7 @@ If you are using a Keycloak adapter, make sure your clients are verifying the au
 
 ### Protect all possible flows
 
-Ensure that you protect authentication to your clients in all flows a user may access. This includes not just the browser flow or the other realm-wide flows, but also identity provider overrides and post login flows.
+The [recommended setup](#recommended-setup) checks access on all paths. If you only use the authenticator, ensure that you protect authentication to your clients in all flows a user may access. This includes not just the browser flow or the other realm-wide flows, but also identity provider overrides and post login flows.
 
 Here is one example: suppose a user tries to log in via the built-in browser flow, at the end of which you have added the "Restrict user authentication on clients" step. If the "Cookie" or "Forms" alternative is used, the user will proceed to this step and be evaluated. But if it is the "Identity Provider Redirector" alternative which gets used, the subsequent steps will be skipped and the user will not be subject to this validation (this is a general feature of how brokering works in Keycloak authentication flows, not specific to this plugin). This extension must also be configured in the identity provider's post login flow in order to apply.
 

@@ -63,7 +63,6 @@ public class RestrictClientAuthConfigProperties {
 
     static final List<ProviderConfigProperty> REALM_SETTINGS_PROPERTIES = ProviderConfigurationBuilder.create()
             .property(ERROR_MESSAGE_PROPERTY)
-            .property(ACCESS_PROVIDER_ID_PROPERTY)
             .property(DEFAULT_DENY_PROPERTY)
             .property(DEFAULT_ACCESS_ROLE_PROPERTY)
             .build();

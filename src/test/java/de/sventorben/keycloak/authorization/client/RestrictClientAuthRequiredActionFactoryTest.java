@@ -1,14 +1,11 @@
 package de.sventorben.keycloak.authorization.client;
 
-import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RequiredActionConfigModel;
 import org.keycloak.models.RoleModel;
-import org.keycloak.provider.ProviderFactory;
 import org.keycloak.userprofile.ValidationException;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,9 +23,6 @@ class RestrictClientAuthRequiredActionFactoryTest {
     KeycloakSession session;
 
     @Mock
-    KeycloakSessionFactory sessionFactory;
-
-    @Mock
     RealmModel realm;
 
     RestrictClientAuthRequiredActionFactory cut = new RestrictClientAuthRequiredActionFactory();
@@ -39,22 +33,11 @@ class RestrictClientAuthRequiredActionFactoryTest {
     }
 
     @Test
-    void acceptsExistingAccessProviderAndRole(@Mock ProviderFactory<AccessProvider> accessProviderFactory,
-                                              @Mock RoleModel role) {
-        givenAccessProvider("policy", accessProviderFactory);
+    void acceptsExistingDefaultAccessRole(@Mock RoleModel role) {
         given(realm.getRole("default-access")).willReturn(role);
 
-        assertThatCode(() -> cut.validateConfig(session, realm,
-            config(Map.of("accessProviderId", "policy", "defaultAccessRole", "default-access"))))
+        assertThatCode(() -> cut.validateConfig(session, realm, config(Map.of("defaultAccessRole", "default-access"))))
             .doesNotThrowAnyException();
-    }
-
-    @Test
-    void rejectsUnknownAccessProvider() {
-        givenAccessProvider("unknown", null);
-
-        assertThatThrownBy(() -> cut.validateConfig(session, realm, config(Map.of("accessProviderId", "unknown"))))
-            .isInstanceOf(ValidationException.class);
     }
 
     @Test
@@ -63,11 +46,6 @@ class RestrictClientAuthRequiredActionFactoryTest {
 
         assertThatThrownBy(() -> cut.validateConfig(session, realm, config(Map.of("defaultAccessRole", "unknown"))))
             .isInstanceOf(ValidationException.class);
-    }
-
-    private void givenAccessProvider(String accessProviderId, ProviderFactory<AccessProvider> factory) {
-        given(session.getKeycloakSessionFactory()).willReturn(sessionFactory);
-        given(sessionFactory.getProviderFactory(AccessProvider.class, accessProviderId)).willReturn(factory);
     }
 
     private static RequiredActionConfigModel config(Map<String, String> config) {

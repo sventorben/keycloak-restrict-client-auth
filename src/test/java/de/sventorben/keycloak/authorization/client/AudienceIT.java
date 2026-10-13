@@ -48,7 +48,7 @@ class AudienceIT {
         LOGGER.info("Running test with Keycloak image: " + FullImageName.get());
         try (Keycloak admin = TestConstants.keycloakAdmin(KEYCLOAK_AUTH_URL)) {
             RealmResource testRealm = admin.realm(REALM_TEST);
-            EnforceAccessPolicy.enable(testRealm, Map.of("accessProviderId", "client-role", "checkAudience", true));
+            EnforceAccessPolicy.enable(testRealm, Map.of("checkAudience", true));
             ProtocolMapperRepresentation mapper = new ProtocolMapperRepresentation();
             mapper.setName("audience " + CLIENT_TEST_RESTRICTED);
             mapper.setProtocol("openid-connect");

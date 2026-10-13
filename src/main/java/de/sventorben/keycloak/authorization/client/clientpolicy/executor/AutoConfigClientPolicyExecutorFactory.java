@@ -1,8 +1,9 @@
 package de.sventorben.keycloak.authorization.client.clientpolicy.executor;
 
-import de.sventorben.keycloak.authorization.client.RestrictClientAuthConfigProperties;
 import de.sventorben.keycloak.authorization.client.access.AccessProvider;
 import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver;
+import de.sventorben.keycloak.authorization.client.access.auto.AutoAccessProviderFactory;
+import de.sventorben.keycloak.authorization.client.access.role.ClientRoleBasedAccessProviderFactory;
 import de.sventorben.keycloak.authorization.client.common.OperationalInfo;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
@@ -18,9 +19,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static de.sventorben.keycloak.authorization.client.RestrictClientAuthConfigProperties.ACCESS_PROVIDER_ID_PROPERTY;
+import static de.sventorben.keycloak.authorization.client.RestrictClientAuthConfig.ACCESS_PROVIDER_ID;
+import static org.keycloak.provider.ProviderConfigProperty.LIST_TYPE;
 
 public class AutoConfigClientPolicyExecutorFactory implements ClientPolicyExecutorProviderFactory, ServerInfoAwareProviderFactory {
+
+    private static final ProviderConfigProperty ACCESS_PROVIDER_ID_PROPERTY = new ProviderConfigProperty(
+        ACCESS_PROVIDER_ID,
+        "Access Provider",
+        "The access provider used to restrict access to clients. The 'auto' access provider is not supported, since " +
+            "it cannot decide how to restrict access.",
+        LIST_TYPE,
+        ClientRoleBasedAccessProviderFactory.PROVIDER_ID,
+        false);
 
     private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = ProviderConfigurationBuilder.create()
         .property(ACCESS_PROVIDER_ID_PROPERTY)
@@ -48,9 +59,10 @@ public class AutoConfigClientPolicyExecutorFactory implements ClientPolicyExecut
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
-        RestrictClientAuthConfigProperties.ACCESS_PROVIDER_ID_PROPERTY.setOptions(
+        ACCESS_PROVIDER_ID_PROPERTY.setOptions(
             factory.getProviderFactoriesStream(AccessProvider.class)
                 .map(ProviderFactory::getId)
+                .filter(it -> !AutoAccessProviderFactory.PROVIDER_ID.equals(it))
                 .collect(Collectors.toList()));
     }
 

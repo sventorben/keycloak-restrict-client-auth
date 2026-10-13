@@ -103,11 +103,11 @@ class DefaultDenyIT {
     }
 
     @Test
-    void rejectsRealmSettingsWithUnknownAccessProvider() {
+    void rejectsRealmSettingsWithUnknownDefaultAccessRole() {
         try (Keycloak admin = TestConstants.keycloakAdmin(KEYCLOAK_AUTH_URL)) {
             AuthenticationManagementResource flows = admin.realm(REALM_TEST).flows();
 
-            assertThatThrownBy(() -> updateRealmSettings(flows, Map.of("accessProviderId", "unknown")))
+            assertThatThrownBy(() -> updateRealmSettings(flows, Map.of("defaultAccessRole", "unknown")))
                 .isInstanceOf(BadRequestException.class);
         }
     }
