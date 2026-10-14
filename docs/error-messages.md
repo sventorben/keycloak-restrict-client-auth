@@ -40,9 +40,9 @@ Parameters are only replaced in messages defined via message keys, not in messag
 
 Define the message via realm overrides:
 
-1) Go to `Realm settings` → `Localization` → `Realm overrides`.
-2) Add a translation for your message key, e.g. `restricted-access.denied`, per language.
-3) Use the message key as the error message.
+1. Go to `Realm settings` → `Localization` → `Realm overrides`.
+2. Add a translation for your message key, e.g. `restricted-access.denied`, per language.
+3. Use the message key as the error message.
 
 ```properties
 restricted-access.denied=Sorry {0}, you have no access to {1}. Please ask your administrator.
