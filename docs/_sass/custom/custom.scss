@@ -1,0 +1,4 @@
+// The title of the site does not fit into the sidebar with the default font size
+.site-title {
+  @include fs-4;
+}
