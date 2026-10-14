@@ -9,6 +9,7 @@ import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.events.Errors;
 import org.keycloak.models.ClientModel;
+import org.keycloak.models.UserModel;
 
 /**
  * Checks access whenever a user authenticates, no matter which authentication flow has been used. Since Keycloak
@@ -16,6 +17,9 @@ import org.keycloak.models.ClientModel;
  * the password during credential reset.
  */
 final class RestrictClientAuthRequiredAction implements RequiredActionProvider {
+
+    private static final String PASSWORD_UPDATE_PENDING = "restrict-client-auth-password-update-pending";
+    private static final String UPDATE_PASSWORD = UserModel.RequiredAction.UPDATE_PASSWORD.name();
 
     private final AccessProviderResolver accessProviderResolver;
 
@@ -32,6 +36,10 @@ final class RestrictClientAuthRequiredAction implements RequiredActionProvider {
     public void evaluateTriggers(RequiredActionContext context) {
         if (!isPermitted(context)) {
             context.getAuthenticationSession().addRequiredAction(RestrictClientAuthRequiredActionFactory.PROVIDER_ID);
+            // triggers are evaluated before any required action runs, i.e. before the password is updated
+            if (isPasswordUpdatePending(context)) {
+                context.getAuthenticationSession().setAuthNote(PASSWORD_UPDATE_PENDING, Boolean.TRUE.toString());
+            }
         }
     }
 
@@ -65,9 +73,25 @@ final class RestrictClientAuthRequiredAction implements RequiredActionProvider {
             .client(client)
             .user(context.getUser())
             .error(Errors.ACCESS_DENIED);
+        final String errorMessage = isPasswordUpdated(context)
+            ? config.getPasswordUpdatedErrorMessage()
+            : config.getErrorMessage();
         context.challenge(context.form()
-            .setError(config.getErrorMessage(), context.getUser().getUsername(), client.getClientId())
+            .setError(errorMessage, context.getUser().getUsername(), client.getClientId())
             .createErrorPage(Response.Status.FORBIDDEN));
+    }
+
+    /**
+     * Whether the user updated the password during this authentication, e.g. after resetting it.
+     */
+    private static boolean isPasswordUpdated(RequiredActionContext context) {
+        return Boolean.parseBoolean(context.getAuthenticationSession().getAuthNote(PASSWORD_UPDATE_PENDING))
+            && !isPasswordUpdatePending(context);
+    }
+
+    private static boolean isPasswordUpdatePending(RequiredActionContext context) {
+        return context.getAuthenticationSession().getRequiredActions().contains(UPDATE_PASSWORD)
+            || context.getUser().getRequiredActionsStream().anyMatch(UPDATE_PASSWORD::equals);
     }
 
     @Override

@@ -158,6 +158,7 @@ They apply even if the required action is disabled. It only has to be registered
 | Setting | Key | Applies to | Description |
 |---|---|---|---|
 | Error message | `restrictClientAuthErrorMessage` | Required action | The error message shown by the required action, see [error messages](error-messages.html). |
+| Error message after password update | `passwordUpdatedErrorMessage` | Required action | The error message shown by the required action if users updated their password during the same login, e.g. after resetting it. If blank, the error message is used. See [error messages](error-messages.html#message-after-a-password-update). |
 | Deny access by default | `defaultDeny` | Whole realm | If enabled, all clients of the realm are restricted. See [Denying access by default](#denying-access-by-default). |
 | Default access role | `defaultAccessRole` | Whole realm | If access is denied by default, users with this role may access all clients that are not restricted by the access provider. Use the role name for realm roles and `client-id.role-name` for client roles. |
 

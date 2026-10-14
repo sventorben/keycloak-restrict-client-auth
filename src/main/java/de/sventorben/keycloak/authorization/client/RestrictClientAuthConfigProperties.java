@@ -10,6 +10,7 @@ import java.util.List;
 
 import static de.sventorben.keycloak.authorization.client.RestrictClientAuthConfig.ACCESS_PROVIDER_ID;
 import static de.sventorben.keycloak.authorization.client.RestrictClientAuthConfig.ERROR_MESSAGE;
+import static de.sventorben.keycloak.authorization.client.RestrictClientAuthConfig.PASSWORD_UPDATED_ERROR_MESSAGE;
 import static org.keycloak.provider.ProviderConfigProperty.BOOLEAN_TYPE;
 import static org.keycloak.provider.ProviderConfigProperty.LIST_TYPE;
 import static org.keycloak.provider.ProviderConfigProperty.ROLE_TYPE;
@@ -33,6 +34,15 @@ public class RestrictClientAuthConfigProperties {
         "The access provider to be used with this authenticator.",
         LIST_TYPE,
         ClientRoleBasedAccessProviderFactory.PROVIDER_ID,
+        false);
+
+    private static final ProviderConfigProperty PASSWORD_UPDATED_ERROR_MESSAGE_PROPERTY = new ProviderConfigProperty(
+        PASSWORD_UPDATED_ERROR_MESSAGE,
+        "Error message after password update",
+        "Error message which will be shown to the user if access is denied after the user updated the password " +
+            "during the same login, e.g. after resetting it. If blank, the error message is used.",
+        STRING_TYPE,
+        null,
         false);
 
     private static final ProviderConfigProperty DEFAULT_DENY_PROPERTY = new ProviderConfigProperty(
@@ -63,6 +73,7 @@ public class RestrictClientAuthConfigProperties {
 
     static final List<ProviderConfigProperty> REALM_SETTINGS_PROPERTIES = ProviderConfigurationBuilder.create()
             .property(ERROR_MESSAGE_PROPERTY)
+            .property(PASSWORD_UPDATED_ERROR_MESSAGE_PROPERTY)
             .property(DEFAULT_DENY_PROPERTY)
             .property(DEFAULT_ACCESS_ROLE_PROPERTY)
             .build();

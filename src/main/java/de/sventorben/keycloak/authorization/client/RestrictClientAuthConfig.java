@@ -10,6 +10,7 @@ import java.util.Optional;
 public final class RestrictClientAuthConfig {
 
     static final String ERROR_MESSAGE = "restrictClientAuthErrorMessage";
+    static final String PASSWORD_UPDATED_ERROR_MESSAGE = "passwordUpdatedErrorMessage";
     public static final String ACCESS_PROVIDER_ID = "accessProviderId";
 
     private final Map<String, String> config;
@@ -29,6 +30,17 @@ public final class RestrictClientAuthConfig {
         return Optional.ofNullable(config)
                 .map(it -> it.getOrDefault(ERROR_MESSAGE, Messages.ACCESS_DENIED))
                 .orElse(Messages.ACCESS_DENIED);
+    }
+
+    /**
+     * The error message if access is denied after the user updated the password, or the {@link #getErrorMessage()
+     * error message} if none is configured.
+     */
+    String getPasswordUpdatedErrorMessage() {
+        return Optional.ofNullable(config)
+            .map(it -> it.get(PASSWORD_UPDATED_ERROR_MESSAGE))
+            .filter(it -> !it.isBlank())
+            .orElseGet(this::getErrorMessage);
     }
 
     /**

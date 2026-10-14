@@ -13,12 +13,17 @@ import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.ClientModel;
+import org.keycloak.models.RequiredActionConfigModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -112,6 +117,62 @@ class RestrictClientAuthRequiredActionTest {
             verify(event).error(Errors.ACCESS_DENIED);
             verify(context).challenge(errorPage);
             verify(context, never()).success();
+        }
+
+        @Test
+        void notesPendingPasswordUpdateIfUserHasNoAccess() {
+            givenAccess(false);
+            given(authenticationSession.getRequiredActions()).willReturn(Set.of("UPDATE_PASSWORD"));
+
+            cut.evaluateTriggers(context);
+
+            verify(authenticationSession).setAuthNote("restrict-client-auth-password-update-pending", "true");
+        }
+
+        @Test
+        void showsPasswordUpdatedErrorMessageIfPasswordHasBeenUpdated(@Mock Response errorPage) {
+            givenAccess(false);
+            LoginFormsProvider form = givenErrorPageWithConfig(errorPage);
+            given(authenticationSession.getAuthNote("restrict-client-auth-password-update-pending")).willReturn("true");
+
+            cut.requiredActionChallenge(context);
+
+            verify(form).setError("password-updated", "user", "client");
+        }
+
+        @Test
+        void showsErrorMessageIfPasswordUpdateIsStillPending(@Mock Response errorPage) {
+            givenAccess(false);
+            LoginFormsProvider form = givenErrorPageWithConfig(errorPage);
+            given(authenticationSession.getAuthNote("restrict-client-auth-password-update-pending")).willReturn("true");
+            given(user.getRequiredActionsStream()).willReturn(Stream.of("UPDATE_PASSWORD"));
+
+            cut.requiredActionChallenge(context);
+
+            verify(form).setError("access-denied", "user", "client");
+        }
+
+        @Test
+        void showsErrorMessageIfPasswordHasNotBeenUpdated(@Mock Response errorPage) {
+            givenAccess(false);
+            LoginFormsProvider form = givenErrorPageWithConfig(errorPage);
+
+            cut.requiredActionChallenge(context);
+
+            verify(form).setError("access-denied", "user", "client");
+        }
+
+        private LoginFormsProvider givenErrorPageWithConfig(Response errorPage) {
+            RequiredActionConfigModel config = new RequiredActionConfigModel();
+            config.setConfig(Map.of("passwordUpdatedErrorMessage", "password-updated"));
+            given(context.getConfig()).willReturn(config);
+            given(user.getUsername()).willReturn("user");
+            given(client.getClientId()).willReturn("client");
+            LoginFormsProvider form = mock(LoginFormsProvider.class, Answers.RETURNS_SELF);
+            given(context.getEvent()).willReturn(mock(EventBuilder.class, Answers.RETURNS_SELF));
+            given(context.form()).willReturn(form);
+            given(form.createErrorPage(Response.Status.FORBIDDEN)).willReturn(errorPage);
+            return form;
         }
 
         private void givenAccess(boolean permitted) {

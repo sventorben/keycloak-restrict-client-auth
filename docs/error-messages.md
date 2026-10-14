@@ -36,6 +36,18 @@ Messages defined via message keys can contain two parameters:
 
 Parameters are only replaced in messages defined via message keys, not in messages entered directly as the error message.
 
+## Message after a password update
+
+The required action runs after other required actions, so users can reset or update their password before access is denied. Users may then wonder whether the password change worked.
+
+Configure `Error message after password update` (`passwordUpdatedErrorMessage`) in the [required action](configuration.html#configuring-the-required-action) to show a different message in this case, e.g. via a message key:
+
+```properties
+restricted-access.denied-after-password-update=Your password has been updated. However, you do not have access to {1}.
+```
+
+The message is shown if users updated their password during the same login, e.g. via the reset credentials flow, because an administrator required it, or via a link sent via email. If blank, the error message is used.
+
 ## Defining messages without a custom theme
 
 Define the message via realm overrides:
