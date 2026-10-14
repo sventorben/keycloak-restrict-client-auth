@@ -56,7 +56,7 @@ public final class AccessProviderResolver {
             return defaultProvider;
         }
 
-        LOG.infof(
+        LOG.debugf(
             "Neither an access provider is configured in authenticator config '%s' nor has a server-wide default provider been set. Using '%s' as a fallback.",
             authenticatorConfigAlias, ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
         return session.getProvider(AccessProvider.class, ClientRoleBasedAccessProviderFactory.PROVIDER_ID);

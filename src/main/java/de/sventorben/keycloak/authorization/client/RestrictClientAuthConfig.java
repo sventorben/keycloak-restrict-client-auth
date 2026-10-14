@@ -1,6 +1,5 @@
 package de.sventorben.keycloak.authorization.client;
 
-import de.sventorben.keycloak.authorization.client.access.role.ClientRoleBasedAccessProviderFactory;
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.RequiredActionConfigModel;
 import org.keycloak.services.messages.Messages;
@@ -32,10 +31,14 @@ public final class RestrictClientAuthConfig {
                 .orElse(Messages.ACCESS_DENIED);
     }
 
+    /**
+     * The configured access provider, or {@code null} if none is configured. In this case, the server-wide default
+     * access provider is used, see {@link de.sventorben.keycloak.authorization.client.access.AccessProviderResolver}.
+     */
     public String getAccessProviderId() {
         return Optional.ofNullable(config)
-            .map(it -> it.getOrDefault(ACCESS_PROVIDER_ID, ClientRoleBasedAccessProviderFactory.PROVIDER_ID))
-            .orElse(ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
+            .map(it -> it.get(ACCESS_PROVIDER_ID))
+            .orElse(null);
     }
 
     String getAuthenticatorConfigAlias() {
