@@ -2,9 +2,11 @@ package de.sventorben.keycloak.authorization.client.access;
 
 import de.sventorben.keycloak.authorization.client.access.role.ClientRoleBasedAccessProviderFactory;
 import org.jboss.logging.Logger;
+import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 
 import java.util.Optional;
 
@@ -38,14 +40,14 @@ public final class AccessProviderResolver {
             AccessProvider accessProvider = session.getProvider(AccessProvider.class, accessProviderId);
             if (accessProvider == null) {
                 LOG.warnf(
-                    "Configured access provider '%s' in authenticator config '%s' does not exist.",
+                    "Configured access provider '%s' in config '%s' does not exist. Access is denied to all clients.",
                     accessProviderId, authenticatorConfigAlias);
-            } else {
-                LOG.tracef(
-                    "Using access provider '%s' in authenticator config '%s'.",
-                    accessProviderId, authenticatorConfigAlias);
-                return accessProvider;
+                return new DenyingAccessProvider();
             }
+            LOG.tracef(
+                "Using access provider '%s' in authenticator config '%s'.",
+                accessProviderId, authenticatorConfigAlias);
+            return accessProvider;
         }
 
         final AccessProvider defaultProvider = session.getProvider(AccessProvider.class);
@@ -64,16 +66,36 @@ public final class AccessProviderResolver {
 
     private AccessProvider resolveDenyingByDefault(String accessProviderId, String configAlias,
                                                    String defaultAccessRole) {
-        if (accessProviderId != null && !exists(accessProviderId)) {
-            LOG.warnf("Configured access provider '%s' in config '%s' does not exist. Access is denied to all clients.",
-                accessProviderId, configAlias);
-            return new DefaultDenyAccessProvider(null, null);
+        AccessProvider accessProvider = resolveConfigured(accessProviderId, configAlias);
+        if (accessProvider instanceof DenyingAccessProvider) {
+            return accessProvider;
         }
-        return new DefaultDenyAccessProvider(resolveConfigured(accessProviderId, configAlias), defaultAccessRole);
+        return new DefaultDenyAccessProvider(accessProvider, defaultAccessRole);
     }
 
-    private boolean exists(String accessProviderId) {
-        return session.getProvider(AccessProvider.class, accessProviderId) != null;
+    /**
+     * Denies access to all clients, so that access is never granted by mistake if the configured access provider does
+     * not exist, e.g. because of a typo or because a custom access provider has been removed.
+     */
+    private static final class DenyingAccessProvider implements AccessProvider {
+
+        @Override
+        public boolean isRestricted(ClientModel client) {
+            return true;
+        }
+
+        @Override
+        public boolean isPermitted(ClientModel client, UserModel user) {
+            return false;
+        }
+
+        @Override
+        public void enableFor(ClientModel client) {
+        }
+
+        @Override
+        public void close() {
+        }
     }
 
 }
