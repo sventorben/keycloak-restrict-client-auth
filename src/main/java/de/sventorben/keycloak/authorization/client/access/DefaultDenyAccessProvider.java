@@ -73,7 +73,7 @@ final class DefaultDenyAccessProvider implements AccessProvider {
         }
         boolean permitted = user.hasRole(role);
         if (!permitted) {
-            LOG.warnf("Access for user '%s' to client '%s' in realm '%s' is denied. User does not have default access "
+            LOG.debugf("Access for user '%s' to client '%s' in realm '%s' is denied. User does not have default access "
                     + "role '%s'.",
                 user.getUsername(), client.getClientId(), client.getRealm().getName(), defaultAccessRole);
         }
