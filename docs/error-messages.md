@@ -27,12 +27,14 @@ You can directly define a particular message or use a message key. Keycloak look
 
 If the field is left blank, the message key `access-denied` is used. It comes with Keycloak out of the box.
 
-The message can contain two parameters:
+Messages defined via message keys can contain two parameters:
 
 | Parameter | Value |
 |---|---|
 | `{0}` | The username |
 | `{1}` | The client ID of the client the user tried to access |
+
+Parameters are only replaced in messages defined via message keys, not in messages entered directly as the error message.
 
 ## Defining messages without a custom theme
 
@@ -63,6 +65,6 @@ For details on how to add custom messages to Keycloak, please refer to section [
 
 Clients may be restricted for different reasons, e.g. users need to have paid a fee for one client and to live in a certain area for another. There are several ways to show different messages:
 
-* **One message for all clients, naming the client:** use the `{1}` parameter, e.g. `You cannot access {1}. Please contact the service desk.`
+* **One message for all clients, naming the client:** use the `{1}` parameter in a message key, e.g. `You cannot access {1}. Please contact the service desk.`
 * **A login theme per client:** Keycloak lets you select the `Login theme` per client in the client settings. Override your message key in the theme of each client.
 * **An authenticator per client:** add the [authenticator](authenticator.html) with its own error message to a flow and bind the flow to the client via `Authentication flow overrides` in the advanced client settings. The authenticator denies access during the flow, before the required action runs, so users see the message of the authenticator.
