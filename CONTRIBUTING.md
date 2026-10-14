@@ -14,7 +14,7 @@ I kindly ask anyone who wants to contribute to this project to follow some basic
 9. Includes basic tests
 
    Please do not add additional test frameworks without prior consultation
-10. Include some documentation/extend the README
+10. Include some documentation/extend the documentation website in `docs`
 11. PR must pass DCO check
 
 ## Sign off Your Work

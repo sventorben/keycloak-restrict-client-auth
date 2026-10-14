@@ -1,0 +1,28 @@
+remote_theme: just-the-docs/just-the-docs
+
+title: 'Keycloak: Restrict user authorization on clients'
+description: Restrict which users may access which clients in Keycloak
+url: 'https://sventorben.github.io'
+aux_links:
+  Author: 'https://sventorben.de'
+  Github: 'https://github.com/sventorben/keycloak-restrict-client-auth'
+# External navigation links
+nav_external_links:
+  - title: Release notes
+    url: https://github.com/sventorben/keycloak-restrict-client-auth/releases
+    hide_icon: false
+  - title: Contributing
+    url: https://github.com/sventorben/keycloak-restrict-client-auth/blob/main/CONTRIBUTING.md
+    hide_icon: false
+  - title: Issue tracker
+    url: https://github.com/sventorben/keycloak-restrict-client-auth/issues
+    hide_icon: false
+search_enabled: true
+color_scheme: dark
+callouts:
+  warning:
+    title: Warning
+    color: yellow
+  note:
+    title: Note
+    color: blue
