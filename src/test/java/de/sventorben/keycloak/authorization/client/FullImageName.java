@@ -56,6 +56,16 @@ class FullImageName {
         return Version.parse(KEYCLOAK_VERSION);
     }
 
+    /**
+     * Latest and nightly versions are always considered newer than any given version.
+     */
+    static boolean isAtLeastVersion(String version) {
+        if (isLatestVersion() || isNightlyVersion()) {
+            return true;
+        }
+        return getParsedVersion().compareTo(Version.parse(version)) >= 0;
+    }
+
     static Distribution getDistribution() {
         return KEYCLOAK_DIST;
     }

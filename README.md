@@ -80,7 +80,7 @@ This is more secure, but you need to think about access differently:
 ### Recommended setup
 
 1) Restrict clients by adding the client role or the resource, manually or via the `restrict-client-auth-auto-config` [client policy executor](#executors).
-2) Enable the [required action](#required-action-support). It checks access at the end of every login.
+2) Keep the [required action](#required-action-support) enabled. It is enabled by default and checks access at the end of every login.
 3) Create a client policy with the `any-client` condition and the `restrict-client-auth-enforce` [client policy executor](#executors). It checks access whenever tokens are issued.
 4) Optionally, [deny access by default](#denying-access-by-default).
 5) Optionally, keep the authenticator in your flows, e.g. to deny access before other required actions run, or to return a dedicated error for the resource owner password credentials grant.
@@ -243,15 +243,41 @@ The required action always uses the [`auto` access provider](#automatic-mode), i
 Since Keycloak runs required actions after the authentication flow, access is checked after other required actions have been completed.
 For example, users are able to reset their password before access to the client is denied.
 
-To enable the required action:
+The required action is registered and enabled in all realms by default: in existing realms on startup, and in new realms when they are created or imported. It is put at the bottom of the list of required actions, so that other required actions run first. If the required action is already registered in a realm, no matter whether enabled or disabled, it is left untouched.
+
+To configure or disable the required action:
 1) Go to `Authentication` and choose the `Required actions` tab.
-2) Enable `Restrict user authentication on clients`.
-3) Keep it at the bottom of the list, so that other required actions run first. Keycloak puts newly enabled required actions at the bottom by default.
-4) Optionally, configure the [realm settings](#realm-settings) and the error message.
+2) Choose the gear icon of `Restrict user authentication on clients` to configure the [realm settings](#realm-settings) and the error message.
+3) To disable it, switch it off. Do not remove it, e.g. via the admin REST API, since it would be registered and enabled again on the next start.
+
+> ⚠️ **Upgrade note**:
+>
+> Since the required action is enabled by default, upgrading changes the behavior of realms with restricted clients: users without access are now also denied if they log in via a path that bypassed the authenticator, e.g. single sign-on or identity provider redirects. Since the required action uses the [`auto` access provider](#automatic-mode), it also enforces restrictions via policies, e.g. leftover `Keycloak Client Resource`s without a permission.
+> Disable the required action in realms where you do not want this.
 
 Please note:
 * Applications cannot initiate the required action via the `kc_action` parameter.
 * For the resource owner password credentials grant (direct access grant), Keycloak denies access with an `Account is not fully set up` error instead. Add the authenticator to the direct grant flow or use the `restrict-client-auth-enforce` [client policy executor](#executors) for a dedicated error.
+
+### Locked out?
+
+If users cannot log in to a realm because of the required action, log in to the admin console of the admin realm and disable the required action in that realm, or fix the restriction.
+
+If you are locked out of the admin realm itself, e.g. after denying access by default there, disable the required action provider via the server configuration, e.g. in `conf/keycloak.conf`:
+
+```properties
+spi-required-action--restrict-client-auth-enforce--enabled=false
+```
+
+or as a command line option:
+
+```shell
+bin/kc.sh start --spi-required-action--restrict-client-auth-enforce--enabled=false
+```
+
+Keycloak 26.2 does not support this format with `--` separators and ignores it. Use `spi-required-action-restrict-client-auth-enforce-enabled=false` there.
+
+Keycloak then skips the required action in all realms, even though it is still registered and enabled. Since this is a build time option, run `bin/kc.sh build` again if you use an optimized server image. Log in, fix the configuration, remove the option, and restart Keycloak.
 
 ### Realm settings
 

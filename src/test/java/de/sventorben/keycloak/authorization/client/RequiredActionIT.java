@@ -4,11 +4,13 @@ import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.ClientRepresentation;
-import org.keycloak.representations.idm.RequiredActionProviderSimpleRepresentation;
+import org.keycloak.representations.idm.RequiredActionProviderRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +52,6 @@ class RequiredActionIT {
         KEYCLOAK_AUTH_URL = KEYCLOAK_CONTAINER.getAuthServerUrl();
         LOGGER.info("Running test with Keycloak image: " + FullImageName.get());
         try (Keycloak admin = keycloakAdmin()) {
-            RequiredActionProviderSimpleRepresentation requiredAction =
-                new RequiredActionProviderSimpleRepresentation();
-            requiredAction.setProviderId("restrict-client-auth-enforce");
-            requiredAction.setName("Restrict user authentication on clients");
-            admin.realm(REALM_TEST).flows().registerRequiredAction(requiredAction);
             allowRedirectsOfUnrestrictedClient(admin.realm(REALM_TEST));
         }
     }
@@ -62,6 +59,17 @@ class RequiredActionIT {
     @AfterEach
     void removeRequiredActionsOfRestrictedUser() {
         setRequiredActionsOfRestrictedUser(List.of());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {REALM_TEST, "master"})
+    void isRegisteredAndEnabledInAllRealmsByDefault(String realm) {
+        try (Keycloak admin = keycloakAdmin()) {
+            RequiredActionProviderRepresentation requiredAction =
+                admin.realm(realm).flows().getRequiredAction(RequiredActions.RESTRICT_CLIENT_AUTH);
+
+            assertThat(requiredAction.isEnabled()).isTrue();
+        }
     }
 
     @Test

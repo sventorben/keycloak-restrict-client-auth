@@ -25,9 +25,15 @@ class TokenEndpoint {
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
     private final String serverUrl;
+    private final String realm;
 
     TokenEndpoint(String serverUrl) {
+        this(serverUrl, REALM_TEST);
+    }
+
+    TokenEndpoint(String serverUrl, String realm) {
         this.serverUrl = serverUrl;
+        this.realm = realm;
     }
 
     AccessTokenResponse grantToken(String username, String password, String client, String scope)
@@ -84,7 +90,7 @@ class TokenEndpoint {
             .map(it -> it.getKey() + "=" + URLEncoder.encode(it.getValue(), StandardCharsets.UTF_8))
             .collect(Collectors.joining("&"));
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(serverUrl + "/realms/" + REALM_TEST + "/protocol/openid-connect/token"))
+            .uri(URI.create(serverUrl + "/realms/" + realm + "/protocol/openid-connect/token"))
             .header("Content-Type", "application/x-www-form-urlencoded")
             .POST(HttpRequest.BodyPublishers.ofString(form))
             .build();
