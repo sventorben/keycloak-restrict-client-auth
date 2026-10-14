@@ -5,7 +5,9 @@ import org.keycloak.admin.client.resource.AuthorizationResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.ResourcePermissionsResource;
 import org.keycloak.representations.idm.authorization.DecisionStrategy;
+import org.keycloak.representations.idm.authorization.PolicyEnforcementMode;
 import org.keycloak.representations.idm.authorization.ResourcePermissionRepresentation;
+import org.keycloak.representations.idm.authorization.ResourceServerRepresentation;
 import org.keycloak.representations.idm.authorization.UserPolicyRepresentation;
 
 import java.util.Set;
@@ -47,6 +49,26 @@ class ClientResourcePermission {
         update(DecisionStrategy.UNANIMOUS, Set.of(POLICY_REALM_ROLE));
         String policyId = authorization.policies().user().findByName(POLICY_DENYING_UNRESTRICTED_USER).getId();
         authorization.policies().policy(policyId).remove();
+    }
+
+    void setPolicyEnforcementMode(PolicyEnforcementMode policyEnforcementMode) {
+        ResourceServerRepresentation settings = authorization.getSettings();
+        settings.setPolicyEnforcementMode(policyEnforcementMode);
+        authorization.update(settings);
+    }
+
+    void removePermission() {
+        ResourcePermissionsResource permissions = authorization.permissions().resource();
+        permissions.findById(permissions.findByName(PERMISSION_CLIENT_RESOURCE).getId()).remove();
+    }
+
+    void restorePermission() {
+        ResourcePermissionRepresentation permission = new ResourcePermissionRepresentation();
+        permission.setName(PERMISSION_CLIENT_RESOURCE);
+        permission.setDecisionStrategy(DecisionStrategy.UNANIMOUS);
+        permission.setResources(Set.of(RESOURCE_CLIENT));
+        permission.setPolicies(Set.of(POLICY_REALM_ROLE));
+        authorization.permissions().resource().create(permission).close();
     }
 
     private void update(DecisionStrategy decisionStrategy, Set<String> policies) {
