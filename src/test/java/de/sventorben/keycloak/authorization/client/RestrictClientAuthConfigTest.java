@@ -34,4 +34,20 @@ class RestrictClientAuthConfigTest {
         assertThat(cut.getAccessProviderId()).isNull();
     }
 
+    @Test
+    void usesErrorMessageAfterPasswordUpdateIfNoneIsConfigured() {
+        RequiredActionConfigModel configModel = new RequiredActionConfigModel();
+        configModel.setConfig(Map.of("restrictClientAuthErrorMessage", "test-message"));
+        RestrictClientAuthConfig cut = new RestrictClientAuthConfig(configModel);
+        assertThat(cut.getPasswordUpdatedErrorMessage()).isEqualTo("test-message");
+    }
+
+    @Test
+    void usesConfiguredErrorMessageAfterPasswordUpdate() {
+        RequiredActionConfigModel configModel = new RequiredActionConfigModel();
+        configModel.setConfig(Map.of("passwordUpdatedErrorMessage", "password-updated"));
+        RestrictClientAuthConfig cut = new RestrictClientAuthConfig(configModel);
+        assertThat(cut.getPasswordUpdatedErrorMessage()).isEqualTo("password-updated");
+    }
+
 }

@@ -10,6 +10,7 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.ClientRepresentation;
+import org.keycloak.representations.idm.RequiredActionConfigRepresentation;
 import org.keycloak.representations.idm.RequiredActionProviderRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
@@ -117,6 +118,25 @@ class RequiredActionIT {
     }
 
     @Test
+    void showsErrorMessageAfterPasswordUpdateIfConfigured() throws Exception {
+        setRequiredActionsOfRestrictedUser(List.of("UPDATE_PASSWORD"));
+        setRequiredActionConfig(Map.of("passwordUpdatedErrorMessage", "Password updated, but access is denied."));
+        try {
+            BrowserLogin browser = new BrowserLogin(KEYCLOAK_AUTH_URL);
+
+            HttpResponse<String> updatePasswordPage = browser.login(
+                browser.authorize(CLIENT_TEST_RESTRICTED, REDIRECT_URI), USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED);
+            HttpResponse<String> response = browser.submitForm(updatePasswordPage, UPDATE_PASSWORD_FORM,
+                Map.of("password-new", PASS_TEST_RESTRICTED, "password-confirm", PASS_TEST_RESTRICTED));
+
+            assertDenied(response);
+            assertThat(response.body()).contains("Password updated, but access is denied.");
+        } finally {
+            setRequiredActionConfig(Map.of());
+        }
+    }
+
+    @Test
     void loginToClientRestrictedByPolicyForUserWithoutPermissionIsDenied() throws Exception {
         BrowserLogin browser = new BrowserLogin(KEYCLOAK_AUTH_URL);
 
@@ -143,6 +163,14 @@ class RequiredActionIT {
             UserRepresentation representation = user.toRepresentation();
             representation.setRequiredActions(requiredActions);
             user.update(representation);
+        }
+    }
+
+    private static void setRequiredActionConfig(Map<String, String> settings) {
+        try (Keycloak admin = keycloakAdmin()) {
+            RequiredActionConfigRepresentation config = new RequiredActionConfigRepresentation();
+            config.setConfig(settings);
+            admin.realm(REALM_TEST).flows().updateRequiredActionConfig(RequiredActions.RESTRICT_CLIENT_AUTH, config);
         }
     }
 
