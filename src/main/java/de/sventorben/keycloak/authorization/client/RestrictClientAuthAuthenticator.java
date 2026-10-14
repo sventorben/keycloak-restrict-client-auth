@@ -5,6 +5,7 @@ import de.sventorben.keycloak.authorization.client.access.AccessProviderResolver
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
+import org.keycloak.OAuthErrorException;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
@@ -14,13 +15,14 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.representations.idm.OAuth2ErrorRepresentation;
-import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaTypeMatcher;
 
 final class RestrictClientAuthAuthenticator implements Authenticator {
 
     private static final Logger LOG = Logger.getLogger(RestrictClientAuthAuthenticator.class);
+
+    private static final String TOKEN_ENDPOINT_PATH = "/protocol/openid-connect/token";
 
     private final AccessProviderResolver accessProviderResolver;
 
@@ -59,7 +61,7 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
         if (MediaTypeMatcher.isHtmlRequest(context.getHttpRequest().getHttpHeaders())) {
             response = htmlErrorResponse(context, config);
         } else {
-            response = oAuth2ErrorResponse();
+            response = oAuth2ErrorResponse(context);
         }
         return response;
     }
@@ -72,9 +74,20 @@ final class RestrictClientAuthAuthenticator implements Authenticator {
             .createErrorPage(Response.Status.FORBIDDEN);
     }
 
-    private static Response oAuth2ErrorResponse() {
-        return Response.status(Response.Status.UNAUTHORIZED.getStatusCode())
-            .entity(new OAuth2ErrorRepresentation(Messages.ACCESS_DENIED, "Access to client is denied."))
+    /**
+     * Errors according to RFC 6749: 'invalid_grant' from the token endpoint, i.e. for the resource owner password
+     * credentials grant, and 'access_denied' otherwise.
+     */
+    private static Response oAuth2ErrorResponse(AuthenticationFlowContext context) {
+        if (context.getUriInfo().getPath().endsWith(TOKEN_ENDPOINT_PATH)) {
+            return oAuth2ErrorResponse(Response.Status.BAD_REQUEST, OAuthErrorException.INVALID_GRANT);
+        }
+        return oAuth2ErrorResponse(Response.Status.FORBIDDEN, OAuthErrorException.ACCESS_DENIED);
+    }
+
+    private static Response oAuth2ErrorResponse(Response.Status status, String error) {
+        return Response.status(status.getStatusCode())
+            .entity(new OAuth2ErrorRepresentation(error, "Access to client is denied."))
             .type(MediaType.APPLICATION_JSON_TYPE)
             .build();
     }

@@ -66,6 +66,17 @@ Keycloak 26.2 does not support this format with `--` separators and ignores it. 
 {: .warning }
 > Use `provider-default`, not `provider`. The `provider` option makes the given access provider the only one, so all other access providers, including `auto`, are not available anymore. The required action and the `restrict-client-auth-enforce` client policy executor then log a warning and use the given access provider instead of `auto`, i.e. they ignore all other restrictions.
 
+### Error responses for non-browser requests
+
+For requests that do not accept HTML, e.g. the resource owner password credentials grant, the authenticator responds with an error according to [RFC 6749](https://www.rfc-editor.org/rfc/rfc6749#section-5.2) instead of an error page, so OAuth client libraries can handle it:
+
+| Endpoint | Status | Error |
+|---|---|---|
+| Token endpoint, i.e. the resource owner password credentials grant | `400` | `invalid_grant` |
+| Other endpoints | `403` | `access_denied` |
+
+The required action and the `restrict-client-auth-enforce` client policy executor respond with standard errors as well.
+
 ## Other flows
 
 Keycloak does not run the browser flow for every path a user may take. The table shows which enforcement point covers which path.
@@ -121,4 +132,4 @@ Repeat this for every identity provider users may log in with.
 
 ### Direct grant
 
-Keycloak evaluates required actions for the resource owner password credentials grant, but cannot show them to the user. If the required action denies access, Keycloak responds with `invalid_grant` and `Account is not fully set up`. For a dedicated error, add the authenticator to the direct grant flow, or use the `restrict-client-auth-enforce` [client policy executor](configuration.html#checking-access-whenever-tokens-are-issued).
+Keycloak evaluates required actions for the resource owner password credentials grant, but cannot show them to the user. If the required action denies access, Keycloak responds with `invalid_grant` and `Account is not fully set up`. For a dedicated error, add the authenticator to the direct grant flow, which responds with `invalid_grant` and `Access to client is denied.`, or use the `restrict-client-auth-enforce` [client policy executor](configuration.html#checking-access-whenever-tokens-are-issued).
