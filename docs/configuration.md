@@ -17,11 +17,11 @@ nav_order: 3
 
 ## Recommended setup
 
-1) [Restrict clients](#restricting-clients) by adding the client role or the resource, manually or via the `restrict-client-auth-auto-config` [client policy executor](#automatically-restricting-new-clients).
-2) Keep the [required action](#required-action) enabled. It is enabled by default and checks access at the end of every login.
-3) Create a [client policy](#checking-access-whenever-tokens-are-issued) with the `any-client` condition and the `restrict-client-auth-enforce` client policy executor. It checks access whenever tokens are issued.
-4) Optionally, [deny access by default](#denying-access-by-default).
-5) Optionally, keep the [authenticator](authenticator.html) in your flows, e.g. to deny access before other required actions run, or to return a dedicated error for the resource owner password credentials grant.
+1. [Restrict clients](#restricting-clients) by adding the client role or the resource, manually or via the `restrict-client-auth-auto-config` [client policy executor](#automatically-restricting-new-clients).
+2. Keep the [required action](#required-action) enabled. It is enabled by default and checks access at the end of every login.
+3. Create a [client policy](#checking-access-whenever-tokens-are-issued) with the `any-client` condition and the `restrict-client-auth-enforce` client policy executor. It checks access whenever tokens are issued.
+4. Optionally, [deny access by default](#denying-access-by-default).
+5. Optionally, keep the [authenticator](authenticator.html) in your flows, e.g. to deny access before other required actions run, or to return a dedicated error for the resource owner password credentials grant.
 
 ## Upgrade notes
 
@@ -60,14 +60,14 @@ For details on SPI and provider configuration, please refer to [Configuring prov
 {: .note }
 > Policy-based restrictions only work with confidential OpenID Connect clients, since Keycloak only supports authorization services for these clients. Use [client roles](#client-role-based) for public clients and SAML clients.
 
-1) Open the client and switch on `Client authentication` and `Authorization` in the `Settings` tab.
-2) Go to `Authorization` → `Resources` and click `Create resource`.
-3) Set the `Name` and `Display name` to `Keycloak Client Resource` and keep the other fields blank.
-4) Save the resource.
+1. Open the client and switch on `Client authentication` and `Authorization` in the `Settings` tab.
+2. Go to `Authorization` → `Resources` and click `Create resource`.
+3. Set the `Name` and `Display name` to `Keycloak Client Resource` and keep the other fields blank.
+4. Save the resource.
    ![Resources overview](images/resource.png)
-5) Click `Create permission` to add permissions and policies (see [Authorization Services Guide](https://www.keycloak.org/docs/latest/authorization_services/#_permission_overview) for details).
+5. Click `Create permission` to add permissions and policies (see [Authorization Services Guide](https://www.keycloak.org/docs/latest/authorization_services/#_permission_overview) for details).
    ![Permissions overview](images/permission.png)
-6) Afterwards, no user can access this client unless permissions have been granted by configured policies.
+6. Afterwards, no user can access this client unless permissions have been granted by configured policies.
 
 The [decision strategy](https://www.keycloak.org/docs/latest/authorization_services/#_permission_create) of the permission decides how multiple policies are combined, e.g. `Affirmative` grants access if any of the policies permits it.
 
@@ -106,8 +106,8 @@ Please note:
 
 ### Disabling the required action
 
-1) Go to `Authentication` and choose the `Required actions` tab.
-2) Switch off `Restrict user authentication on clients`.
+1. Go to `Authentication` and choose the `Required actions` tab.
+2. Switch off `Restrict user authentication on clients`.
 
 Do not remove the required action, e.g. via the admin REST API. A removed required action is registered and enabled again on the next start.
 
@@ -133,9 +133,10 @@ Tokens for service accounts (client credentials grant) are not checked. SAML cli
 The executor always uses the [`auto` access provider](#using-client-roles-and-policies-in-the-same-realm), i.e. it checks all restrictions a client has.
 
 To enable the executor:
-1) Go to `Realm settings` → `Client policies` → `Profiles`, create a client profile and add the `restrict-client-auth-enforce` executor to it.
+
+1. Go to `Realm settings` → `Client policies` → `Profiles`, create a client profile and add the `restrict-client-auth-enforce` executor to it.
    ![Client profile](images/client-profile.png)
-2) Go to `Policies`, create a client policy, and add the `any-client` condition and the client profile to it.
+2. Go to `Policies`, create a client policy, and add the `any-client` condition and the client profile to it.
    ![Client policy](images/client-policy.png)
 
 ### Checking the audience
@@ -164,8 +165,8 @@ If the default access role does not exist, access to clients that are not restri
 
 ### Configuring realm settings in the admin console
 
-1) Go to `Authentication` and choose the `Required actions` tab.
-2) Choose the gear icon of `Restrict user authentication on clients` and configure the settings.
+1. Go to `Authentication` and choose the `Required actions` tab.
+2. Choose the gear icon of `Restrict user authentication on clients` and configure the settings.
 
 The admin console validates the settings when saving. Default access roles that do not exist are rejected.
 

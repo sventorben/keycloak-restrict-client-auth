@@ -85,7 +85,7 @@ When your authentication flow includes an identity provider redirect (e.g., usin
 
 The required action checks access after the redirect, so you do not need to do anything if it is enabled. If you only use the authenticator, configure a post login flow for the identity provider:
 
-1) Create a custom authentication flow:
+1. Create a custom authentication flow:
     * Go to `Authentication` from the left-hand menu.
     ![AuthFlow_Authentication](https://github.com/user-attachments/assets/89021a3a-6961-4553-9556-705e74a04855)
     * Under the `Flows` tab, click `Create Flow`.
@@ -94,7 +94,7 @@ The required action checks access after the redirect, so you do not need to do a
     * Click `Save`.
     * After creating the flow, click `Add Step` to add steps to the flow.
     * Add the step `Restrict user authentication on clients`.
-2) Assign the post login flow to the identity provider:
+2. Assign the post login flow to the identity provider:
     * Go to `Identity Providers`.
     ![AuthFlow_google](https://github.com/user-attachments/assets/2c8c6d17-007b-487c-8669-05c7c7827c1d)
     * Select the identity provider (e.g., "Google") used in the redirect flow.

@@ -19,9 +19,9 @@ nav_order: 6
 
 Suppose you have three clients and teams that need access to different combinations of them.
 
-1) Add a client role named `restricted-access` to every client.
-2) Create a group per team.
-3) Open a group, go to `Role mapping`, click `Assign role`, filter by clients, and assign the `restricted-access` roles of the clients the team may access.
+1. Add a client role named `restricted-access` to every client.
+2. Create a group per team.
+3. Open a group, go to `Role mapping`, click `Assign role`, filter by clients, and assign the `restricted-access` roles of the clients the team may access.
 
 Each client has its own `restricted-access` role, so a group can grant access to any combination of clients. Users get access via their groups.
 
@@ -29,9 +29,9 @@ Each client has its own `restricted-access` role, so a group can grant access to
 
 Suppose users may access a confidential client if they have a certain role, or if they meet other conditions, e.g. group membership or user attributes.
 
-1) Restrict the client via [policies](configuration.html#resource-policy-based).
-2) Add a `Role` policy for the role and further policies for the other conditions.
-3) Add all policies to the permission of the `Keycloak Client Resource` and set its decision strategy to `Affirmative`.
+1. Restrict the client via [policies](configuration.html#resource-policy-based).
+2. Add a `Role` policy for the role and further policies for the other conditions.
+3. Add all policies to the permission of the `Keycloak Client Resource` and set its decision strategy to `Affirmative`.
 
 Access is granted if any of the policies permits it.
 
@@ -54,8 +54,8 @@ Keycloak does not allow authorization services for public clients, e.g. single-p
 
 Suppose a realm has existing users who may access all clients, and you add users, e.g. of a partner, who may only access some clients.
 
-1) Create a realm role, e.g. `default-access`, and assign it to the existing users via a group.
-2) Configure it as the default access role and enable [Deny access by default](configuration.html#denying-access-by-default).
-3) Restrict the clients the new users may access and grant access to the new users. Grant access to the existing users as well, since the default access role only applies to clients that are not restricted.
+1. Create a realm role, e.g. `default-access`, and assign it to the existing users via a group.
+2. Configure it as the default access role and enable [Deny access by default](configuration.html#denying-access-by-default).
+3. Restrict the clients the new users may access and grant access to the new users. Grant access to the existing users as well, since the default access role only applies to clients that are not restricted.
 
 Existing users keep access to all clients that are not restricted. New users may only access the clients they have been granted access to, even if you forget to restrict a client.

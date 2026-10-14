@@ -19,9 +19,9 @@ nav_order: 9
 
 Access providers decide which clients are restricted and which users may access them. Besides the built-in access providers `client-role` and `policy`, you can add your own via the `restrict-client-auth-access-provider` SPI.
 
-1) Implement `de.sventorben.keycloak.authorization.client.access.AccessProvider` and `AccessProviderFactory`.
-2) Register your factory in `META-INF/services/de.sventorben.keycloak.authorization.client.access.AccessProviderFactory`.
-3) Deploy your jar next to the jar of this extension.
+1. Implement `de.sventorben.keycloak.authorization.client.access.AccessProvider` and `AccessProviderFactory`.
+2. Register your factory in `META-INF/services/de.sventorben.keycloak.authorization.client.access.AccessProviderFactory`.
+3. Deploy your jar next to the jar of this extension.
 
 Your access provider can then be selected in the authenticator and in the `restrict-client-auth-auto-config` client policy executor. The `auto` access provider, which the required action and the `restrict-client-auth-enforce` client policy executor always use, considers it as well.
 
