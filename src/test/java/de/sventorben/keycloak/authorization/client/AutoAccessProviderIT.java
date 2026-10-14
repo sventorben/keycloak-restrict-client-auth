@@ -1,7 +1,7 @@
 package de.sventorben.keycloak.authorization.client;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.BadRequestException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
@@ -68,7 +68,7 @@ class AutoAccessProviderIT {
     @Test
     void deniesAccessToClientRestrictedByClientRoleForUserWithoutClientRole() {
         try (Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED)) {
-            assertThatThrownBy(() -> keycloak.tokenManager().grantToken()).isInstanceOf(NotAuthorizedException.class);
+            assertThatThrownBy(() -> keycloak.tokenManager().grantToken()).isInstanceOf(BadRequestException.class);
         }
     }
 
@@ -84,7 +84,7 @@ class AutoAccessProviderIT {
     void deniesAccessToClientRestrictedByPolicyForUserWithoutPermission() {
         try (Keycloak keycloak = TestConstants.keycloakTest(KEYCLOAK_AUTH_URL, USER_TEST_RESTRICTED,
             PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY)) {
-            assertThatThrownBy(() -> keycloak.tokenManager().grantToken()).isInstanceOf(NotAuthorizedException.class);
+            assertThatThrownBy(() -> keycloak.tokenManager().grantToken()).isInstanceOf(BadRequestException.class);
         }
     }
 

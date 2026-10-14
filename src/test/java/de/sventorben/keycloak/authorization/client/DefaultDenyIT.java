@@ -76,7 +76,7 @@ class DefaultDenyIT {
         HttpResponse<String> response = TOKEN_ENDPOINT.passwordGrant(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED,
             CLIENT_TEST_UNRESTRICTED, null);
 
-        assertThat(response.statusCode()).as(response.body()).isEqualTo(401);
+        assertThat(response.statusCode()).as(response.body()).isEqualTo(400);
     }
 
     @Test

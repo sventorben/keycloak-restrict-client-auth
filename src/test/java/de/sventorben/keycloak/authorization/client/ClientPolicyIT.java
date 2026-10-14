@@ -1,7 +1,7 @@
 package de.sventorben.keycloak.authorization.client;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.BadRequestException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -87,7 +87,7 @@ class ClientPolicyIT {
                 clientResource.update(client);
 
                 assertThatThrownBy(() -> keycloakTest.tokenManager().grantToken())
-                    .isInstanceOf(NotAuthorizedException.class);
+                    .isInstanceOf(BadRequestException.class);
             }
         }
     }

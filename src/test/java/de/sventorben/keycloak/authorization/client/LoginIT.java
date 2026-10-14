@@ -1,7 +1,7 @@
 package de.sventorben.keycloak.authorization.client;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.BadRequestException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -19,6 +19,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Map;
 
@@ -59,8 +60,18 @@ class LoginIT {
             LoginIT.this.switchAccessProvider(accessProviderId);
             try (Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED)) {
                 assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
-                    .isInstanceOf(NotAuthorizedException.class);
+                    .isInstanceOf(BadRequestException.class);
             }
+        }
+
+        @Test
+        void accessIsDeniedWithErrorAccordingToRfc6749() throws Exception {
+            LoginIT.this.switchAccessProvider("client-role");
+            HttpResponse<String> response = new TokenEndpoint(KEYCLOAK_AUTH_URL)
+                .passwordGrant(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED, CLIENT_TEST_RESTRICTED, null);
+
+            assertThat(response.statusCode()).as(response.body()).isEqualTo(400);
+            assertThat(response.body()).contains("\"invalid_grant\"", "Access to client is denied.");
         }
 
         @ParameterizedTest
@@ -86,7 +97,7 @@ class LoginIT {
             try (Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED,
                 CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY)) {
                 assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
-                    .isInstanceOf(NotAuthorizedException.class);
+                    .isInstanceOf(BadRequestException.class);
             }
         }
 
@@ -101,7 +112,7 @@ class LoginIT {
         @Test
         void accessForUserWithRoleIsDeniedIfAnotherPolicyDeniesAndDecisionStrategyIsUnanimous() {
             assertThatThrownBy(() -> grantTokenWithDenyingPolicy(DecisionStrategy.UNANIMOUS))
-                .isInstanceOf(NotAuthorizedException.class);
+                .isInstanceOf(BadRequestException.class);
         }
 
         @Test

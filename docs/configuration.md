@@ -32,6 +32,8 @@ The required action is registered and enabled in all realms by default. This cha
 
 To keep the previous behavior in a realm, [disable the required action](#disabling-the-required-action). If you are locked out, see [Locked out?](faq.html#locked-out).
 
+For requests that do not accept HTML, e.g. the resource owner password credentials grant, the authenticator now responds with [errors according to RFC 6749](authenticator.html#error-responses-for-non-browser-requests): `invalid_grant` with status `400` from the token endpoint, and `access_denied` with status `403` otherwise. So far, it responded with `access-denied` and status `401`. Update clients that check for the previous error.
+
 ## Restricting clients
 
 ### Client role based
