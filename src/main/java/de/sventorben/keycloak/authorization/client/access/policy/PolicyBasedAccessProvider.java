@@ -98,7 +98,7 @@ public final class PolicyBasedAccessProvider implements AccessProvider {
     }
 
     private void logAccessDenied(ClientModel client, UserModel user) {
-        LOG.warnf(
+        LOG.debugf(
             "Access for user '%s' is denied. User does not have permission to access resource '%s' on client '%s' in realm '%s'.",
             user.getUsername(), RESOURCE_NAME, client.getId(), client.getRealm().getName());
     }
