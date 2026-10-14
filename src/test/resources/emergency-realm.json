@@ -1,0 +1,49 @@
+{
+  "realm": "emergency",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "test-client-restricted",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "roles": {
+    "client": {
+      "test-client-restricted": [
+        {
+          "name": "restricted-access"
+        }
+      ]
+    }
+  },
+  "users": [
+    {
+      "username": "test-restricted",
+      "enabled": true,
+      "email": "test-restricted@example.org",
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "Restricted",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test",
+          "temporary": false
+        }
+      ]
+    }
+  ],
+  "requiredActions": [
+    {
+      "alias": "restrict-client-auth-enforce",
+      "name": "Restrict user authentication on clients",
+      "providerId": "restrict-client-auth-enforce",
+      "enabled": true,
+      "defaultAction": false,
+      "priority": 1000,
+      "config": {}
+    }
+  ]
+}

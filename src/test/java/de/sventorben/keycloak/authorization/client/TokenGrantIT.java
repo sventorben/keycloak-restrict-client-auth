@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The test realm uses Keycloak's built-in browser flow and, in this test, also Keycloak's built-in direct grant flow.
- * Hence, only the client policy executor restricts access.
+ * The required action is disabled. Hence, only the client policy executor restricts access.
  */
 @Testcontainers
 class TokenGrantIT {
@@ -47,6 +47,7 @@ class TokenGrantIT {
         try (Keycloak admin = TestConstants.keycloakAdmin(KEYCLOAK_AUTH_URL)) {
             RealmResource testRealm = admin.realm(REALM_TEST);
             EnforceAccessPolicy.enable(testRealm);
+            RequiredActions.disable(testRealm);
             RealmRepresentation realm = testRealm.toRepresentation();
             realm.setDirectGrantFlow("direct grant");
             testRealm.update(realm);

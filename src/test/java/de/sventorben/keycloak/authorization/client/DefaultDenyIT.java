@@ -9,8 +9,6 @@ import org.keycloak.admin.client.resource.AuthenticationManagementResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RequiredActionConfigRepresentation;
-import org.keycloak.representations.idm.RequiredActionProviderRepresentation;
-import org.keycloak.representations.idm.RequiredActionProviderSimpleRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * The realm settings, configured via the disabled required action, deny access by default. Users with the default
+ * The realm settings, configured via the required action, which is disabled, deny access by default. Users with the default
  * access role may access clients without the client role. The authenticator in the direct grant flow of the test realm
  * and the client policy executor both apply these settings.
  */
@@ -61,7 +59,7 @@ class DefaultDenyIT {
             createDefaultAccessRole(testRealm);
             createClientWithoutAuthenticator(testRealm);
             EnforceAccessPolicy.enable(testRealm);
-            registerDisabledRequiredAction(testRealm.flows());
+            RequiredActions.disable(testRealm);
             updateRealmSettings(testRealm.flows(),
                 Map.of("defaultDeny", "true", "defaultAccessRole", DEFAULT_ACCESS_ROLE));
         }
@@ -142,15 +140,6 @@ class DefaultDenyIT {
         testRealm.clients().create(client).close();
     }
 
-    private static void registerDisabledRequiredAction(AuthenticationManagementResource flows) {
-        RequiredActionProviderSimpleRepresentation registration = new RequiredActionProviderSimpleRepresentation();
-        registration.setProviderId(REQUIRED_ACTION);
-        registration.setName("Restrict user authentication on clients");
-        flows.registerRequiredAction(registration);
-        RequiredActionProviderRepresentation requiredAction = flows.getRequiredAction(REQUIRED_ACTION);
-        requiredAction.setEnabled(false);
-        flows.updateRequiredAction(REQUIRED_ACTION, requiredAction);
-    }
 
     private static void updateRealmSettings(AuthenticationManagementResource flows, Map<String, String> settings) {
         RequiredActionConfigRepresentation config = new RequiredActionConfigRepresentation();

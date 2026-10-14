@@ -23,10 +23,11 @@ import java.util.Optional;
 public final class RestrictClientAuthRequiredActionFactory implements RequiredActionFactory, ServerInfoAwareProviderFactory {
 
     static final String PROVIDER_ID = RealmSettings.REQUIRED_ACTION;
+    static final String DISPLAY_TEXT = "Restrict user authentication on clients";
 
     @Override
     public String getDisplayText() {
-        return "Restrict user authentication on clients";
+        return DISPLAY_TEXT;
     }
 
     @Override
@@ -59,6 +60,7 @@ public final class RestrictClientAuthRequiredActionFactory implements RequiredAc
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
+        factory.register(RequiredActionRegistration::onEvent);
     }
 
     @Override
