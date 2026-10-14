@@ -16,7 +16,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.lang.module.ModuleDescriptor.Version;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
@@ -50,8 +49,7 @@ class TokenExchangeIT {
         .withStartupTimeout(Duration.ofSeconds(90));
 
     static boolean isTokenExchangeResponseEventSupported() {
-        return FullImageName.isLatestVersion() || FullImageName.isNightlyVersion()
-            || FullImageName.getParsedVersion().compareTo(Version.parse("26.8")) >= 0;
+        return FullImageName.isAtLeastVersion("26.8");
     }
 
     @BeforeAll

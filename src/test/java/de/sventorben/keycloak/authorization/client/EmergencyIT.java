@@ -11,7 +11,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.lang.module.ModuleDescriptor.Version;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
@@ -44,8 +43,7 @@ class EmergencyIT {
      * Keycloak 26.2 does not support the new format of SPI options with '--' separators.
      */
     private static String serverConfiguration() {
-        if (FullImageName.isLatestVersion() || FullImageName.isNightlyVersion()
-            || FullImageName.getParsedVersion().compareTo(Version.parse("26.3")) >= 0) {
+        if (FullImageName.isAtLeastVersion("26.3")) {
             return "keycloak-required-action-disabled.conf";
         }
         return "keycloak-required-action-disabled-legacy.conf";
