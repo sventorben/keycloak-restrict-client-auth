@@ -21,6 +21,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mock.Strictness.LENIENT;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -50,7 +51,7 @@ class AutoConfigClientPolicyExecutorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.INCLUDE, names = {"REGISTER", "REGISTERED", "UPDATE", "UPDATED"})
+    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.INCLUDE, names = {"REGISTERED", "UPDATE", "UPDATED"})
     void enable(ClientPolicyEvent event) {
         cut.executeOnEvent(new ClientCRUDContext() {
             @Override
@@ -67,7 +68,7 @@ class AutoConfigClientPolicyExecutorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.EXCLUDE, names = {"REGISTER", "REGISTERED", "UPDATE", "UPDATED"})
+    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.EXCLUDE, names = {"REGISTERED", "UPDATE", "UPDATED"})
     void doNothing(ClientPolicyEvent event) {
         cut.executeOnEvent(new ClientCRUDContext() {
             @Override
@@ -81,6 +82,18 @@ class AutoConfigClientPolicyExecutorTest {
             }
         });
         verify(accessProvider, never()).enableFor(targetClient);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.INCLUDE, names = {"REGISTER", "UPDATE"})
+    void doesNothingWithoutTargetClient(ClientPolicyEvent event) {
+        cut.executeOnEvent(new ClientCRUDContext() {
+            @Override
+            public ClientPolicyEvent getEvent() {
+                return event;
+            }
+        });
+        verify(accessProvider, never()).enableFor(any());
     }
 
     @Test

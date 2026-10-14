@@ -2,6 +2,7 @@ package de.sventorben.keycloak.authorization.client;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,6 +13,7 @@ import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.ClientPoliciesRepresentation;
 import org.keycloak.representations.idm.ClientPolicyRepresentation;
 import org.keycloak.representations.idm.ClientRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
@@ -89,6 +91,30 @@ class ClientPolicyIT {
                 assertThatThrownBy(() -> keycloakTest.tokenManager().grantToken())
                     .isInstanceOf(BadRequestException.class);
             }
+        }
+    }
+
+    @Test
+    void restrictedAccessAutoConfigRestrictsNewClients() {
+        try (Keycloak keycloakAdmin = keycloakAdmin()) {
+            RealmResource testRealm = keycloakAdmin.realm(REALM_TEST);
+            ClientPoliciesRepresentation policies = testRealm.clientPoliciesPoliciesResource().getPolicies();
+            policies.getPolicies().stream()
+                .filter(it -> "enable-restricted-access-all-clients".equals(it.getName()))
+                .forEach(it -> it.setEnabled(true));
+            testRealm.clientPoliciesPoliciesResource().updatePolicies(policies);
+
+            ClientRepresentation client = new ClientRepresentation();
+            client.setClientId("new-client-" + UUID.randomUUID());
+            client.setPublicClient(true);
+            try (Response response = testRealm.clients().create(client)) {
+                assertThat(response.getStatus()).isEqualTo(201);
+            }
+
+            String id = testRealm.clients().findByClientId(client.getClientId()).get(0).getId();
+            assertThat(testRealm.clients().get(id).roles().list())
+                .extracting(RoleRepresentation::getName)
+                .contains("restricted-access");
         }
     }
 
