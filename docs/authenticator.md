@@ -49,7 +49,7 @@ Choose the gear icon of the `Restrict user authentication on clients` step.
 | Option | Key | Description |
 |---|---|---|
 | Error message | `restrictClientAuthErrorMessage` | The error message shown if access is denied, see [error messages](error-messages.html). |
-| Access Provider | `accessProviderId` | The access provider that decides which clients are restricted: `client-role`, `policy`, or `auto` for [both](configuration.html#using-client-roles-and-policies-in-the-same-realm). If not set, the [server-wide default access provider](#server-wide-default-access-provider) is used. |
+| Access Provider | `accessProviderId` | The access provider that decides which clients are restricted: `client-role`, `policy`, or `auto` for [both](configuration.html#using-client-roles-and-policies-in-the-same-realm). If not set, the [server-wide default access provider](#server-wide-default-access-provider) is used. If the access provider does not exist, the authenticator denies access to all clients. |
 
 ### Server-wide default access provider
 
@@ -64,7 +64,7 @@ spi-restrict-client-auth-access-provider--provider-default=policy
 Keycloak 26.2 does not support this format with `--` separators and ignores it. Use `spi-restrict-client-auth-access-provider-provider-default=policy` there.
 
 {: .warning }
-> Use `provider-default`, not `provider`. The `provider` option makes the given access provider the only one, so all other access providers, including `auto`, are not available anymore. The required action and the `restrict-client-auth-enforce` client policy executor then log a warning and use the given access provider instead of `auto`, i.e. they ignore all other restrictions.
+> Use `provider-default`, not `provider`. The `provider` option makes the given access provider the only one, so all other access providers, including `auto`, are not available anymore. The required action and the `restrict-client-auth-enforce` client policy executor then log a warning and deny access to all clients, since `auto` does not exist.
 
 ### Error responses for non-browser requests
 

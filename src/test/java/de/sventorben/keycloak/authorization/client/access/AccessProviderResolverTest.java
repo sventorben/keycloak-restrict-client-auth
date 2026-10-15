@@ -47,11 +47,14 @@ class AccessProviderResolverTest {
     }
 
     @Test
-    void fallsBackToServerWideDefaultIfConfiguredProviderDoesNotExist() {
+    void deniesAccessToAllClientsIfConfiguredProviderDoesNotExist(@Mock ClientModel client, @Mock UserModel user) {
         given(keycloakSession.getProvider(AccessProvider.class, "unknown")).willReturn(null);
-        given(keycloakSession.getProvider(AccessProvider.class)).willReturn(defaultProvider);
 
-        assertThat(cut.resolve("unknown", "alias")).isSameAs(defaultProvider);
+        AccessProvider accessProvider = cut.resolve("unknown", "alias");
+
+        assertThat(accessProvider.isRestricted(client)).isTrue();
+        assertThat(accessProvider.isPermitted(client, user)).isFalse();
+        verify(keycloakSession, never()).getProvider(AccessProvider.class);
     }
 
     @Test
@@ -63,11 +66,10 @@ class AccessProviderResolverTest {
 
     @Test
     void fallsBackToClientRoleProviderIfNoServerWideDefaultExists() {
-        given(keycloakSession.getProvider(AccessProvider.class, "unknown")).willReturn(null);
         given(keycloakSession.getProvider(AccessProvider.class)).willReturn(null);
         given(keycloakSession.getProvider(AccessProvider.class, "client-role")).willReturn(clientRoleProvider);
 
-        assertThat(cut.resolve("unknown", "alias")).isSameAs(clientRoleProvider);
+        assertThat(cut.resolve(null, "alias")).isSameAs(clientRoleProvider);
     }
 
     @Nested
@@ -115,7 +117,6 @@ class AccessProviderResolverTest {
         void deniesAccessToAllClientsIfAccessProviderDoesNotExistAndAccessIsDeniedByDefault() {
             givenRealmSettings(Map.of("defaultDeny", "true"));
             given(keycloakSession.getProvider(AccessProvider.class, "unknown")).willReturn(null);
-            given(client.getRealm()).willReturn(realm);
 
             AccessProvider accessProvider = cut.resolve("unknown", "alias");
 
