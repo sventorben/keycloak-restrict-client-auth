@@ -29,10 +29,11 @@ public final class AccessProviderResolver {
     public AccessProvider resolve(String accessProviderId, String configAlias) {
         RealmModel realm = Optional.ofNullable(session.getContext()).map(KeycloakContext::getRealm).orElse(null);
         RealmSettings settings = RealmSettings.of(realm);
-        if (settings.isDefaultDeny()) {
-            return resolveDenyingByDefault(accessProviderId, configAlias, settings.getDefaultAccessRole());
+        AccessProvider accessProvider = resolveConfigured(accessProviderId, configAlias);
+        if (settings.isDefaultDeny() && !(accessProvider instanceof DenyingAccessProvider)) {
+            return new DefaultDenyAccessProvider(accessProvider, settings.getDefaultAccessRole());
         }
-        return resolveConfigured(accessProviderId, configAlias);
+        return accessProvider;
     }
 
     private AccessProvider resolveConfigured(String accessProviderId, String authenticatorConfigAlias) {
@@ -62,15 +63,6 @@ public final class AccessProviderResolver {
             "Neither an access provider is configured in authenticator config '%s' nor has a server-wide default provider been set. Using '%s' as a fallback.",
             authenticatorConfigAlias, ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
         return session.getProvider(AccessProvider.class, ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
-    }
-
-    private AccessProvider resolveDenyingByDefault(String accessProviderId, String configAlias,
-                                                   String defaultAccessRole) {
-        AccessProvider accessProvider = resolveConfigured(accessProviderId, configAlias);
-        if (accessProvider instanceof DenyingAccessProvider) {
-            return accessProvider;
-        }
-        return new DefaultDenyAccessProvider(accessProvider, defaultAccessRole);
     }
 
     /**
