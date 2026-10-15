@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.AuthenticationManagementResource;
 import org.keycloak.representations.AccessTokenResponse;
@@ -110,34 +111,20 @@ class LoginIT {
             }
         }
 
-        @Test
-        void accessForUserWithoutRoleIsDeniedIfPolicyEnforcementIsDisabled() {
-            assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode.DISABLED);
-        }
-
-        @Test
-        void accessIsDeniedIfPermissionIsMissingAndPolicyEnforcementIsPermissive() {
+        @ParameterizedTest
+        @EnumSource(PolicyEnforcementMode.class)
+        void accessIsDeniedIfPermissionIsMissing(PolicyEnforcementMode policyEnforcementMode) {
             try (Keycloak admin = keycloakAdmin()) {
                 ClientResourcePermission permission = new ClientResourcePermission(admin);
                 permission.removePermission();
-                try {
-                    assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode.PERMISSIVE);
-                } finally {
-                    permission.restorePermission();
-                }
-            }
-        }
-
-        private void assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode policyEnforcementMode) {
-            try (Keycloak admin = keycloakAdmin()) {
-                ClientResourcePermission permission = new ClientResourcePermission(admin);
                 permission.setPolicyEnforcementMode(policyEnforcementMode);
-                try (Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED,
+                try (Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
                     CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY)) {
                     assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
                         .isInstanceOf(BadRequestException.class);
                 } finally {
                     permission.setPolicyEnforcementMode(PolicyEnforcementMode.ENFORCING);
+                    permission.restorePermission();
                 }
             }
         }
