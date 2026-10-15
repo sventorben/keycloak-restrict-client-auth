@@ -84,16 +84,31 @@ class TokenEndpoint {
         return post(params);
     }
 
+    HttpResponse<String> requestingPartyToken(String accessToken, String audience, String ticket)
+        throws IOException, InterruptedException {
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("grant_type", "urn:ietf:params:oauth:grant-type:uma-ticket");
+        params.put("audience", audience);
+        params.put("ticket", ticket);
+        return send(request(params).header("Authorization", "Bearer " + accessToken));
+    }
+
     private HttpResponse<String> post(Map<String, String> params) throws IOException, InterruptedException {
+        return send(request(params));
+    }
+
+    private HttpRequest.Builder request(Map<String, String> params) {
         String form = params.entrySet().stream()
             .filter(it -> it.getValue() != null)
             .map(it -> it.getKey() + "=" + URLEncoder.encode(it.getValue(), StandardCharsets.UTF_8))
             .collect(Collectors.joining("&"));
-        HttpRequest request = HttpRequest.newBuilder()
+        return HttpRequest.newBuilder()
             .uri(URI.create(serverUrl + "/realms/" + realm + "/protocol/openid-connect/token"))
             .header("Content-Type", "application/x-www-form-urlencoded")
-            .POST(HttpRequest.BodyPublishers.ofString(form))
-            .build();
-        return HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+            .POST(HttpRequest.BodyPublishers.ofString(form));
+    }
+
+    private static HttpResponse<String> send(HttpRequest.Builder request) throws IOException, InterruptedException {
+        return HTTP_CLIENT.send(request.build(), HttpResponse.BodyHandlers.ofString());
     }
 }

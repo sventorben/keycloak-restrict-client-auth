@@ -149,6 +149,12 @@ Enable the `Check audience` option (`checkAudience`) to also check access to all
 
 ![Executor configuration](images/executor.png)
 
+## Requesting party tokens
+
+Clients that use [Authorization Services](https://www.keycloak.org/docs/latest/authorization_services/) can obtain requesting party tokens (RPT) for a resource server via the UMA grant (`urn:ietf:params:oauth:grant-type:uma-ticket`). Keycloak does not trigger client policies for this grant, so the `restrict-client-auth-enforce` client policy executor does not cover it.
+
+The extension therefore replaces Keycloak's implementation of the UMA grant. Before Keycloak evaluates any permission, it checks whether the user has access to the resource server, i.e. to the client identified by the permission ticket or the `audience` parameter. If the resource server is restricted and the user does not have access, Keycloak responds with an `access_denied` error and status `403`. This check is always active and uses the [`auto` access provider](#using-client-roles-and-policies-in-the-same-realm). Service accounts are not checked.
+
 ## Realm settings
 
 The configuration of the required action also holds settings for the whole realm.

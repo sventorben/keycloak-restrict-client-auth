@@ -97,6 +97,8 @@ Keycloak does not run the browser flow for every path a user may take. The table
 | CIBA, JWT authorization grant | No | ✔ | No |
 | Client credentials (service accounts) | No | No | No |
 
+In addition, the extension always checks access when requesting party tokens are issued via the UMA grant, see [Requesting party tokens](configuration.html#requesting-party-tokens).
+
 ### Registration
 
 Keycloak creates the user account before the required action runs. Users without access to the client can register, but cannot log in to the client. Only allow registration for clients users may access after registering, or grant access to new users, e.g. via a default group.
