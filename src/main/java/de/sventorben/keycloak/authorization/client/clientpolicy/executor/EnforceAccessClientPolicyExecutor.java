@@ -27,6 +27,7 @@ import org.keycloak.services.clientpolicy.ClientPolicyException;
 import org.keycloak.services.clientpolicy.context.ImplicitHybridTokenResponse;
 import org.keycloak.services.clientpolicy.context.JWTAuthorizationGrantResponseContext;
 import org.keycloak.services.clientpolicy.context.ResourceOwnerPasswordCredentialsResponseContext;
+import org.keycloak.services.clientpolicy.context.ServiceAccountTokenResponseContext;
 import org.keycloak.services.clientpolicy.context.TokenExchangeResponseContext;
 import org.keycloak.services.clientpolicy.context.TokenRefreshResponseContext;
 import org.keycloak.services.clientpolicy.context.TokenResponseContext;
@@ -52,6 +53,7 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
     private final AccessProviderResolver accessProviderResolver;
     private AccessProvider accessProvider;
     private boolean checkAudience;
+    private boolean checkServiceAccounts;
 
     EnforceAccessClientPolicyExecutor(KeycloakSession keycloakSession, AccessProviderResolver accessProviderResolver) {
         this.keycloakSession = keycloakSession;
@@ -71,6 +73,11 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
                 break;
             case TOKEN_EXCHANGE_RESPONSE:
                 enforceOnExchange((TokenExchangeResponseContext) context);
+                break;
+            case SERVICE_ACCOUNT_TOKEN_RESPONSE:
+                if (checkServiceAccounts) {
+                    enforceOnServiceAccountToken((ServiceAccountTokenResponseContext) context);
+                }
                 break;
             default:
                 enforceOnTokenResponse(context);
@@ -98,6 +105,22 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
         if (!isPermitted(clients, user, context.getAccessTokenResponseBuilder())) {
             throw new ClientPolicyException(OAuthErrorException.ACCESS_DENIED,
                 ACCESS_DENIED_MESSAGE, Response.Status.FORBIDDEN);
+        }
+    }
+
+    /**
+     * Checks access of the service account to the clients in the audience of the access token. A client always has
+     * access to itself.
+     */
+    private void enforceOnServiceAccountToken(ServiceAccountTokenResponseContext context)
+        throws ClientPolicyException {
+        ClientModel client = context.getClientSession().getClient();
+        UserModel serviceAccount = keycloakSession.users().getServiceAccount(client);
+        boolean permitted = getAllAudienceClients(context.getAccessTokenResponseBuilder())
+            .filter(audienceClient -> !audienceClient.getId().equals(client.getId()))
+            .allMatch(audienceClient -> isPermitted(audienceClient, serviceAccount));
+        if (!permitted) {
+            throw new ClientPolicyException(OAuthErrorException.UNAUTHORIZED_CLIENT, ACCESS_DENIED_MESSAGE);
         }
     }
 
@@ -173,6 +196,10 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
         if (!checkAudience) {
             return Stream.empty();
         }
+        return getAllAudienceClients(responseBuilder);
+    }
+
+    private Stream<ClientModel> getAllAudienceClients(TokenManager.AccessTokenResponseBuilder responseBuilder) {
         String[] audience = Optional.ofNullable(responseBuilder)
             .map(TokenManager.AccessTokenResponseBuilder::getAccessToken)
             .map(AccessToken::getAudience)
@@ -225,6 +252,7 @@ class EnforceAccessClientPolicyExecutor implements ClientPolicyExecutorProvider<
             EnforceAccessClientPolicyExecutorConfiguration::new);
         accessProvider = accessProviderResolver.resolve(AutoAccessProviderFactory.PROVIDER_ID, PROVIDER_ID);
         checkAudience = configuration.isCheckAudience();
+        checkServiceAccounts = configuration.isCheckServiceAccounts();
     }
 
     @Override

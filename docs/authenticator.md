@@ -95,7 +95,7 @@ Keycloak does not run the browser flow for every path a user may take. The table
 | Refresh token, offline token | No | ✔ | No |
 | Token exchange | No | ✔ (Keycloak 26.8 or later) | No |
 | CIBA, JWT authorization grant | No | ✔ | No |
-| Client credentials (service accounts) | No | No | No |
+| Client credentials (service accounts) | No | Optional, see [Checking service accounts](configuration.html#checking-service-accounts) | No |
 
 ### Registration
 
