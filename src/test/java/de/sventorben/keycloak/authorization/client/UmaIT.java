@@ -4,12 +4,7 @@ import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.AuthorizationResource;
-import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.representations.idm.authorization.ResourcePermissionRepresentation;
-import org.keycloak.representations.idm.authorization.ResourceRepresentation;
-import org.keycloak.representations.idm.authorization.RolePolicyRepresentation;
 import org.keycloak.util.JsonSerialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +18,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Map;
-import java.util.Set;
 
 import static de.sventorben.keycloak.authorization.client.TestConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,8 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UmaIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UmaIT.class);
-
-    private static final String RESOURCE_DATA = "data";
 
     private static String KEYCLOAK_AUTH_URL;
     private static TokenEndpoint TOKEN_ENDPOINT;
@@ -57,7 +49,7 @@ class UmaIT {
         TOKEN_ENDPOINT = new TokenEndpoint(KEYCLOAK_AUTH_URL);
         LOGGER.info("Running test with Keycloak image: " + FullImageName.get());
         try (Keycloak admin = TestConstants.keycloakAdmin(KEYCLOAK_AUTH_URL)) {
-            DATA_RESOURCE_ID = addResourceForAllUsers(admin.realm(REALM_TEST));
+            DATA_RESOURCE_ID = ResourceForAllUsers.add(admin.realm(REALM_TEST));
         }
     }
 
@@ -120,26 +112,5 @@ class UmaIT {
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
         assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
         return JsonSerialization.readValue(response.body(), AccessTokenResponse.class).getToken();
-    }
-
-    private static String addResourceForAllUsers(RealmResource realm) {
-        String clientId = realm.clients().findByClientId(CLIENT_TEST_RESTRICTED_BY_POLICY).get(0).getId();
-        AuthorizationResource authorization = realm.clients().get(clientId).authorization();
-
-        ResourceRepresentation resource = new ResourceRepresentation(RESOURCE_DATA);
-        authorization.resources().create(resource).close();
-
-        RolePolicyRepresentation policy = new RolePolicyRepresentation();
-        policy.setName("All users");
-        policy.addRole("default-roles-test-realm");
-        authorization.policies().role().create(policy).close();
-
-        ResourcePermissionRepresentation permission = new ResourcePermissionRepresentation();
-        permission.setName("Access data");
-        permission.setResources(Set.of(RESOURCE_DATA));
-        permission.setPolicies(Set.of("All users"));
-        authorization.permissions().resource().create(permission).close();
-
-        return authorization.resources().findByName(RESOURCE_DATA).get(0).getId();
     }
 }
