@@ -23,7 +23,7 @@ If you are locked out of the admin realm itself, e.g. after denying access by de
 
 ### Use a temporary admin service account
 
-Stop Keycloak and create a temporary admin service account. It logs in via the client credentials grant, which the extension does not check. The command prompts for a client secret.
+Stop Keycloak and create a temporary admin service account. It logs in via the client credentials grant, which the extension does not check, unless [`Check service accounts`](configuration.html#checking-service-accounts) is enabled in the admin realm. The command prompts for a client secret.
 
 ```shell
 bin/kc.sh bootstrap-admin service --client-id=temp-admin
