@@ -21,6 +21,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mock.Strictness.LENIENT;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -50,37 +51,24 @@ class AutoConfigClientPolicyExecutorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.INCLUDE, names = {"REGISTER", "REGISTERED", "UPDATE", "UPDATED"})
+    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.INCLUDE, names = {"REGISTERED", "UPDATE", "UPDATED"})
     void enable(ClientPolicyEvent event) {
-        cut.executeOnEvent(new ClientCRUDContext() {
-            @Override
-            public ClientPolicyEvent getEvent() {
-                return event;
-            }
-
-            @Override
-            public ClientModel getTargetClient() {
-                return targetClient;
-            }
-        });
+        cut.executeOnEvent(clientCrudContext(event, targetClient));
         verify(accessProvider).enableFor(targetClient);
     }
 
     @ParameterizedTest
-    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.EXCLUDE, names = {"REGISTER", "REGISTERED", "UPDATE", "UPDATED"})
+    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.EXCLUDE, names = {"REGISTERED", "UPDATE", "UPDATED"})
     void doNothing(ClientPolicyEvent event) {
-        cut.executeOnEvent(new ClientCRUDContext() {
-            @Override
-            public ClientPolicyEvent getEvent() {
-                return event;
-            }
-
-            @Override
-            public ClientModel getTargetClient() {
-                return targetClient;
-            }
-        });
+        cut.executeOnEvent(clientCrudContext(event, targetClient));
         verify(accessProvider, never()).enableFor(targetClient);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ClientPolicyEvent.class, mode = EnumSource.Mode.INCLUDE, names = {"REGISTER", "UPDATE"})
+    void doesNothingWithoutTargetClient(ClientPolicyEvent event) {
+        cut.executeOnEvent(clientCrudContext(event, null));
+        verify(accessProvider, never()).enableFor(any());
     }
 
     @Test
@@ -98,4 +86,17 @@ class AutoConfigClientPolicyExecutorTest {
             AutoConfigClientPolicyExecutorConfiguration.class);
     }
 
+    private static ClientCRUDContext clientCrudContext(ClientPolicyEvent event, ClientModel targetClient) {
+        return new ClientCRUDContext() {
+            @Override
+            public ClientPolicyEvent getEvent() {
+                return event;
+            }
+
+            @Override
+            public ClientModel getTargetClient() {
+                return targetClient;
+            }
+        };
+    }
 }

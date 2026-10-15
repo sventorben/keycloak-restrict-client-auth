@@ -30,8 +30,8 @@ class AutoConfigClientPolicyExecutor implements ClientPolicyExecutorProvider<Aut
 
     @Override
     public void executeOnEvent(ClientPolicyContext context) {
+        // on REGISTER, the client does not exist yet; it is restricted on REGISTERED
         switch (context.getEvent()) {
-            case REGISTER:
             case REGISTERED:
             case UPDATE:
             case UPDATED:
@@ -47,7 +47,9 @@ class AutoConfigClientPolicyExecutor implements ClientPolicyExecutorProvider<Aut
     }
 
     private void enable(ClientModel client) {
-        accessProvider.enableFor(client);
+        if (client != null) {
+            accessProvider.enableFor(client);
+        }
     }
 
     @Override
