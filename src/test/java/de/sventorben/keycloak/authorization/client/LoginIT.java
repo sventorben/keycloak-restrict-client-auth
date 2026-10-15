@@ -112,32 +112,34 @@ class LoginIT {
 
         @Test
         void accessForUserWithoutRoleIsDeniedIfPolicyEnforcementIsDisabled() {
-            try (Keycloak admin = keycloakAdmin()) {
-                ClientResourcePermission permission = new ClientResourcePermission(admin);
-                permission.setPolicyEnforcementMode(PolicyEnforcementMode.DISABLED);
-                try (Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED,
-                    CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY)) {
-                    assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
-                        .isInstanceOf(BadRequestException.class);
-                } finally {
-                    permission.setPolicyEnforcementMode(PolicyEnforcementMode.ENFORCING);
-                }
-            }
+            assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode.DISABLED, false,
+                USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED);
         }
 
         @Test
         void accessIsDeniedIfPermissionIsMissingAndPolicyEnforcementIsPermissive() {
+            assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode.PERMISSIVE, true,
+                USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED);
+        }
+
+        private void assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode policyEnforcementMode,
+                                                           boolean withoutPermission, String username,
+                                                           String password) {
             try (Keycloak admin = keycloakAdmin()) {
                 ClientResourcePermission permission = new ClientResourcePermission(admin);
-                permission.removePermission();
-                permission.setPolicyEnforcementMode(PolicyEnforcementMode.PERMISSIVE);
-                try (Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
+                if (withoutPermission) {
+                    permission.removePermission();
+                }
+                permission.setPolicyEnforcementMode(policyEnforcementMode);
+                try (Keycloak keycloak = keycloakTest(username, password,
                     CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY)) {
                     assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
                         .isInstanceOf(BadRequestException.class);
                 } finally {
                     permission.setPolicyEnforcementMode(PolicyEnforcementMode.ENFORCING);
-                    permission.restorePermission();
+                    if (withoutPermission) {
+                        permission.restorePermission();
+                    }
                 }
             }
         }
