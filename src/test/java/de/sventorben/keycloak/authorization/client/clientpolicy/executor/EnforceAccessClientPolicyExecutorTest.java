@@ -472,11 +472,7 @@ class EnforceAccessClientPolicyExecutorTest {
 
         @Test
         void deniesTokenIfServiceAccountHasNoAccessToClientInAudience() {
-            givenAudience(AUDIENCE);
-            given(realm.getClientByClientId(AUDIENCE)).willReturn(audienceClient);
-            given(audienceClient.getId()).willReturn("audience-client-id");
-            given(accessProvider.isRestricted(audienceClient)).willReturn(true);
-            given(accessProvider.isPermitted(audienceClient, serviceAccount)).willReturn(false);
+            givenAccessToClientInAudience(false);
 
             assertThatThrownBy(() -> cut.executeOnEvent(serviceAccountTokenResponse()))
                 .isInstanceOf(ClientPolicyException.class)
@@ -485,11 +481,7 @@ class EnforceAccessClientPolicyExecutorTest {
 
         @Test
         void allowsTokenIfServiceAccountHasAccessToClientInAudience() {
-            givenAudience(AUDIENCE);
-            given(realm.getClientByClientId(AUDIENCE)).willReturn(audienceClient);
-            given(audienceClient.getId()).willReturn("audience-client-id");
-            given(accessProvider.isRestricted(audienceClient)).willReturn(true);
-            given(accessProvider.isPermitted(audienceClient, serviceAccount)).willReturn(true);
+            givenAccessToClientInAudience(true);
 
             assertThatCode(() -> cut.executeOnEvent(serviceAccountTokenResponse())).doesNotThrowAnyException();
         }
@@ -501,6 +493,14 @@ class EnforceAccessClientPolicyExecutorTest {
 
             assertThatCode(() -> cut.executeOnEvent(serviceAccountTokenResponse())).doesNotThrowAnyException();
             verify(accessProvider, never()).isRestricted(client);
+        }
+
+        private void givenAccessToClientInAudience(boolean permitted) {
+            givenAudience(AUDIENCE);
+            given(realm.getClientByClientId(AUDIENCE)).willReturn(audienceClient);
+            given(audienceClient.getId()).willReturn("audience-client-id");
+            given(accessProvider.isRestricted(audienceClient)).willReturn(true);
+            given(accessProvider.isPermitted(audienceClient, serviceAccount)).willReturn(permitted);
         }
 
         private void givenAudience(String audience) {
