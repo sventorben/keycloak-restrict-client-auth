@@ -112,34 +112,32 @@ class LoginIT {
 
         @Test
         void accessForUserWithoutRoleIsDeniedIfPolicyEnforcementIsDisabled() {
-            assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode.DISABLED, false,
-                USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED);
+            assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode.DISABLED);
         }
 
         @Test
         void accessIsDeniedIfPermissionIsMissingAndPolicyEnforcementIsPermissive() {
-            assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode.PERMISSIVE, true,
-                USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED);
-        }
-
-        private void assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode policyEnforcementMode,
-                                                           boolean withoutPermission, String username,
-                                                           String password) {
             try (Keycloak admin = keycloakAdmin()) {
                 ClientResourcePermission permission = new ClientResourcePermission(admin);
-                if (withoutPermission) {
-                    permission.removePermission();
+                permission.removePermission();
+                try {
+                    assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode.PERMISSIVE);
+                } finally {
+                    permission.restorePermission();
                 }
+            }
+        }
+
+        private void assertDeniedWithPolicyEnforcementMode(PolicyEnforcementMode policyEnforcementMode) {
+            try (Keycloak admin = keycloakAdmin()) {
+                ClientResourcePermission permission = new ClientResourcePermission(admin);
                 permission.setPolicyEnforcementMode(policyEnforcementMode);
-                try (Keycloak keycloak = keycloakTest(username, password,
+                try (Keycloak keycloak = keycloakTest(USER_TEST_RESTRICTED, PASS_TEST_RESTRICTED,
                     CLIENT_TEST_RESTRICTED_BY_POLICY, CLIENT_SECRET_TEST_RESTRICTED_BY_POLICY)) {
                     assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
                         .isInstanceOf(BadRequestException.class);
                 } finally {
                     permission.setPolicyEnforcementMode(PolicyEnforcementMode.ENFORCING);
-                    if (withoutPermission) {
-                        permission.restorePermission();
-                    }
                 }
             }
         }
