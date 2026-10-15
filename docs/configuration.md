@@ -73,6 +73,8 @@ For details on SPI and provider configuration, please refer to [Configuring prov
 
 The [decision strategy](https://www.keycloak.org/docs/latest/authorization_services/#_permission_create) of the permission decides how multiple policies are combined, e.g. `Affirmative` grants access if any of the policies permits it.
 
+The extension always evaluates the permissions of the `Keycloak Client Resource` as if the policy enforcement mode of the client were `Enforcing`. A resource without a permission denies access to everyone, even if the mode is `Permissive` or `Disabled`.
+
 ### Using client roles and policies in the same realm
 
 The `auto` access provider determines per client which restriction applies. For example, use client roles for public clients and policies for confidential clients.
