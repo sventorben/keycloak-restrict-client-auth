@@ -36,12 +36,22 @@ final class RestrictedPermissionGrantType extends PermissionGrantType {
         setContext(context);
         UserModel user = getUser();
         ClientModel resourceServer = getResourceServer();
-        if (user != null && resourceServer != null && !isPermitted(resourceServer, user)) {
+        if (isDenied(user, resourceServer)) {
             event.user(user).detail(Details.AUDIENCE, resourceServer.getClientId()).error(Errors.ACCESS_DENIED);
             throw new CorsErrorResponseException(cors, OAuthErrorException.ACCESS_DENIED, ACCESS_DENIED_MESSAGE,
                 Response.Status.FORBIDDEN);
         }
         return super.process(context);
+    }
+
+    /**
+     * Access is only denied if the user and the resource server are known. Otherwise, Keycloak rejects the request.
+     */
+    private boolean isDenied(UserModel user, ClientModel resourceServer) {
+        if (user == null) {
+            return false;
+        }
+        return resourceServer != null && !isPermitted(resourceServer, user);
     }
 
     private boolean isPermitted(ClientModel resourceServer, UserModel user) {
