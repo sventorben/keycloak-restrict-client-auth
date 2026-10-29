@@ -26,6 +26,15 @@ public class EnforceAccessClientPolicyExecutorFactory implements ClientPolicyExe
         .type(ProviderConfigProperty.BOOLEAN_TYPE)
         .defaultValue(false)
         .add()
+        .property()
+        .name(EnforceAccessClientPolicyExecutorConfiguration.CHECK_SERVICE_ACCOUNTS)
+        .label("Check service accounts")
+        .helpText("If enabled, access is also checked for service accounts (client credentials grant): tokens are "
+            + "denied if the service account does not have access to any client in the audience of the access "
+            + "token, except the client itself.")
+        .type(ProviderConfigProperty.BOOLEAN_TYPE)
+        .defaultValue(false)
+        .add()
         .build();
 
     @Override

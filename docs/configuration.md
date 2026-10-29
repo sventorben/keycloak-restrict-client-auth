@@ -132,7 +132,7 @@ The executor checks access
 * whenever a token, including an offline token, is refreshed. It responds with an `invalid_grant` error if access is denied.
 * whenever a token is exchanged using [standard token exchange](https://www.keycloak.org/securing-apps/token-exchange). It checks access to the requesting client and to all clients requested via the `audience` parameter and responds with an `access_denied` error if access is denied to any of them. This requires Keycloak 26.8 or later. Legacy token exchange (V1), e.g. impersonation or external to internal token exchange, is not covered.
 
-Tokens for service accounts (client credentials grant) are not checked. SAML clients are not covered either, since SAML does not use the token endpoint.
+Tokens for service accounts (client credentials grant) are only checked if you enable [`Check service accounts`](#checking-service-accounts). SAML clients are not covered, since SAML does not use the token endpoint.
 
 The executor always uses the [`auto` access provider](#using-client-roles-and-policies-in-the-same-realm), i.e. it checks all restrictions a client has.
 
@@ -150,6 +150,15 @@ Access tokens may contain further clients in their audience (`aud`), e.g. added 
 Enable the `Check audience` option (`checkAudience`) to also check access to all clients in the audience of the access token. Tokens are denied if the user does not have access to any of them. Audience values that are no client IDs of the realm are ignored.
 
 ![Executor configuration](images/executor.png)
+
+### Checking service accounts
+
+Service accounts obtain tokens via the client credentials grant, without a user logging in. Their tokens may contain other clients in their audience, e.g. added by audience mappers or because the service account has roles of these clients.
+
+Enable the `Check service accounts` option (`checkServiceAccounts`) to also check access of service accounts: tokens are denied with an `unauthorized_client` error if the service account does not have access to a restricted client in the audience of the access token. A client always has access to itself, i.e. its own client ID in the audience is not checked. Grant service accounts access like users, e.g. assign the client role to the service account in the `Service account roles` tab of the client.
+
+{: .warning }
+> In the admin realm, this also applies to the temporary admin service account that helps if you are [locked out](faq.html#locked-out). If clients in the audience of its tokens are restricted, e.g. because access is denied by default, it is denied as well. Do not enable this option in the admin realm in this case.
 
 ## Realm settings
 

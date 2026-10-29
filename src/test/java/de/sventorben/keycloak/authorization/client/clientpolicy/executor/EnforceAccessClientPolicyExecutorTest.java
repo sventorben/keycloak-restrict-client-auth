@@ -24,6 +24,7 @@ import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.UserProvider;
 import org.keycloak.models.UserSessionModel;
 import org.keycloak.models.UserSessionProvider;
 import org.keycloak.protocol.oidc.TokenManager;
@@ -37,6 +38,7 @@ import org.keycloak.services.clientpolicy.context.AbstractClientSessionCtxTokenR
 import org.keycloak.services.clientpolicy.context.ImplicitHybridTokenResponse;
 import org.keycloak.services.clientpolicy.context.JWTAuthorizationGrantResponseContext;
 import org.keycloak.services.clientpolicy.context.ResourceOwnerPasswordCredentialsResponseContext;
+import org.keycloak.services.clientpolicy.context.ServiceAccountTokenResponseContext;
 import org.keycloak.services.clientpolicy.context.TokenExchangeResponseContext;
 import org.keycloak.services.clientpolicy.context.TokenRefreshResponseContext;
 import org.keycloak.services.clientpolicy.context.TokenResponseContext;
@@ -55,6 +57,7 @@ import static org.keycloak.services.clientpolicy.ClientPolicyEvent.DEVICE_TOKEN_
 import static org.keycloak.services.clientpolicy.ClientPolicyEvent.IMPLICIT_HYBRID_TOKEN_RESPONSE;
 import static org.keycloak.services.clientpolicy.ClientPolicyEvent.JWT_AUTHORIZATION_GRANT_RESPONSE;
 import static org.keycloak.services.clientpolicy.ClientPolicyEvent.RESOURCE_OWNER_PASSWORD_CREDENTIALS_RESPONSE;
+import static org.keycloak.services.clientpolicy.ClientPolicyEvent.SERVICE_ACCOUNT_TOKEN_RESPONSE;
 import static org.keycloak.services.clientpolicy.ClientPolicyEvent.TOKEN_RESPONSE;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
@@ -423,6 +426,93 @@ class EnforceAccessClientPolicyExecutorTest {
             TokenResponseContext context = mock(TokenResponseContext.class);
             given(context.getEvent()).willReturn(TOKEN_RESPONSE);
             given(context.getClientSessionContext()).willReturn(clientSessionContext);
+            given(context.getAccessTokenResponseBuilder()).willReturn(responseBuilder);
+            return context;
+        }
+    }
+
+    @Nested
+    class ServiceAccount {
+
+        private static final String AUDIENCE = "audience-client";
+        private static final String OWN_CLIENT = "own-client";
+
+        @Mock
+        AuthenticatedClientSessionModel clientSession;
+
+        @Mock
+        ClientModel client;
+
+        @Mock
+        ClientModel audienceClient;
+
+        @Mock
+        UserModel serviceAccount;
+
+        @Mock
+        TokenManager.AccessTokenResponseBuilder responseBuilder;
+
+        @Mock
+        KeycloakContext keycloakContext;
+
+        @Mock
+        RealmModel realm;
+
+        @BeforeEach
+        void setUp(@Mock UserProvider users) {
+            cut.setupConfiguration(new ObjectMapper().convertValue(Map.of("checkServiceAccounts", true),
+                EnforceAccessClientPolicyExecutorConfiguration.class));
+            given(clientSession.getClient()).willReturn(client);
+            given(client.getId()).willReturn("own-client-id");
+            given(keycloakSession.users()).willReturn(users);
+            given(users.getServiceAccount(client)).willReturn(serviceAccount);
+            given(keycloakSession.getContext()).willReturn(keycloakContext);
+            given(keycloakContext.getRealm()).willReturn(realm);
+        }
+
+        @Test
+        void deniesTokenIfServiceAccountHasNoAccessToClientInAudience() {
+            givenAccessToClientInAudience(false);
+
+            assertThatThrownBy(() -> cut.executeOnEvent(serviceAccountTokenResponse()))
+                .isInstanceOf(ClientPolicyException.class)
+                .hasFieldOrPropertyWithValue("error", OAuthErrorException.UNAUTHORIZED_CLIENT);
+        }
+
+        @Test
+        void allowsTokenIfServiceAccountHasAccessToClientInAudience() {
+            givenAccessToClientInAudience(true);
+
+            assertThatCode(() -> cut.executeOnEvent(serviceAccountTokenResponse())).doesNotThrowAnyException();
+        }
+
+        @Test
+        void allowsTokenForOwnClientInAudience() {
+            givenAudience(OWN_CLIENT);
+            given(realm.getClientByClientId(OWN_CLIENT)).willReturn(client);
+
+            assertThatCode(() -> cut.executeOnEvent(serviceAccountTokenResponse())).doesNotThrowAnyException();
+            verify(accessProvider, never()).isRestricted(client);
+        }
+
+        private void givenAccessToClientInAudience(boolean permitted) {
+            givenAudience(AUDIENCE);
+            given(realm.getClientByClientId(AUDIENCE)).willReturn(audienceClient);
+            given(audienceClient.getId()).willReturn("audience-client-id");
+            given(accessProvider.isRestricted(audienceClient)).willReturn(true);
+            given(accessProvider.isPermitted(audienceClient, serviceAccount)).willReturn(permitted);
+        }
+
+        private void givenAudience(String audience) {
+            AccessToken accessToken = new AccessToken();
+            accessToken.audience(audience);
+            given(responseBuilder.getAccessToken()).willReturn(accessToken);
+        }
+
+        private ClientPolicyContext serviceAccountTokenResponse() {
+            ServiceAccountTokenResponseContext context = mock(ServiceAccountTokenResponseContext.class);
+            given(context.getEvent()).willReturn(SERVICE_ACCOUNT_TOKEN_RESPONSE);
+            given(context.getClientSession()).willReturn(clientSession);
             given(context.getAccessTokenResponseBuilder()).willReturn(responseBuilder);
             return context;
         }

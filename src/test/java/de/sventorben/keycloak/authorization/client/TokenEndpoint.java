@@ -54,6 +54,14 @@ class TokenEndpoint {
         return post(params);
     }
 
+    HttpResponse<String> clientCredentials(String client, String clientSecret) throws IOException, InterruptedException {
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("grant_type", "client_credentials");
+        params.put("client_id", client);
+        params.put("client_secret", clientSecret);
+        return post(params);
+    }
+
     HttpResponse<String> exchangeCode(String client, String code, String redirectUri)
         throws IOException, InterruptedException {
         Map<String, String> params = new LinkedHashMap<>();
