@@ -18,6 +18,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.representations.idm.authorization.AuthorizationRequest;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 
@@ -41,7 +42,9 @@ public final class PolicyBasedAccessProvider implements AccessProvider {
     public boolean isPermitted(ClientModel client, UserModel user) {
         AuthorizationProvider authorization = keycloakSession.getProvider(AuthorizationProvider.class);
         Resource resource = getResource(client, authorization);
-        ResourceServer resourceServer = getResourceServer(client, authorization);
+        ResourceServer resourceServer = Optional.ofNullable(getResourceServer(client, authorization))
+            .map(EnforcingResourceServer::new)
+            .orElse(null);
 
         if (resource == null || resourceServer == null) {
             LOG.warnf("Possible configuration issue: Could not find resource '%s' for client '%s' in realm '%s'.",
