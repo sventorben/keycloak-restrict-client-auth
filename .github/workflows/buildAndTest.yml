@@ -2,12 +2,12 @@ name: Build and test
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 26.1.x ]
     paths:
     - 'src/**'
     - '*.xml'
   pull_request:
-    branches: [ main ]
+    branches: [ main, 26.1.x ]
 
 jobs:
   build:

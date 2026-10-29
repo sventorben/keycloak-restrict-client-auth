@@ -75,7 +75,7 @@ jobs:
         commit-message: "chore(release): Prepare next version"
         delete-branch: "true"
         branch: "release/${{ github.event.inputs.releaseVersion }}"
-        base: "main"
+        base: "${{ github.ref_name }}"
         title: "chore(release): Prepare next version after release ${{ github.event.inputs.releaseVersion }}"
         body: "Automated PR to prepare next version after release ${{ github.event.inputs.releaseVersion }}"
         labels: "release,ignore-for-release"
