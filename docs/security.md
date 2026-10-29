@@ -63,6 +63,14 @@ Keycloak's [fine-grained admin permissions](https://www.keycloak.org/docs/latest
 
 Without [denying access by default](configuration.html#denying-access-by-default), administrators who may manage a client can remove its restriction and thereby grant access to all users. If access is denied by default, removing the restriction only grants access to users with the default access role.
 
+## Policy types that need a token
+
+If you restrict a client via [policies](configuration.html#resource-policy-based), the extension evaluates the permissions of the `Keycloak Client Resource` for the user, not for a token. Policy types that evaluate the token of the request do not work:
+* Policies of type `Client` never permit access, since there is no client the token has been issued for.
+* Policies of type `Client scope` fail, since there are no scopes of a token. Keycloak responds with an error and users cannot log in to the restricted client.
+
+Do not use these policy types in the permission of the `Keycloak Client Resource`. Policy types that evaluate the user, e.g. `Role`, `Group`, or `User`, work as expected.
+
 ## Disable the `Audience Resolve` mapper if necessary
 
 The [`Audience Resolve` protocol mapper](https://www.keycloak.org/docs/latest/server_admin/#_audience_resolve) is enabled by default by client scope `roles`, but it may be necessary to remove it in some cases.
