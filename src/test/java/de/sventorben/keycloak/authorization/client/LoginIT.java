@@ -85,6 +85,32 @@ class LoginIT {
     }
 
     @Nested
+    class UnknownAccessProvider {
+
+        @BeforeEach
+        void switchAccessProvider() {
+            LoginIT.this.switchAccessProvider("does-not-exist");
+        }
+
+        @Test
+        void accessForUserWithRoleIsDenied() {
+            try (Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED, CLIENT_TEST_RESTRICTED)) {
+                assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
+                    .isInstanceOf(BadRequestException.class);
+            }
+        }
+
+        @Test
+        void accessToUnrestrictedClientIsDenied() {
+            try (Keycloak keycloak = keycloakTest(USER_TEST_UNRESTRICTED, PASS_TEST_UNRESTRICTED,
+                CLIENT_TEST_UNRESTRICTED)) {
+                assertThatThrownBy(() -> keycloak.tokenManager().grantToken())
+                    .isInstanceOf(BadRequestException.class);
+            }
+        }
+    }
+
+    @Nested
     class RestrictedClientByPolicy {
 
         @BeforeEach

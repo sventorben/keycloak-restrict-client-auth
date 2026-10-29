@@ -2,9 +2,11 @@ package de.sventorben.keycloak.authorization.client.access;
 
 import de.sventorben.keycloak.authorization.client.access.role.ClientRoleBasedAccessProviderFactory;
 import org.jboss.logging.Logger;
+import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 
 import java.util.Optional;
 
@@ -27,10 +29,11 @@ public final class AccessProviderResolver {
     public AccessProvider resolve(String accessProviderId, String configAlias) {
         RealmModel realm = Optional.ofNullable(session.getContext()).map(KeycloakContext::getRealm).orElse(null);
         RealmSettings settings = RealmSettings.of(realm);
-        if (settings.isDefaultDeny()) {
-            return resolveDenyingByDefault(accessProviderId, configAlias, settings.getDefaultAccessRole());
+        AccessProvider accessProvider = resolveConfigured(accessProviderId, configAlias);
+        if (settings.isDefaultDeny() && !(accessProvider instanceof DenyingAccessProvider)) {
+            return new DefaultDenyAccessProvider(accessProvider, settings.getDefaultAccessRole());
         }
-        return resolveConfigured(accessProviderId, configAlias);
+        return accessProvider;
     }
 
     private AccessProvider resolveConfigured(String accessProviderId, String authenticatorConfigAlias) {
@@ -38,14 +41,14 @@ public final class AccessProviderResolver {
             AccessProvider accessProvider = session.getProvider(AccessProvider.class, accessProviderId);
             if (accessProvider == null) {
                 LOG.warnf(
-                    "Configured access provider '%s' in authenticator config '%s' does not exist.",
+                    "Configured access provider '%s' in config '%s' does not exist. Access is denied to all clients.",
                     accessProviderId, authenticatorConfigAlias);
-            } else {
-                LOG.tracef(
-                    "Using access provider '%s' in authenticator config '%s'.",
-                    accessProviderId, authenticatorConfigAlias);
-                return accessProvider;
+                return new DenyingAccessProvider();
             }
+            LOG.tracef(
+                "Using access provider '%s' in authenticator config '%s'.",
+                accessProviderId, authenticatorConfigAlias);
+            return accessProvider;
         }
 
         final AccessProvider defaultProvider = session.getProvider(AccessProvider.class);
@@ -62,18 +65,29 @@ public final class AccessProviderResolver {
         return session.getProvider(AccessProvider.class, ClientRoleBasedAccessProviderFactory.PROVIDER_ID);
     }
 
-    private AccessProvider resolveDenyingByDefault(String accessProviderId, String configAlias,
-                                                   String defaultAccessRole) {
-        if (accessProviderId != null && !exists(accessProviderId)) {
-            LOG.warnf("Configured access provider '%s' in config '%s' does not exist. Access is denied to all clients.",
-                accessProviderId, configAlias);
-            return new DefaultDenyAccessProvider(null, null);
-        }
-        return new DefaultDenyAccessProvider(resolveConfigured(accessProviderId, configAlias), defaultAccessRole);
-    }
+    /**
+     * Denies access to all clients, so that access is never granted by mistake if the configured access provider does
+     * not exist, e.g. because of a typo or because a custom access provider has been removed.
+     */
+    private static final class DenyingAccessProvider implements AccessProvider {
 
-    private boolean exists(String accessProviderId) {
-        return session.getProvider(AccessProvider.class, accessProviderId) != null;
+        @Override
+        public boolean isRestricted(ClientModel client) {
+            return true;
+        }
+
+        @Override
+        public boolean isPermitted(ClientModel client, UserModel user) {
+            return false;
+        }
+
+        @Override
+        public void enableFor(ClientModel client) {
+        }
+
+        @Override
+        public void close() {
+        }
     }
 
 }
