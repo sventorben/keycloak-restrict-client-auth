@@ -44,6 +44,7 @@ The `auto` access provider combines both: it determines per client which restric
 The extension started as an authenticator: access was checked wherever you added it to an authentication flow, using the access provider you configured for it. Every path that did not run through such a flow, e.g. single sign-on, identity provider redirects, password reset, refreshing or exchanging tokens, was not checked.
 
 The extension now follows a different approach: **the restriction belongs to the client, and access is checked on every path.**
+One exception remains: [requesting party tokens](configuration.html#requesting-party-tokens) issued via the UMA grant are not checked yet.
 You restrict a client by adding the client role or the resource. You no longer need to make sure that every flow contains the authenticator and that each authenticator uses the right access provider.
 
 | | Authenticator only | Required action and client policy executor |

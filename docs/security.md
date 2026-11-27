@@ -41,7 +41,7 @@ If you are using a Keycloak adapter, make sure your clients are verifying the au
 
 ## Protect all possible flows
 
-The [recommended setup](configuration.html#recommended-setup) checks access on all paths. If you only use the authenticator, ensure that you protect authentication to your clients in all flows a user may access. This includes not just the browser flow or the other realm-wide flows, but also identity provider overrides and post login flows.
+The [recommended setup](configuration.html#recommended-setup) checks access on all paths, except for [requesting party tokens](configuration.html#requesting-party-tokens). If you only use the authenticator, ensure that you protect authentication to your clients in all flows a user may access. This includes not just the browser flow or the other realm-wide flows, but also identity provider overrides and post login flows.
 
 Here is one example: suppose a user tries to log in via the built-in browser flow, at the end of which you have added the "Restrict user authentication on clients" step. If the "Cookie" or "Forms" alternative is used, the user will proceed to this step and be evaluated. But if it is the "Identity Provider Redirector" alternative which gets used, the subsequent steps will be skipped and the user will not be subject to this validation (this is a general feature of how brokering works in Keycloak authentication flows, not specific to this extension). This extension must also be configured in the identity provider's post login flow in order to apply.
 

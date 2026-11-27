@@ -96,6 +96,7 @@ Keycloak does not run the browser flow for every path a user may take. The table
 | Token exchange | No | ✔ (Keycloak 26.8 or later) | No |
 | CIBA, JWT authorization grant | No | ✔ | No |
 | Client credentials (service accounts) | No | Optional, see [Checking service accounts](configuration.html#checking-service-accounts) | No |
+| UMA grant (requesting party tokens) | No | No, see [Requesting party tokens](configuration.html#requesting-party-tokens) | No |
 
 ### Registration
 

@@ -23,7 +23,7 @@ While the answer used to be "no" for out-of-the-box Keycloak, I have developed t
 
 You restrict a client by adding a client role named `restricted-access` or an authorization resource named `Keycloak Client Resource` to it. Users may only access a restricted client if they have the role or if the policies of the resource permit access.
 
-The restriction belongs to the client, and access is checked on every path: a required action checks access at the end of every login, no matter which authentication flow has been used, and a client policy executor checks access whenever tokens are issued, including refresh and token exchange.
+The restriction belongs to the client, and access is checked on every path: a required action checks access at the end of every login, no matter which authentication flow has been used, and a client policy executor checks access whenever tokens are issued, including refresh and token exchange. Requesting party tokens issued via the UMA grant are not checked yet, see the [documentation](https://sventorben.github.io/keycloak-restrict-client-auth/configuration.html#requesting-party-tokens).
 
 ## Documentation
 

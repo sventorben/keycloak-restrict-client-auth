@@ -70,7 +70,7 @@ The required action is registered and enabled on every start in all realms in wh
 
 ## Do I still need the authenticator?
 
-No. The [required action](configuration.html#required-action) and the `restrict-client-auth-enforce` [client policy executor](configuration.html#checking-access-whenever-tokens-are-issued) check access on all paths. See [Authenticator and flows](authenticator.html) for cases in which the authenticator is still useful.
+No. The [required action](configuration.html#required-action) and the `restrict-client-auth-enforce` [client policy executor](configuration.html#checking-access-whenever-tokens-are-issued) check access on all paths, except for [requesting party tokens](configuration.html#requesting-party-tokens). See [Authenticator and flows](authenticator.html) for cases in which the authenticator is still useful.
 
 ## Does it work with Keycloak version X.Y.Z?
 
