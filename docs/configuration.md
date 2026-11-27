@@ -160,6 +160,15 @@ Enable the `Check service accounts` option (`checkServiceAccounts`) to also chec
 {: .warning }
 > In the admin realm, this also applies to the temporary admin service account that helps if you are [locked out](faq.html#locked-out). If clients in the audience of its tokens are restricted, e.g. because access is denied by default, it is denied as well. Do not enable this option in the admin realm in this case.
 
+## Requesting party tokens
+
+Clients that use [Authorization Services](https://www.keycloak.org/docs/latest/authorization_services/) can obtain requesting party tokens (RPT) for a resource server via the UMA grant (`urn:ietf:params:oauth:grant-type:uma-ticket`). Keycloak does not run any authentication flow and does not trigger client policies for this grant, so neither the required action nor the `restrict-client-auth-enforce` client policy executor checks access, and `Check audience` does not help either.
+
+{: .warning }
+> Users without access to a restricted client can obtain requesting party tokens for it, if it is a resource server whose permissions grant them other resources. The token contains the restricted client in its audience and the permissions for these resources. Clients restricted via the client role without `Authorization` enabled are not affected, since they are no resource servers.
+
+Until the extension covers this grant, make sure that the permissions of a restricted resource server only grant resources to users who have access to it, e.g. add a policy that only applies to users with access, such as a `Role` policy for the `restricted-access` client role or the policy of the permission for the `Keycloak Client Resource`, to each permission and set its `Decision strategy` to `Unanimous`.
+
 ## Realm settings
 
 The configuration of the required action also holds settings for the whole realm.
